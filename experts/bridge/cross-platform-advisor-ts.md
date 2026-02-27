@@ -1,14 +1,52 @@
-# slack-to-teams-ts
+# cross-platform-advisor-ts
 
 ## purpose
 
-Interactive migration advisor. Analyzes a Slack bot's codebase, determines its profile, and walks the developer through every YELLOW/RED migration decision — with a "take all defaults" escape hatch on every question.
+Interactive cross-platform bridging advisor. Detects which platform(s) a bot already targets, determines the bridging direction, analyzes the codebase, and walks the developer through every YELLOW/RED bridging decision — with a "take all defaults" escape hatch on every question.
 
 ## rules
 
+### Phase 0: Direction Detection
+
+1. **Detect the existing platform.** Scan the codebase in parallel for platform signatures:
+
+   | Pattern to search | Platform detected |
+   |---|---|
+   | `@slack/bolt` or `require('slack')` or `app.command(` (Bolt-style) | Slack |
+   | `@microsoft/teams-ai` or `@microsoft/teams.apps` or `teamsBot` or `BotFrameworkAdapter` | Teams |
+   | `Block Kit` or `"type":"section"` or `blocks:` (Slack-style) | Slack |
+   | `AdaptiveCards` or `"type":"AdaptiveCard"` or `CardFactory` | Teams |
+   | `SLACK_BOT_TOKEN` or `SLACK_APP_TOKEN` or `socketMode` | Slack |
+   | `CLIENT_ID` + `CLIENT_SECRET` + `TENANT_ID` (Azure Bot) | Teams |
+   | `ack(` (Slack acknowledgement) | Slack |
+   | `app.on("message"` or `app.message(` (Teams AI style) | Teams |
+
+2. **Determine direction.** Based on what was found:
+   - **Slack only detected** → Direction is **Slack → Teams** (adding Teams support)
+   - **Teams only detected** → Direction is **Teams → Slack** (adding Slack support)
+   - **Both detected** → Dual-platform bot already exists. Ask what they want to do (extend, reconcile, or audit).
+   - **Neither detected** → Ask the developer which platform they're starting from.
+
+3. **Confirm with the developer.** Present the detected direction:
+   ```
+   header: "Direction"
+   question: "I detected {platform} patterns in your codebase. Which direction are you bridging?"
+   options:
+     - label: "Add Teams to existing Slack bot (Recommended)"
+       description: "Keep Slack, add Teams as a second platform."
+     - label: "Add Slack to existing Teams bot"
+       description: "Keep Teams, add Slack as a second platform."
+     - label: "Audit existing dual-platform bot"
+       description: "Both platforms detected — review coverage and gaps."
+   ```
+
+   Adapt the recommended option to match what was detected. If Teams was detected, recommend "Add Slack."
+
 ### Phase 1: Codebase Analysis
 
-1. **Scan for Slack API usage.** Search the codebase for these patterns to build a feature inventory. Run all searches in parallel:
+4. **Scan for platform API usage.** Search the codebase for these patterns to build a feature inventory. Run all searches in parallel:
+
+   **Slack patterns (relevant when Slack → Teams):**
 
    | Pattern to search | What it detects | Maps to |
    |---|---|---|
@@ -23,7 +61,7 @@ Interactive migration advisor. Analyzes a Slack bot's codebase, determines its p
    | `chat.postEphemeral` or `response_type.*ephemeral` | Ephemeral messages | Y1, R1 |
    | `reply_broadcast` or `broadcast.*true` | Thread broadcast | Y2 |
    | `conversations.replies` | Thread discovery | Y3 |
-   | `files.upload` or `file_shared` | File upload | Y4/Y5/Y6 |
+   | `files.upload` or `file_shared` | File upload | Y4/5/6 |
    | `link_shared` or `chat.unfurl` | Link unfurling | Y7 |
    | `scheduleMessage` or `chat.schedule` | Scheduled messages | Y8, R7 |
    | `reminders.add` | Reminders | Y9 |
@@ -45,25 +83,46 @@ Interactive migration advisor. Analyzes a Slack bot's codebase, determines its p
    | `*.example.com` in manifest or unfurl config | Unfurl wildcards | Y23 |
    | `conversations.create` or `conversations.setTopic` | Channel ops | Y10/Y11 |
 
-2. **Build the feature list.** From scan results, produce a table: `Feature | Found (Y/N) | File:Line | Feature ID`. Only include features where code evidence was found.
+   **Teams patterns (relevant when Teams → Slack):**
 
-3. **Determine the bot profile.** Use the feature list to classify:
+   | Pattern to search | What it detects | Slack equivalent |
+   |---|---|---|
+   | `app.on("message"` or `activity.text` | Message handling | `app.message` |
+   | `AdaptiveCard` or `CardFactory.adaptiveCard` | Adaptive Cards | Block Kit |
+   | `app.on("dialog"` or `taskModule` | Task module / dialog | `views.open` modal |
+   | `proactiveMessage` or `continueConversation` | Proactive messaging | `chat.postMessage` to channel |
+   | `app.on("messageReaction"` | Reaction events | `reaction_added` |
+   | `refresh.userIds` | Per-user cards | Ephemeral messages |
+   | `MessageExtension` or `composeExtension` | Message extensions | Shortcuts |
+   | `tab.fetch` or `tab.submit` | Personal tabs | App Home |
+   | `Graph` or `graphClient` | Microsoft Graph calls | Slack Web API |
+   | `SSO` or `oauth` (Teams context) | SSO / OAuth | Slack OAuth |
+   | `FileConsentCard` or `supportsFiles` | File consent flow | `files.upload` |
+   | `messageHandlers` (in manifest) | Link unfurling | `link_shared` |
+   | `ChannelMessage.Read.Group` (RSC) | All channel messages | Default in Slack |
+
+5. **Build the feature list.** From scan results, produce a table: `Feature | Found (Y/N) | File:Line | Feature ID`. Only include features where code evidence was found.
+
+6. **Determine the bot profile.** Use the feature list to classify:
    - **Profile A** — Only GREEN features found (G1–G34)
    - **Profile B** — GREEN + YELLOW from: Y1, Y2, Y3, Y4/5/6, Y17, Y18, Y21
    - **Profile C** — Profile B + any of: Y7, Y8, Y9, Y10, Y11, Y13, Y14, Y15, Y16, Y23, Y24
    - **Profile D** — Profile C + any of: Y12, Y19, Y20, Y22, or any RED feature is core
 
-4. **Present the profile.** Show the developer:
+   Note: For Teams → Slack direction, the profile classification still applies — the feature IDs map to equivalent complexity tiers in the reverse direction.
+
+7. **Present the profile.** Show the developer:
    - Their detected profile (A/B/C/D)
+   - The bridging direction (Slack → Teams or Teams → Slack)
    - The feature inventory table
-   - Which phases from the migration sequence apply (reference `MigrationDecisionMatrix.md` Section 2)
+   - Which phases from the bridging sequence apply (reference `MigrationDecisionMatrix.md` Section 2)
    - How many YELLOW and RED decisions they need to make
 
 ### Phase 2: Decision Walkthrough
 
-5. **Ask one decision at a time.** For each YELLOW/RED feature found in the codebase, present a question using `AskUserQuestion`. Walk through decisions in phase order (matching the migration phase sequence), not alphabetically.
+8. **Ask one decision at a time.** For each YELLOW/RED feature found in the codebase, present a question using `AskUserQuestion`. Walk through decisions in phase order (matching the bridging phase sequence), not alphabetically.
 
-6. **Decision ordering.** Present decisions in this order (skip any not found in codebase):
+9. **Decision ordering.** Present decisions in this order (skip any not found in codebase):
 
    **Phase 5 — Interactive Responses:**
    Y1 (Ephemeral), Y21 (Confirmation dialogs), Y17 (View hash)
@@ -89,25 +148,27 @@ Interactive migration advisor. Analyzes a Slack bot's codebase, determines its p
    **RED features (after all YELLOW):**
    R1 (True ephemeral), R2 (Emoji reactions), R3 (viewClosed), R4 (Mid-form dynamic), R5 (Field validation), R6 (Dialog stacking), R7 (Scheduled API), R8 (Channel archive), R9 (Retroactive unfurl), R10 (Firewall transport)
 
-7. **Every question gets an escape hatch.** The final option in every `AskUserQuestion` call MUST be one of:
+   Note: For Teams → Slack direction, adapt the questions to reflect adding Slack equivalents. The same feature IDs apply but the "source" and "target" swap. For example, Y1 becomes "Your bot uses refresh.userIds — Slack supports true ephemeral messages via chat.postEphemeral. Use it directly."
+
+10. **Every question gets an escape hatch.** The final option in every `AskUserQuestion` call MUST be one of:
    - First question: **"You Decide Everything"** — accept all defaults for ALL decisions (YELLOW + RED), skip remaining questions, jump to Phase 3.
    - Subsequent questions: **"You Decide Everything Else"** — accept defaults for all REMAINING decisions, skip remaining questions, jump to Phase 3.
 
    When the developer picks either escape hatch, record all remaining features as "default" and proceed to Phase 3 immediately.
 
-8. **Question format for YELLOW features.** Each `AskUserQuestion` must include:
+11. **Question format for YELLOW features.** Each `AskUserQuestion` must include:
    - `header`: Feature ID (e.g., "Y1 Ephemeral")
-   - `question`: Clear question about which approach they prefer
+   - `question`: Clear question about which approach they prefer (adapted for bridging direction)
    - Options from `MigrationDecisionMatrix.md` Section 3, with the **(Recommended)** option listed first
    - Final option: the escape hatch
 
-9. **Question format for RED features.** Each `AskUserQuestion` must include:
+12. **Question format for RED features.** Each `AskUserQuestion` must include:
    - `header`: Feature ID (e.g., "R4 Dynamic")
-   - `question`: What they want to do about the platform gap
+   - `question`: What they want to do about the platform gap (adapted for bridging direction)
    - Options matching the strategies from `MigrationDecisionMatrix.md` Section 4
    - Final option: the escape hatch
 
-10. **Record every decision.** Maintain a running decisions table as you go:
+13. **Record every decision.** Maintain a running decisions table as you go:
 
     | Feature | Decision | Option | Notes |
     |---|---|---|---|
@@ -115,14 +176,15 @@ Interactive migration advisor. Analyzes a Slack bot's codebase, determines its p
     | Y4/5/6 Files | `sendFile()` helper | B (Recommended) | Default accepted |
     | ... | ... | ... | ... |
 
-### Phase 3: Migration Plan Output
+### Phase 3: Bridging Plan Output
 
-11. **Generate the migration plan.** After all decisions are made (or defaults accepted), produce a single actionable migration plan with:
+14. **Generate the bridging plan.** After all decisions are made (or defaults accepted), produce a single actionable plan with:
 
+    - **Direction** — Which platform exists, which is being added
     - **Profile summary** — Profile letter, feature count, phase count
     - **Decisions summary** — The completed decisions table
     - **Phase-by-phase implementation order** — For each applicable phase:
-      - Which expert(s) to load: `.experts/migrate/{filename}`
+      - Which expert(s) to load: `.experts/bridge/{filename}`
       - What to implement
       - Which decision applies (if any)
       - Go/no-go gate from `MigrationDecisionMatrix.md` Section 2
@@ -130,59 +192,44 @@ Interactive migration advisor. Analyzes a Slack bot's codebase, determines its p
     - **RED feature workarounds** — For each RED feature, the chosen strategy and implementation approach
     - **Estimated phase count** — Total phases and which can be parallelized
 
-12. **Always reference, never duplicate.** Point developers to the specific expert files for implementation details. Do NOT reproduce the code patterns from individual experts — just reference them by filename and rule number.
+15. **Always reference, never duplicate.** Point developers to the specific expert files for implementation details. Do NOT reproduce the code patterns from individual experts — just reference them by filename and rule number.
 
 ### Phase 4: Per-Project Implementation Order
 
-When implementing each migrated project (whether a single sample or a batch), follow this exact sequence. Do NOT skip steps or reorder them.
+When implementing each bridged project (whether a single sample or a batch), follow this exact sequence. Do NOT skip steps or reorder them.
 
-13. **Step 1 — Write all source files.** Write every file the project needs before running any commands:
+16. **Step 1 — Write all source files.** Write every file the project needs before running any commands:
     - `package.json` — dependencies, scripts (`build`, `start`, `dev`)
     - `tsconfig.json` — TypeScript compiler config
     - `src/index.ts` — main entry point (and any additional `.ts` files)
     - `.env.sample` — template with placeholder values for all required env vars
-    - Stub implementations — where a Teams API is not yet wired up, leave a clearly marked `// TODO:` with an explanation of what should go there so the code still compiles.
+    - Stub implementations — where an API is not yet wired up, leave a clearly marked `// TODO:` with an explanation of what should go there so the code still compiles.
 
-14. **Step 2 — Install dependencies.** Run `npm install` in the project directory. Verify `node_modules` is created and there are no install errors.
+17. **Step 2 — Install dependencies.** Run `npm install` in the project directory. Verify `node_modules` is created and there are no install errors.
 
-15. **Step 3 — Build and verify.** Run `npm run build`. Must succeed with **zero TypeScript errors**. Fix any issues before proceeding.
+18. **Step 3 — Build and verify.** Run `npm run build`. Must succeed with **zero TypeScript errors**. Fix any issues before proceeding.
 
-16. **Step 4 — Create Teams app manifest.** Create `appPackage/` directory with:
-    - `manifest.json` — Teams app manifest (schema v1.19+) with bot configuration, command definitions, and placeholder `{{BOT_ID}}` / `{{BOT_DOMAIN}}` tokens
-    - `color.png` — 192×192 color icon (placeholder)
-    - `outline.png` — 32×32 outline icon (placeholder)
-    - The manifest must be valid and ready to zip for sideloading.
+19. **Step 4 — Create app manifest.**
+    - **Adding Teams:** Create `appPackage/` directory with `manifest.json` (schema v1.19+), `color.png` (192x192), `outline.png` (32x32). The manifest must be valid and ready to zip for sideloading.
+    - **Adding Slack:** Create or update `manifest.yaml` (Slack app manifest) with bot scopes, event subscriptions, and slash commands. Alternatively, configure via api.slack.com app settings.
 
-17. **Step 5 — Write README.md.** The README is written **last** because it documents the final state of the project. It must contain:
+20. **Step 5 — Write README.md.** The README is written **last** because it documents the final state of the project. It must contain:
 
     - **One-paragraph description** of what the example demonstrates.
-    - **`## Prerequisites`** — Node.js 18+, Microsoft 365 developer tenant (or Teams test account), Azure Bot registration (with Microsoft App ID and password), [ngrok](https://ngrok.com/) or equivalent tunneling tool.
-    - **`## Environment Setup`** — step-by-step instructions for filling out `.env`:
-      - Copy `.env.sample` to `.env`
-      - Explain each variable (`BOT_ID`, `BOT_PASSWORD`, `BOT_DOMAIN`, etc.)
-      - Where to find each value (Azure Portal → Bot registration → Configuration)
-    - **`## Running Locally`** — full launch sequence:
-      1. Start ngrok: `ngrok http 3978`
-      2. Copy the ngrok HTTPS URL → update Azure Bot messaging endpoint to `https://{subdomain}.ngrok-free.app/api/messages`
-      3. Update `.env` with the ngrok domain (if `BOT_DOMAIN` is used)
-      4. `npm install` (if not already done)
-      5. `npm run build && npm start` (or `npm run dev` for watch mode)
-    - **`## Sideloading in Teams`** — how to install the app:
-      1. Zip the `appPackage/` folder (manifest.json + icons)
-      2. Open Teams → Apps → Manage your apps → Upload a custom app
-      3. Select the zip file
-      4. Add the bot to a chat or team
-      5. Test by sending a message or command
-    - **`## What Was Migrated`** — bullet list mapping original Slack concept → Teams equivalent.
-    - **`## TODO`** — checklist of remaining items (e.g., "wire up real Azure AD app registration", "replace stub Adaptive Card with full design", "add unit tests", "deploy to Azure App Service").
+    - **`## Prerequisites`** — Node.js 18+, platform-specific accounts and registrations.
+    - **`## Environment Setup`** — step-by-step instructions for filling out `.env`.
+    - **`## Running Locally`** — full launch sequence with tunneling setup.
+    - **`## Installing the App`** — platform-specific installation instructions (sideloading for Teams, OAuth install for Slack, or both).
+    - **`## What Was Bridged`** — bullet list mapping original platform concept → target platform equivalent.
+    - **`## TODO`** — checklist of remaining items.
 
 ## question templates
 
-Use these as the basis for each `AskUserQuestion` call. Adapt the question text based on what was found in the codebase (e.g., mention the specific file where the feature was detected).
+Use these as the basis for each `AskUserQuestion` call. Adapt the question text based on what was found in the codebase (e.g., mention the specific file where the feature was detected) and the bridging direction.
 
 ### Y1 — Ephemeral Messages
 ```
-question: "Your bot uses ephemeral messages ({file}:{line}). How should Teams handle user-only visibility?"
+question: "Your bot uses ephemeral messages ({file}:{line}). How should the target platform handle user-only visibility?"
 header: "Y1 Ephemeral"
 options:
   - label: "refresh.userIds (Recommended)"
@@ -194,9 +241,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, ephemeral is natively supported via `chat.postEphemeral`. This question may be skipped — just use the native API.
+
 ### Y2 — Threaded Replies with reply_broadcast
 ```
-question: "Your bot uses reply_broadcast ({file}:{line}). How should Teams handle thread + channel posting?"
+question: "Your bot uses reply_broadcast ({file}:{line}). How should the target platform handle thread + channel posting?"
 header: "Y2 Broadcast"
 options:
   - label: "Two API calls (Recommended)"
@@ -208,7 +257,7 @@ options:
 
 ### Y3 — Thread Discovery
 ```
-question: "Your bot reads thread replies ({file}:{line}). How should Teams fetch thread history?"
+question: "Your bot reads thread replies ({file}:{line}). How should the target platform fetch thread history?"
 header: "Y3 Threads"
 options:
   - label: "Graph API direct (Recommended)"
@@ -218,9 +267,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `conversations.replies` directly — native API.
+
 ### Y4/5/6 — File Upload
 ```
-question: "Your bot uploads files ({file}:{line}). How should Teams handle file operations?"
+question: "Your bot uploads files ({file}:{line}). How should the target platform handle file operations?"
 header: "Y4-6 Files"
 options:
   - label: "Build sendFile() helper (Recommended)"
@@ -230,9 +281,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `files.uploadV2` directly — much simpler than the Teams consent flow.
+
 ### Y7 — Link Unfurling
 ```
-question: "Your bot unfurls links ({file}:{line}). How should Teams handle link previews?"
+question: "Your bot unfurls links ({file}:{line}). How should the target platform handle link previews?"
 header: "Y7 Unfurl"
 options:
   - label: "Cache-first with prefetch (Recommended)"
@@ -244,7 +297,7 @@ options:
 
 ### Y8 — Scheduled Messages
 ```
-question: "Your bot schedules messages ({file}:{line}). How should Teams handle deferred delivery?"
+question: "Your bot schedules messages ({file}:{line}). How should the target platform handle deferred delivery?"
 header: "Y8 Schedule"
 options:
   - label: "Functions timer + Cosmos DB (Recommended)"
@@ -256,9 +309,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `chat.scheduleMessage` directly — native API.
+
 ### Y9 — Reminders
 ```
-question: "Your bot sets reminders ({file}:{line}). How should Teams handle reminder delivery?"
+question: "Your bot sets reminders ({file}:{line}). How should the target platform handle reminder delivery?"
 header: "Y9 Reminders"
 options:
   - label: "Piggyback on scheduler (Recommended)"
@@ -268,9 +323,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `reminders.add` directly — native API.
+
 ### Y10 — Channel Archive
 ```
-question: "Your bot archives channels ({file}:{line}). How should Teams simulate channel archival?"
+question: "Your bot archives channels ({file}:{line}). How should the target platform simulate channel archival?"
 header: "Y10 Archive"
 options:
   - label: "Rename + description (Recommended)"
@@ -282,9 +339,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `conversations.archive` directly — native API.
+
 ### Y11 — Channel Member Removal
 ```
-question: "Your bot removes channel members ({file}:{line}). How should Teams handle member removal?"
+question: "Your bot removes channel members ({file}:{line}). How should the target platform handle member removal?"
 header: "Y11 Members"
 options:
   - label: "Two-step Graph API (Recommended)"
@@ -294,9 +353,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `conversations.kick` directly — native API.
+
 ### Y12 — Workflow Builder
 ```
-question: "Your bot uses Workflow Builder ({file}:{line}). How should Teams handle workflow automation?"
+question: "Your bot uses Workflow Builder ({file}:{line}). How should the target platform handle workflow automation?"
 header: "Y12 Workflows"
 options:
   - label: "Bot-driven orchestration (Recommended)"
@@ -310,7 +371,7 @@ options:
 
 ### Y13 — Global Shortcuts
 ```
-question: "Your bot uses global shortcuts ({file}:{line}). How should Teams expose quick actions?"
+question: "Your bot uses global shortcuts ({file}:{line}). How should the target platform expose quick actions?"
 header: "Y13 Shortcuts"
 options:
   - label: "Compose extension (Recommended)"
@@ -322,9 +383,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, map compose extensions to `app.shortcut` with a global shortcut callback.
+
 ### Y14 — Message Shortcuts
 ```
-question: "Your bot uses message shortcuts ({file}:{line}). How should Teams expose message actions?"
+question: "Your bot uses message shortcuts ({file}:{line}). How should the target platform expose message actions?"
 header: "Y14 MsgAction"
 options:
   - label: "Action-based message extension (Recommended)"
@@ -332,9 +395,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, map action-based message extensions to `app.shortcut` with `message_shortcut` type.
+
 ### Y15 — Dynamic Selects
 ```
-question: "Your bot uses dynamic select menus ({file}:{line}). How should Teams handle server-filtered dropdowns?"
+question: "Your bot uses dynamic select menus ({file}:{line}). How should the target platform handle server-filtered dropdowns?"
 header: "Y15 Selects"
 options:
   - label: "Pre-populated ChoiceSet (Recommended)"
@@ -346,9 +411,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `block_suggestion` with `external_data_source` for native dynamic selects.
+
 ### Y16 — App Home
 ```
-question: "Your bot uses App Home ({file}:{line}). How should Teams present the bot's home experience?"
+question: "Your bot uses App Home ({file}:{line}). How should the target platform present the bot's home experience?"
 header: "Y16 AppHome"
 options:
   - label: "tab.fetch handler (Recommended)"
@@ -360,9 +427,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, map `tab.fetch` to `app_home_opened` event with `views.publish`.
+
 ### Y17 — View Hash
 ```
-question: "Your bot uses view_hash for race conditions ({file}:{line}). How should Teams protect against stale updates?"
+question: "Your bot uses view_hash for race conditions ({file}:{line}). How should the target platform protect against stale updates?"
 header: "Y17 ViewHash"
 options:
   - label: "Manual _version field (Recommended)"
@@ -372,9 +441,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use the native `view_hash` parameter in `views.update` — built-in.
+
 ### Y18 — All Channel Messages
 ```
-question: "Your bot receives all channel messages without @mention ({file}:{line}). How should Teams enable this?"
+question: "Your bot receives all channel messages without @mention ({file}:{line}). How should the target platform enable this?"
 header: "Y18 RSC"
 options:
   - label: "RSC permission (Recommended)"
@@ -384,9 +455,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, Slack receives all channel messages by default when the bot is in the channel. No special config needed.
+
 ### Y19 — Socket Mode
 ```
-question: "Your bot uses Socket Mode ({file}:{line}). Teams requires inbound HTTPS. How do you want to handle transport?"
+question: "Your bot uses Socket Mode ({file}:{line}). The target platform requires inbound HTTPS. How do you want to handle transport?"
 header: "Y19 Transport"
 options:
   - label: "Deploy to Azure (Recommended)"
@@ -396,9 +469,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, Slack supports Socket Mode for firewall-friendly deployments — a simpler story.
+
 ### Y20 — Built-in Retry
 ```
-question: "Your bot uses Bolt's retryConfig ({file}:{line}). How should Teams handle retry and resilience?"
+question: "Your bot uses Bolt's retryConfig ({file}:{line}). How should the target platform handle retry and resilience?"
 header: "Y20 Retry"
 options:
   - label: "Build RetryPlugin (Recommended)"
@@ -410,7 +485,7 @@ options:
 
 ### Y21 — Confirmation Dialogs
 ```
-question: "Your bot uses confirmation dialogs on buttons ({file}:{line}). How should Teams confirm destructive actions?"
+question: "Your bot uses confirmation dialogs on buttons ({file}:{line}). How should the target platform confirm destructive actions?"
 header: "Y21 Confirm"
 options:
   - label: "Action.ShowCard inline (Recommended)"
@@ -422,9 +497,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use the native `confirm` object on button elements — built-in.
+
 ### Y22 — App Directory
 ```
-question: "Your bot is listed in the Slack App Directory. How should it be distributed on Teams?"
+question: "Your bot is listed in an app directory. How should it be distributed on the target platform?"
 header: "Y22 Distrib"
 options:
   - label: "Org app catalog (Recommended)"
@@ -436,9 +513,11 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, submit to the Slack App Directory via api.slack.com.
+
 ### Y23 — Unfurl Domain Wildcards
 ```
-question: "Your bot uses wildcard domain matching for link unfurling ({file}:{line}). How should Teams list domains?"
+question: "Your bot uses wildcard domain matching for link unfurling ({file}:{line}). How should the target platform list domains?"
 header: "Y23 Wildcards"
 options:
   - label: "Manual enumeration (Recommended)"
@@ -450,7 +529,7 @@ options:
 
 ### Y24 — Multi-Step Modal Stacking
 ```
-question: "Your bot uses views.push for modal stacking ({file}:{line}). How should Teams handle multi-step forms?"
+question: "Your bot uses views.push for modal stacking ({file}:{line}). How should the target platform handle multi-step forms?"
 header: "Y24 Stacking"
 options:
   - label: "Flatten into single dialog (Recommended)"
@@ -461,6 +540,8 @@ options:
     description: "Close current, open next. No back navigation. Degraded UX. 4-8 hrs."
   - label: "{escape hatch}"
 ```
+
+Note: For Teams → Slack, use native `views.push` for stacking — up to 3 levels supported.
 
 ### R1 — True Ephemeral Messages
 ```
@@ -474,6 +555,8 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, this is a non-issue — Slack has native ephemeral support.
+
 ### R2 — Custom Emoji Reactions
 ```
 question: "Your bot uses emoji reactions as workflow signals — Teams only has 6 fixed reactions. How do you want to handle this?"
@@ -485,6 +568,8 @@ options:
     description: "Map your most important reactions to like/heart/laugh/surprised/sad/angry. Lossy."
   - label: "{escape hatch}"
 ```
+
+Note: For Teams → Slack, Slack supports unlimited custom emoji reactions — direct mapping.
 
 ### R3 — viewClosed / Cancel Notification
 ```
@@ -498,6 +583,8 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `notify_on_close: true` in `views.open` — native support.
+
 ### R4 — Mid-Form Dynamic Updates
 ```
 question: "Your bot uses blockAction inside modals for dynamic form updates — a Teams platform gap. How do you want to handle this?"
@@ -509,6 +596,8 @@ options:
     description: "Embed a full web form in the task module for complete control. Much more effort."
   - label: "{escape hatch}"
 ```
+
+Note: For Teams → Slack, use `block_actions` inside modals with `views.update` — native support.
 
 ### R5 — Server-Side Field Validation
 ```
@@ -522,6 +611,8 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use `response_action: errors` in `view_submission` handler — native support.
+
 ### R6 — Dialog Stacking
 ```
 question: "Your bot uses views.push for dialog stacking — a Teams platform gap. How do you want to handle this?"
@@ -533,6 +624,8 @@ options:
     description: "Embed a web app with real navigation in the task module. Full control. High effort."
   - label: "{escape hatch}"
 ```
+
+Note: For Teams → Slack, use native `views.push` — up to 3 levels.
 
 ### R7 — Scheduled Message API
 ```
@@ -546,6 +639,8 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, use native `chat.scheduleMessage` — direct mapping.
+
 ### R8 — Channel Archive
 ```
 question: "Your bot archives individual channels — Teams can only archive entire Teams. How do you want to handle this?"
@@ -557,6 +652,8 @@ options:
     description: "Stronger enforcement but destructive. Hard to undo."
   - label: "{escape hatch}"
 ```
+
+Note: For Teams → Slack, use native `conversations.archive` — direct mapping.
 
 ### R9 — Retroactive Link Unfurling
 ```
@@ -582,57 +679,60 @@ options:
   - label: "{escape hatch}"
 ```
 
+Note: For Teams → Slack, Slack's Socket Mode provides firewall-friendly transport natively.
+
 ## defaults table
 
 When the developer picks "You Decide Everything" or "You Decide Everything Else", apply these defaults for all remaining decisions:
 
 | Feature | Default Option | Strategy |
 |---|---|---|
-| Y1 | A | `refresh.userIds` |
-| Y2 | A | Two API calls |
-| Y3 | A | Graph API direct |
-| Y4/5/6 | B | `sendFile()` helper |
-| Y7 | B | Cache-first with prefetch |
-| Y8 | A | Functions timer + Cosmos DB |
-| Y9 | A | Piggyback on Y8 scheduler |
-| Y10 | A | Rename + description |
-| Y11 | A | Two-step Graph API |
+| Y1 | A | `refresh.userIds` (Slack→Teams) / `chat.postEphemeral` (Teams→Slack) |
+| Y2 | A | Two API calls (Slack→Teams) / `reply_broadcast` (Teams→Slack) |
+| Y3 | A | Graph API direct (Slack→Teams) / `conversations.replies` (Teams→Slack) |
+| Y4/5/6 | B | `sendFile()` helper (Slack→Teams) / `files.uploadV2` (Teams→Slack) |
+| Y7 | B | Cache-first with prefetch (Slack→Teams) / `link_shared` + `chat.unfurl` (Teams→Slack) |
+| Y8 | A | Functions timer + Cosmos DB (Slack→Teams) / `chat.scheduleMessage` (Teams→Slack) |
+| Y9 | A | Piggyback on Y8 scheduler (Slack→Teams) / `reminders.add` (Teams→Slack) |
+| Y10 | A | Rename + description (Slack→Teams) / `conversations.archive` (Teams→Slack) |
+| Y11 | A | Two-step Graph API (Slack→Teams) / `conversations.kick` (Teams→Slack) |
 | Y12 | B | Bot-driven orchestration |
-| Y13 | A | Compose extension |
-| Y14 | A | Action-based message extension |
-| Y15 | A | Pre-populated ChoiceSet |
-| Y16 | B | `tab.fetch` handler |
-| Y17 | A | Manual `_version` field |
-| Y18 | A | RSC permission |
-| Y19 | B | Deploy to Azure |
-| Y20 | B | `RetryPlugin` |
-| Y21 | A | `Action.ShowCard` inline |
-| Y22 | B | Org app catalog |
-| Y23 | A | Manual enumeration |
-| Y24 | A | Flatten into single dialog |
-| R1 | — | Accept & Redesign |
-| R2 | — | Accept & Redesign (card buttons) |
-| R3 | — | Build Custom (timeout + Cancel button) |
-| R4 | — | Accept & Redesign (multi-step + ToggleVisibility) |
-| R5 | — | Build Custom (re-open with errors) |
-| R6 | — | Accept & Redesign (step routing) |
-| R7 | — | Build Custom (Y8 scheduler) |
-| R8 | — | Accept & Redesign (rename pattern) |
+| Y13 | A | Compose extension (Slack→Teams) / `app.shortcut` (Teams→Slack) |
+| Y14 | A | Action-based message extension (Slack→Teams) / `message_shortcut` (Teams→Slack) |
+| Y15 | A | Pre-populated ChoiceSet (Slack→Teams) / `block_suggestion` (Teams→Slack) |
+| Y16 | B | `tab.fetch` handler (Slack→Teams) / `views.publish` (Teams→Slack) |
+| Y17 | A | Manual `_version` field (Slack→Teams) / `view_hash` (Teams→Slack) |
+| Y18 | A | RSC permission (Slack→Teams) / Default in Slack (Teams→Slack) |
+| Y19 | B | Deploy to Azure (Slack→Teams) / Socket Mode (Teams→Slack) |
+| Y20 | B | `RetryPlugin` (Slack→Teams) / Bolt `retryConfig` (Teams→Slack) |
+| Y21 | A | `Action.ShowCard` inline (Slack→Teams) / `confirm` object (Teams→Slack) |
+| Y22 | B | Org app catalog (Slack→Teams) / Slack App Directory (Teams→Slack) |
+| Y23 | A | Manual enumeration (Slack→Teams) / Wildcard support (Teams→Slack) |
+| Y24 | A | Flatten into single dialog (Slack→Teams) / `views.push` (Teams→Slack) |
+| R1 | — | Accept & Redesign (Slack→Teams) / Native (Teams→Slack) |
+| R2 | — | Accept & Redesign (Slack→Teams) / Native (Teams→Slack) |
+| R3 | — | Build Custom (Slack→Teams) / `notify_on_close` (Teams→Slack) |
+| R4 | — | Accept & Redesign (Slack→Teams) / `block_actions` + `views.update` (Teams→Slack) |
+| R5 | — | Build Custom (Slack→Teams) / `response_action: errors` (Teams→Slack) |
+| R6 | — | Accept & Redesign (Slack→Teams) / `views.push` (Teams→Slack) |
+| R7 | — | Build Custom (Slack→Teams) / `chat.scheduleMessage` (Teams→Slack) |
+| R8 | — | Accept & Redesign (Slack→Teams) / `conversations.archive` (Teams→Slack) |
 | R9 | — | Defer |
-| R10 | — | Accept & Redesign (deploy to Azure) |
+| R10 | — | Accept & Redesign (Slack→Teams) / Socket Mode (Teams→Slack) |
 
 ## instructions
 
 Pair with:
 - `MigrationDecisionMatrix.md` — source of truth for all decision options, effort estimates, and profile definitions
-- All 22 migration experts in `.experts/migrate/` — referenced in the Phase 3 output for implementation details
+- All 22 bridge experts in `.experts/bridge/` — referenced in the Phase 3 output for implementation details
 - `SlackToTeamsMigrationAnalysis.md` — cross-reference for feature status (G/Y/R)
 
 Do a web search for:
 - "Microsoft Teams Bot Framework SDK TypeScript latest changes 2026"
+- "Slack Bolt SDK TypeScript latest changes 2026"
 
 ## research
 
 Deep Research prompt:
 
-"Write an interactive migration advisor for Slack-to-Teams bot migration. Cover codebase analysis (detecting Slack API patterns), bot profile classification (A-D by complexity), and per-feature decision walkthrough for 24 YELLOW and 10 RED platform gaps. Include question templates with effort estimates and a defaults table for one-click acceptance."
+"Write an interactive cross-platform bridging advisor for Slack↔Teams bot development. Cover codebase analysis (detecting both Slack and Teams API patterns), direction detection (which platform exists, which to add), bot profile classification (A-D by complexity), and per-feature decision walkthrough for 24 YELLOW and 10 RED platform gaps — with bidirectional defaults for each direction. Include question templates with effort estimates and a defaults table for one-click acceptance."

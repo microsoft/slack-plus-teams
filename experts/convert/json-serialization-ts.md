@@ -214,7 +214,7 @@ const EventSchema = z.object({
 
 ## instructions
 
-Use this expert when converting Java Gson/Jackson serialization code to TypeScript. The most critical pattern is polymorphic deserialization (TypeAdapter factories → Zod discriminated unions), which affects all Block Kit model conversion. Start by identifying all `@SerializedName` fields and custom TypeAdapter/JsonDeserializer classes, then map them to TypeScript interfaces + Zod schemas. Pair with `java-to-ts-ts.md` for general Java→TS conversion, `type-mapping-ts.md` for type system reference, and `../migrate/block-kit-to-adaptive-cards-ts.md` if converting Block Kit models to Adaptive Cards.
+Use this expert when converting Java Gson/Jackson serialization code to TypeScript. The most critical pattern is polymorphic deserialization (TypeAdapter factories → Zod discriminated unions), which affects all Block Kit model conversion. Start by identifying all `@SerializedName` fields and custom TypeAdapter/JsonDeserializer classes, then map them to TypeScript interfaces + Zod schemas. Pair with `java-to-ts-ts.md` for general Java→TS conversion, `type-mapping-ts.md` for type system reference, and `../bridge/ui-block-kit-adaptive-cards-ts.md` if converting Block Kit models to Adaptive Cards.
 
 ## research
 

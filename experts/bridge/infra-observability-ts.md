@@ -1,8 +1,10 @@
-# aws-to-azure.observability-ts
+# infra-observability-ts
 
 ## purpose
 
-Migrating logging and monitoring from AWS CloudWatch to Azure Monitor, Application Insights, and Log Analytics for Teams bot observability.
+Bridges AWS and Azure observability for cross-platform bot monitoring. Covers CloudWatch to Azure Monitor/Application Insights/Log Analytics (and the reverse). The common direction is AWS → Azure, but the service mappings apply bidirectionally.
+
+> **Note:** AWS → Azure is the most common direction for this expert. For Azure → AWS, reverse the mappings: Application Insights → CloudWatch + X-Ray, Log Analytics (KQL) → CloudWatch Logs Insights, Azure Monitor Alerts → CloudWatch Alarms + SNS.
 
 ## rules
 
@@ -233,20 +235,20 @@ export class AppInsightsLogger implements ILogger {
 
 ## instructions
 
-This expert covers migrating observability and monitoring from AWS CloudWatch to Azure Monitor and Application Insights when moving a Slack bot to Microsoft Teams. Use it when you need to:
+This expert bridges observability between AWS and Azure for cross-platform bot monitoring. Use it when adding cross-platform support in either direction and you need to:
 
-- Replace CloudWatch Logs with Application Insights and Log Analytics for structured logging
-- Migrate CloudWatch Metrics and Alarms to Azure Monitor Metrics and Alerts
-- Replace AWS X-Ray distributed tracing with Application Insights correlation
+- Map monitoring services between clouds (CloudWatch ↔ Azure Monitor, X-Ray ↔ Application Insights, CloudWatch Alarms ↔ Azure Alerts)
 - Instrument a Node.js Teams bot with the `applicationinsights` npm package
 - Write KQL queries for bot diagnostics (latency, errors, usage patterns)
 - Build Azure dashboards for bot health monitoring
 - Bridge the Teams SDK `ConsoleLogger` to Application Insights telemetry
 
-Pair with `../teams/dev.debug-test-ts.md` for Teams SDK ConsoleLogger integration, and `aws-to-azure.compute-ts.md` for Application Insights instrumentation on the target compute platform.
+For Azure → AWS (less common): reverse the mappings. Application Insights maps to CloudWatch + X-Ray, KQL maps to CloudWatch Logs Insights, Azure Alerts map to CloudWatch Alarms + SNS.
+
+Pair with `../teams/dev.debug-test-ts.md` for Teams SDK ConsoleLogger integration, and `infra-compute-ts.md` for Application Insights instrumentation on the target compute platform.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating observability from AWS CloudWatch to Azure Monitor/Application Insights for Node/TypeScript Teams bots. Cover structured logging with the applicationinsights npm package, distributed tracing migration from X-Ray, KQL query equivalents for CloudWatch Logs Insights, custom metrics, alert rules, dashboard setup, and cost management with sampling. Include instrumentation code examples and diagnostic KQL queries."
+"Write a micro expert for bridging observability between AWS CloudWatch and Azure Monitor/Application Insights for cross-platform bots. Cover structured logging with the applicationinsights npm package, distributed tracing (X-Ray ↔ Application Insights), KQL ↔ CloudWatch Logs Insights query mapping, custom metrics, alert rules, dashboard setup, and cost management with sampling bidirectionally. Include instrumentation code examples and diagnostic queries."

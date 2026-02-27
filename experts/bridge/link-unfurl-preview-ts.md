@@ -1,8 +1,8 @@
-# slack-unfurl-to-teams-link-preview-ts
+# link-unfurl-preview-ts
 
 ## purpose
 
-Migrating Slack link unfurling (`link_shared` event + `chat.unfurl()`) to Teams link unfurling via compose extension `message.ext.query-link` handlers and manifest `messageHandlers` domain configuration.
+Bridges Slack link unfurling (link_shared, chat.unfurl) and Teams link preview (messageHandlers) for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack link unfurling (`link_shared` event + `chat.unfurl()`) to Teams 
 8. **Domain matching is exact — no wildcards for subdomains.** Slack unfurl domain matching supports wildcards. Teams manifest `messageHandlers.value.domains` requires exact domain entries. To match `foo.example.com` and `bar.example.com`, list both explicitly. [learn.microsoft.com -- Manifest domains](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
 9. **Slack's unfurl `is_bot_token_only` flag → not applicable.** Slack distinguishes between user-token and bot-token unfurling. Teams link unfurling always runs as the bot identity. There is no user-token mode. [github.com/microsoft/teams.ts](https://github.com/microsoft/teams.ts)
 10. **Cache unfurl results where possible.** Since the 5-second deadline is strict, cache API responses for frequently unfurled URLs. Slack's async model made caching less critical. In Teams, a cache miss that takes >5 seconds means the unfurl silently fails with no preview shown. [learn.microsoft.com -- Link unfurling](https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/link-unfurling)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map `messageHandlers` domain config to `link_shared` event subscription (configured in the Slack app dashboard under Unfurl Domains), and preview card responses to `chat.unfurl` calls. The key advantage in reverse is that Slack's async model (`chat.unfurl` within 30 minutes) is more forgiving than Teams' 5-second synchronous deadline. Adaptive Card preview content maps to Slack unfurl attachment objects with `title`, `text`, `thumb_url`, and `color`.
 
 ## patterns
 
@@ -233,10 +234,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack link unfurling to Teams. It covers: `link_shared` event to `message.ext.query-link` handler, `chat.unfurl()` to synchronous card response, manifest `messageHandlers` domain configuration, the 5-second response deadline, installation requirement, and the lack of retroactive unfurling. Pair with `../teams/ui.message-extensions-ts.md` for general message extension patterns, `../teams/runtime.manifest-ts.md` for manifest configuration, and `block-kit-to-adaptive-cards-ts.md` for converting Slack attachment unfurl format to Adaptive Cards.
+Use this expert when adding cross-platform support in either direction for Slack link unfurling or Teams link preview. It covers: `link_shared` event to `message.ext.query-link` handler, `chat.unfurl()` to synchronous card response, manifest `messageHandlers` domain configuration, the 5-second response deadline, installation requirement, and the lack of retroactive unfurling. For Teams → Slack, map `messageHandlers` domain config to `link_shared` event subscription, and preview card responses to `chat.unfurl` calls. Pair with `../teams/ui.message-extensions-ts.md` for general message extension patterns, `../teams/runtime.manifest-ts.md` for manifest configuration, and `ui-block-kit-adaptive-cards-ts.md` for converting between Slack attachment unfurl format and Adaptive Cards.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack link unfurling (link_shared event + chat.unfurl) to Microsoft Teams link unfurling (compose extension query-link handler). Cover: manifest messageHandlers domain configuration, the 5-second synchronous response deadline vs Slack's async model, bot installation requirement, no retroactive unfurling, exact domain matching, Adaptive Card response format, caching strategies, and per-URL invocation. Include TypeScript code examples and a mapping table."
+"Write a micro expert for bridging Slack link unfurling (link_shared event + chat.unfurl) and Teams link preview (compose extension query-link handler, messageHandlers) in either direction for cross-platform bots. Cover: manifest messageHandlers domain configuration, the 5-second synchronous response deadline vs Slack's async model, bot installation requirement, no retroactive unfurling, exact domain matching, Adaptive Card response format, caching strategies, per-URL invocation, and reverse-direction mapping from Teams messageHandlers to Slack link_shared subscriptions and chat.unfurl calls. Include TypeScript code examples and a mapping table."

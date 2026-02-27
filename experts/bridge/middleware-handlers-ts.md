@@ -1,8 +1,8 @@
-# slack-middleware-to-teams-ts
+# middleware-handlers-ts
 
 ## purpose
 
-Converting Slack Bolt middleware chains (request → middleware → handler → response with `ack()`) to Teams SDK v2 handler patterns (activity → route → handler with `send()`/`reply()`), including global middleware, listener middleware, and error handling.
+Bridges Slack Bolt middleware chains and Teams SDK handler patterns for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -248,6 +248,20 @@ app.message(/^\/deploy\s*(.*)/i, async ({ send, activity }) => {
 });
 ```
 
+### Reverse direction (Teams → Slack)
+
+For Teams → Slack, convert handler wrappers/guards back to formal middleware chains with `next()`. Add `ack()` calls where required. Key reverse mappings:
+- Wrapper/decorator functions → `app.use(async ({ next, ... }) => { ... await next(); })` for global middleware
+- Guard functions at top of handler → listener middleware: `app.message(guardMiddleware, actualHandler)`
+- Early `return` for short-circuit → omit `await next()` to stop the chain
+- `send()` for interim status → `ack('status message')` for immediate acknowledgement within 3 seconds
+- `ctx.updateActivity()` → `respond({ replace_original: true, ... })`
+- `app.on('error', ...)` → `app.error(async ({ error, context, body }) => { ... })`
+- Handler registration order → explicit `app.use()` registration order for middleware chain
+- Closure-scoped state / `app.state` → `context` object properties set by middleware (e.g., `context.botUserId`)
+- Inline sequential work → split into pre-`ack()` (fast) and post-`ack()` (slow) phases where needed
+- Bot Framework JWT validation (automatic, remove) → add `signingSecret` to Bolt config for request verification
+
 ## pitfalls
 
 - **Looking for `next()`**: Teams has no middleware chain with `next()`. Every registered handler for a matching route runs. Stop thinking in chains and think in "ordered handler list."
@@ -268,10 +282,10 @@ app.message(/^\/deploy\s*(.*)/i, async ({ send, activity }) => {
 
 ## instructions
 
-Use this expert when converting Slack middleware patterns to Teams handler patterns. The key conceptual shift is: Slack uses a formal middleware chain with `next()` and `ack()`, while Teams uses ordered route handlers with no chain, no acknowledgement requirement, and automatic authentication. Focus on: (1) replacing global middleware with first-registered handlers or wrapper functions, (2) replacing listener middleware with guard functions, (3) removing all `ack()` calls, (4) removing authorization middleware (JWT is automatic). Pair with `slack-events-to-teams-activities-ts.md` for the event/route mapping and `../teams/runtime.routing-handlers-ts.md` for Teams handler registration patterns.
+Use this expert when bridging Slack middleware patterns and Teams handler patterns in either direction. The key conceptual shift is: Slack uses a formal middleware chain with `next()` and `ack()`, while Teams uses ordered route handlers with no chain, no acknowledgement requirement, and automatic authentication. For Slack → Teams: replace global middleware with first-registered handlers or wrappers, replace listener middleware with guards, remove `ack()`, remove authorization middleware. For Teams → Slack: convert wrappers/guards back to formal middleware chains with `next()`, add `ack()` calls, add signing secret verification. Pair with `events-activities-ts.md` for the event/route mapping and `../teams/runtime.routing-handlers-ts.md` for Teams handler registration patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for converting Slack Bolt middleware to Teams SDK v2 handler patterns. Cover: global middleware (app.use with next()) to first-registered handlers, listener middleware to guard functions, ack() removal strategy, respond() replacement, Java Middleware interface to TypeScript wrapper functions, authorization middleware elimination, context property migration, error handling middleware, and pre/post-ack logic restructuring. Include 4 worked examples."
+"Write a micro expert for bridging Slack Bolt middleware and Teams SDK v2 handler patterns bidirectionally. Cover: global middleware (app.use with next()) <-> first-registered handlers, listener middleware <-> guard functions, ack() addition/removal strategy, respond() <-> send()/updateActivity(), Java Middleware interface <-> TypeScript wrapper functions, authorization middleware bridging, context property migration, error handling middleware, and pre/post-ack logic restructuring. Include 4 worked examples covering both directions."

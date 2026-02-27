@@ -1,8 +1,8 @@
-# slack-events-to-teams-activities-ts
+# events-activities-ts
 
 ## purpose
 
-Mapping Slack event subscriptions to Teams activity handlers and conversation events with side-by-side code examples.
+Bridges Slack event subscriptions and Teams activity handlers for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -206,6 +206,23 @@ app.start(3978);
 | *(no equivalent)* | `app.on('install.remove')` | Bot uninstalled event |
 | *(no equivalent)* | `app.on('typing')` | User typing indicator |
 
+### Reverse direction (Teams → Slack)
+
+For Teams → Slack, reverse the mapping -- Teams routes map back to Slack events:
+- `app.on('message')` → `app.message(async ...)` catch-all or `app.event('app_mention')` if handling @mentions specifically
+- `app.message(pattern)` → `app.message(pattern)` (direct equivalent)
+- `app.on('conversationUpdate')` + `membersAdded` → `app.event('member_joined_channel')`
+- `app.on('conversationUpdate')` + `membersRemoved` → `app.event('member_left_channel')`
+- `app.on('messageReaction')` + `reactionsAdded` → `app.event('reaction_added')` -- note Teams has 6 fixed types; Slack supports unlimited custom emoji
+- `app.on('messageReaction')` + `reactionsRemoved` → `app.event('reaction_removed')`
+- `app.on('messageUpdate')` → `app.event('message_changed')`
+- `app.on('messageDelete')` → `app.event('message_deleted')`
+- `app.on('install.add')` → no direct Slack equivalent (use `app_home_opened` or OAuth completion callback for welcome messages)
+- `send(text)` → `say(text)`
+- `reply(text)` → `say({ text, thread_ts: message.ts })`
+- Add `ack()` calls to Slack event handlers where required
+- Slack bots receive all channel messages by default (no @mention required) -- adjust UX expectations accordingly
+
 ## pitfalls
 
 - **Assuming all channel messages are delivered**: In Teams channels, bots only receive messages when @mentioned. This is the biggest behavioral difference from Slack. Design accordingly or use RSC permissions for broader message access.
@@ -233,10 +250,10 @@ app.start(3978);
 
 ## instructions
 
-This expert covers migrating Slack event subscriptions to Teams activity handlers. Use it when you need to: map Slack events (app_mention, member_joined_channel, member_left_channel, reaction_added, reaction_removed, message_changed, message_deleted, app_home_opened) to their Teams equivalents (message, conversationUpdate, messageReaction, messageUpdate, messageDelete, tab.open, install.add); convert say() to send() and threaded say({ thread_ts }) to reply(); handle the absence of ephemeral messages in Teams; understand the @mention requirement for channel bots; and map event payload properties between platforms. The comprehensive mapping table provides a quick reference for all event translations. Pair with `../slack/runtime.bolt-foundations-ts.md` for the source Slack event patterns, and `../teams/runtime.routing-handlers-ts.md` for the target Teams activity routes.
+This expert covers bridging Slack event subscriptions and Teams activity handlers. Use it when adding cross-platform support in either direction: mapping Slack events (app_mention, member_joined_channel, member_left_channel, reaction_added, reaction_removed, message_changed, message_deleted, app_home_opened) to their Teams equivalents (message, conversationUpdate, messageReaction, messageUpdate, messageDelete, tab.open, install.add) or vice versa; converting between `say()`/`send()` and `reply()`/threaded patterns; handling ephemeral message differences; understanding the @mention requirement in Teams channels vs Slack's default all-message delivery; and mapping event payload properties between platforms. The comprehensive mapping table and reverse-direction section provide a quick reference for bridging in both directions. Pair with `../slack/runtime.bolt-foundations-ts.md` for Slack event patterns, and `../teams/runtime.routing-handlers-ts.md` for Teams activity routes.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for mapping Slack events to Teams activity routes. Cover all major Slack events (app_mention, member_joined_channel, member_left_channel, reaction_added, reaction_removed, message subtypes, app_home_opened) with their Teams equivalents (message, conversationUpdate, messageReaction, messageUpdate, messageDelete, typing, install events). Include side-by-side TypeScript code examples, a comprehensive mapping table, payload shape differences, the @mention requirement in channels, ephemeral message redesign strategies, and common pitfalls."
+"Write a micro expert for bridging Slack events and Teams activity routes bidirectionally. Cover all major Slack events (app_mention, member_joined_channel, member_left_channel, reaction_added, reaction_removed, message subtypes, app_home_opened) with their Teams equivalents (message, conversationUpdate, messageReaction, messageUpdate, messageDelete, typing, install events) and vice versa. Include side-by-side TypeScript code examples, a comprehensive bidirectional mapping table, payload shape differences, the @mention requirement in channels, ephemeral message handling strategies, and common pitfalls for both directions."

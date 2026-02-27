@@ -1,8 +1,8 @@
-# slack-interactive-responses-to-teams-ts
+# interactive-responses-ts
 
 ## purpose
 
-Migrating Slack interactive message response patterns (`respond({ replace_original })`, `respond({ delete_original })`, `chat.update`, `chat.postEphemeral`, deferred responses, `response_url`) to Teams Adaptive Card replacement, activity update/delete, and `Action.Execute` with user-specific refresh.
+Bridges Slack interactive response patterns (respond, replace_original, ephemeral) and Teams card/message update patterns for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack interactive message response patterns (`respond({ replace_origin
 8. **Store activity IDs at send time.** Every `send()` in Teams returns an activity ID (or resource response). Store this ID if you need to update or delete the message later. Slack uses `channel + ts`; Teams uses a single opaque `activityId` string. Failing to store the ID means you cannot update the message. [github.com/microsoft/teams.ts](https://github.com/microsoft/teams.ts)
 9. **Slack `respond({ response_type: 'in_channel' })` → `send()`.** Slack's `in_channel` response type makes an ephemeral-by-default response visible to everyone. In Teams, all bot messages are visible by default — simply call `send()`. There is no visibility toggle. [learn.microsoft.com -- Bot messages](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/conversation-messages)
 10. **Card action handler must return within 3 seconds.** Teams invoke activities (including `Action.Execute` and `Action.Submit`) require a synchronous response within ~3 seconds. If processing takes longer, return a "processing" card immediately and update asynchronously via proactive messaging. Slack's `response_url` had a 30-minute window; Teams' invoke has a 3-second window. [learn.microsoft.com -- Invoke activities](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/conversation-messages)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map `updateActivity` to `respond({ replace_original: true })`, and card refresh (`Action.Execute` with `refresh.userIds`) to ephemeral messages via `chat.postEphemeral`. `deleteActivity` maps to `chat.delete(channel, ts)`. The 3-second invoke deadline has no Slack equivalent -- Slack's `response_url` gives 30 minutes, which is more lenient.
 
 ## patterns
 
@@ -277,10 +278,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack interactive message patterns to Teams. It covers: `respond({ replace_original })` to invoke card replacement, `respond({ delete_original })` to `deleteActivity()`, `chat.update()` to `updateActivity()`, `chat.postEphemeral()` redesign strategies, deferred response patterns (processing card + proactive update), `response_url` elimination, and `Action.Execute` with `refresh.userIds` for per-user card views. Pair with `../teams/ui.adaptive-cards-ts.md` for card construction patterns, `../teams/runtime.proactive-messaging-ts.md` for deferred update infrastructure, and `slack-events-to-teams-activities-ts.md` for the underlying event/activity mapping.
+Use this expert when adding cross-platform support in either direction for Slack interactive response patterns or Teams card/message update patterns. It covers: `respond({ replace_original })` to invoke card replacement, `respond({ delete_original })` to `deleteActivity()`, `chat.update()` to `updateActivity()`, `chat.postEphemeral()` redesign strategies, deferred response patterns (processing card + proactive update), `response_url` elimination, and `Action.Execute` with `refresh.userIds` for per-user card views. For Teams → Slack, map `updateActivity` to `respond({ replace_original })`, and card refresh to ephemeral messages. Pair with `../teams/ui.adaptive-cards-ts.md` for card construction patterns, `../teams/runtime.proactive-messaging-ts.md` for deferred update infrastructure, and `events-activities-ts.md` for the underlying event/activity mapping.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack interactive message response patterns to Microsoft Teams. Cover: respond({ replace_original }), respond({ delete_original }), chat.update, chat.postEphemeral (no equivalent — redesign strategies), response_url expiry semantics, deferred response patterns with processing indicators, Action.Execute with refresh.userIds for per-user views, activity ID storage requirements, and the 3-second invoke timeout constraint. Include side-by-side TypeScript code examples and a mapping table."
+"Write a micro expert for bridging Slack interactive response patterns (respond, replace_original, ephemeral) and Teams card/message update patterns in either direction for cross-platform bots. Cover: respond({ replace_original }) to invoke card replacement and vice versa, respond({ delete_original }) to deleteActivity, chat.update to updateActivity, chat.postEphemeral redesign strategies, response_url expiry semantics, deferred response patterns with processing indicators, Action.Execute with refresh.userIds for per-user views, reverse-direction mapping from Teams to Slack, and the 3-second invoke timeout constraint. Include side-by-side TypeScript code examples and a mapping table."

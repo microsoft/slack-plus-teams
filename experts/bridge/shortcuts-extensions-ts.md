@@ -1,8 +1,8 @@
-# slack-shortcuts-to-teams-ts
+# shortcuts-extensions-ts
 
 ## purpose
 
-Migrating Slack shortcuts (global shortcuts and message shortcuts) to Teams equivalents using action-based and compose-based message extensions, with task module integration for form flows.
+Bridges Slack shortcuts (global and message) and Teams message extensions / compose extensions for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack shortcuts (global shortcuts and message shortcuts) to Teams equi
 8. **Slack `view_submission` → Teams `message.ext.submit`.** When the user submits the task module form, Teams invokes the `message.ext.submit` handler (or `composeExtension/submitAction` activity). The form data is in `activity.value.data`. The handler can return a card to insert into the compose box, send a message, or show another task module. [learn.microsoft.com -- Handle submit](https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/action-commands/respond-to-task-module-submit)
 9. **No "fire and forget" shortcuts in Teams.** Slack global shortcuts can trigger background actions without showing a modal (just `ack()` + do work). Teams action-based extensions always show a task module if `fetchTask: true`. To mimic fire-and-forget, return a minimal confirmation card from the task module and process in the background. [learn.microsoft.com -- Action commands](https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/action-commands/define-action-command)
 10. **Teams action extensions can insert cards into the compose box.** Slack shortcuts post messages via `say()` or `respond()`. Teams action extensions can return a card that gets inserted into the user's compose box for them to review and send. This is a UX improvement — the user controls when the message is posted. Return `{ composeExtension: { type: 'result', attachments: [...] } }` from the submit handler. [learn.microsoft.com -- Respond to submit](https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/action-commands/respond-to-task-module-submit#respond-with-an-adaptive-card-message-sent-from-a-bot)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map compose extensions to `app.shortcut` with `global_shortcut` or `message_shortcut` type. Action-based extensions with `context: ['compose', 'commandBox']` map to Slack global shortcuts; extensions with `context: ['message']` map to Slack message shortcuts. Task module forms become Slack modals opened via `views.open()` with a `trigger_id`. The `message.ext.submit` handler maps to a Slack `view_submission` handler.
 
 ## patterns
 
@@ -348,10 +349,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack shortcuts (global and message) to Teams. It covers: global shortcuts to compose extensions, message shortcuts to action-based extensions with `context: ['message']`, `trigger_id` elimination with `fetchTask: true`, target message access via `messagePayload`, and task module form flows replacing Slack modals. Pair with `../teams/ui.message-extensions-ts.md` for general message extension patterns, `../teams/ui.dialogs-task-modules-ts.md` for task module details, and `slack-modals-to-teams-dialogs-ts.md` for modal-to-dialog conversion.
+Use this expert when adding cross-platform support in either direction for shortcuts and message/compose extensions. It covers: Slack global shortcuts bridged to Teams compose extensions, Slack message shortcuts bridged to Teams action-based extensions with `context: ['message']`, `trigger_id` vs `fetchTask: true`, target message access via `messagePayload`, task module form flows bridged to Slack modals, and reverse mapping from Teams extensions to Slack shortcuts. Pair with `../teams/ui.message-extensions-ts.md` for general message extension patterns, `../teams/ui.dialogs-task-modules-ts.md` for task module details, and `ui-modals-dialogs-ts.md` for modal-to-dialog conversion.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack shortcuts (global shortcuts and message shortcuts) to Microsoft Teams action-based message extensions. Cover: manifest composeExtensions command config with context arrays, fetchTask: true for task module invocation, trigger_id elimination, message payload access for message shortcuts, view_submission to message.ext.submit, the lack of fire-and-forget shortcuts in Teams, and compose box card insertion. Include TypeScript code examples and a mapping table."
+"Write a micro expert for bridging Slack shortcuts (global shortcuts and message shortcuts) and Microsoft Teams action-based message extensions in either direction. Cover: manifest composeExtensions command config with context arrays, fetchTask: true for task module invocation, trigger_id elimination, message payload access for message shortcuts, view_submission to message.ext.submit, the lack of fire-and-forget shortcuts in Teams, compose box card insertion, and reverse mapping from Teams compose/action extensions back to Slack shortcuts. Include TypeScript code examples and a mapping table."

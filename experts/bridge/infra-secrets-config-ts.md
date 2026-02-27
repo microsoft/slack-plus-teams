@@ -1,8 +1,10 @@
-# aws-to-azure.secrets-config-ts
+# infra-secrets-config-ts
 
 ## purpose
 
-Migrating secrets and configuration from AWS Secrets Manager/SSM Parameter Store to Azure Key Vault and App Configuration for Teams bot deployments.
+Bridges AWS and Azure secrets/configuration management for cross-platform bot deployments. Covers Secrets Manager/SSM to Key Vault/App Configuration (and the reverse). The common direction is AWS → Azure, but the service mappings apply bidirectionally.
+
+> **Note:** AWS → Azure is the most common direction for this expert. For Azure → AWS, reverse the mappings: Key Vault → Secrets Manager, App Configuration → SSM Parameter Store, managed identity → IAM roles.
 
 ## rules
 
@@ -171,15 +173,16 @@ app.start(process.env.PORT || 3978);
 
 ## instructions
 
-This expert covers migrating secrets and configuration management from AWS to Azure when moving a Slack bot to Microsoft Teams. Use it when you need to:
+This expert bridges secrets and configuration management between AWS and Azure for cross-platform bot hosting. Use it when adding cross-platform support in either direction and you need to:
 
-- Replace AWS Secrets Manager with Azure Key Vault for storing bot credentials and API keys
-- Replace AWS SSM Parameter Store with Azure App Configuration for non-secret config values
+- Map secrets services between clouds (Secrets Manager ↔ Key Vault, SSM ↔ App Configuration)
 - Set up Key Vault references in App Service App Settings for zero-code secret injection
 - Configure managed identity for passwordless access to Key Vault and other Azure services
-- Migrate `.env` files to production-ready Azure App Settings
+- Bridge `.env` files to production-ready App Settings on either cloud
 - Implement the `managedIdentityClientId` option in the Teams SDK for zero-secret bot authentication
 - Plan secret rotation for CLIENT_SECRET and other credentials
+
+For Azure → AWS (less common): reverse the mappings. Key Vault maps to Secrets Manager, App Configuration maps to SSM Parameter Store, managed identity maps to IAM roles.
 
 Pair with `../security/secrets-ts.md` for general secrets management best practices, and `../teams/runtime.app-init-ts.md` for the Teams bot credentials that need to be stored.
 
@@ -187,4 +190,4 @@ Pair with `../security/secrets-ts.md` for general secrets management best practi
 
 Deep Research prompt:
 
-"Write a micro expert for migrating secrets/config from AWS to Azure for a Node/TypeScript Teams bot. Cover AWS Secrets Manager to Azure Key Vault mapping, SSM Parameter Store to Azure App Configuration, Key Vault references in App Service App Settings, managed identity for zero-secret deployments, @azure/keyvault-secrets and @azure/identity SDK usage, .env to App Settings migration, and secret rotation patterns. Include code examples for Key Vault access and CLI commands for setup."
+"Write a micro expert for bridging secrets/config between AWS and Azure for cross-platform bots. Cover Secrets Manager ↔ Key Vault mapping, SSM ↔ App Configuration, Key Vault references in App Service, managed identity ↔ IAM roles, @azure/keyvault-secrets and @azure/identity SDK usage, .env to App Settings migration, and secret rotation patterns bidirectionally. Include code examples and CLI commands."

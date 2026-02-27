@@ -1,8 +1,8 @@
-# slack-scheduling-to-teams-ts
+# scheduling-deferred-send-ts
 
 ## purpose
 
-Migrating Slack scheduled messages (`chat.scheduleMessage`, `chat.deleteScheduledMessage`) and reminder patterns (`reminders.add`) to Teams proactive messaging with timer-based infrastructure (in-process, Azure Functions, Queue Storage).
+Bridges Slack scheduling (chat.scheduleMessage, reminders) and Teams deferred delivery patterns for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack scheduled messages (`chat.scheduleMessage`, `chat.deleteSchedule
 8. **Power Automate "Recurrence" trigger is a no-code alternative.** For simple recurring messages (daily standup reminder, weekly digest), a Power Automate flow with a Recurrence trigger can send messages via the bot's webhook or Graph API without code. Good for business users managing their own schedules. [learn.microsoft.com -- Power Automate Recurrence](https://learn.microsoft.com/en-us/power-automate/triggers-introduction#recurrence-trigger)
 9. **Store conversation references at install time for proactive messaging.** All scheduled/reminder sends require a valid conversation reference (including `serviceUrl`). Capture and persist the reference in the `install.add` handler. Without it, the bot cannot send proactive messages at scheduled time. [learn.microsoft.com -- Conversation reference](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages#get-the-conversation-reference)
 10. **Rate limiting applies to bulk scheduled sends.** Teams limits bots to ~1 message/second per conversation and ~30 messages/minute per conversation. If many scheduled messages are due at the same time (e.g., "send daily digest to 500 users at 9 AM"), implement a send queue with concurrency control and staggered delivery. [learn.microsoft.com -- Rate limits](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/rate-limit)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, this is simpler — Slack has native `chat.scheduleMessage` and `reminders.add` APIs. Timer-based infrastructure (Azure Functions, Queue Storage, Service Bus) can be replaced with direct Slack API calls. Map proactive send patterns to `chat.scheduleMessage` with a `post_at` Unix timestamp. Map Power Automate recurrence flows to Slack Workflow Builder scheduled triggers or `reminders.add` for user-facing reminders.
 
 ## patterns
 
@@ -267,10 +268,10 @@ app.message(/^\/?remind (.+)$/i, async ({ send, activity }) => {
 
 ## instructions
 
-Use this expert when migrating Slack scheduled messages or reminders to Teams. It covers: `chat.scheduleMessage` replacement with timer + proactive send, `reminders.add` replacement with persistent storage, in-process timers (dev), Azure Functions timer triggers (production), Queue Storage visibility timeout, Service Bus scheduled messages, Power Automate Recurrence, rate limiting for bulk sends, and conversation reference storage requirements. Pair with `../teams/runtime.proactive-messaging-ts.md` for proactive messaging infrastructure, `../teams/state.storage-patterns-ts.md` for persisting scheduled items, and `slack-interactive-responses-to-teams-ts.md` for deferred response patterns.
+Use this expert when adding cross-platform support in either direction for scheduled messages, reminders, and deferred delivery. It covers: Slack `chat.scheduleMessage` bridged to Teams timer + proactive send, `reminders.add` bridged to persistent storage patterns, in-process timers (dev), Azure Functions timer triggers (production), Queue Storage visibility timeout, Service Bus scheduled messages, Power Automate Recurrence, rate limiting for bulk sends, conversation reference storage requirements, and reverse mapping from Teams deferred patterns back to Slack native scheduling APIs. Pair with `../teams/runtime.proactive-messaging-ts.md` for proactive messaging infrastructure, `../teams/state.storage-patterns-ts.md` for persisting scheduled items, and `slack-interactive-responses-to-teams-ts.md` for deferred response patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack scheduled messages (chat.scheduleMessage, chat.deleteScheduledMessage) and reminders (reminders.add) to Microsoft Teams. Cover: proactive messaging with stored conversation references, in-process timers (node-cron/setTimeout) for dev, Azure Functions timer trigger for production, Queue Storage visibility timeout, Service Bus scheduled messages, Power Automate Recurrence, rate limiting for bulk sends, and cancellation patterns. Include TypeScript code examples and a comparison table."
+"Write a micro expert for bridging Slack scheduled messages (chat.scheduleMessage, chat.deleteScheduledMessage) and reminders (reminders.add) with Microsoft Teams deferred delivery patterns in either direction. Cover: proactive messaging with stored conversation references, in-process timers (node-cron/setTimeout) for dev, Azure Functions timer trigger for production, Queue Storage visibility timeout, Service Bus scheduled messages, Power Automate Recurrence, rate limiting for bulk sends, cancellation patterns, and reverse mapping from Teams deferred infrastructure back to Slack native scheduling APIs. Include TypeScript code examples and a comparison table."

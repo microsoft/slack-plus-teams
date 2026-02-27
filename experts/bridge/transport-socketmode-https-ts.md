@@ -1,8 +1,8 @@
-# slack-transport-to-teams-ts
+# transport-socketmode-https-ts
 
 ## purpose
 
-Mapping Slack's transport mechanisms (HTTP webhooks, Socket Mode WebSocket, RTM) to Teams' Bot Framework transport (Azure Bot Service HTTPS channel), including connection lifecycle, event delivery, and deployment model differences.
+Bridges Slack transport (Socket Mode, HTTP Events API) and Teams Bot Framework HTTPS transport for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,7 +16,8 @@ Mapping Slack's transport mechanisms (HTTP webhooks, Socket Mode WebSocket, RTM)
 8. **Slack's retry mechanism (`x-slack-retry-num` header, `x-slack-retry-reason`)** is replaced by Bot Framework delivery guarantees. Teams does not retry failed deliveries in the same way — if your endpoint is down, activities may be lost. Ensure high availability.
 9. **Java SDK's `SocketModeClient` classes (`SocketModeApp`, `SocketModeClient`, `JavaxWebSocketClient`, `TyrusWebSocketClient`)** are entirely eliminated. Delete all Socket Mode client code, connection management, reconnection logic, and WebSocket libraries.
 10. **Slack's event subscription URL verification challenge (`url_verification` event)** has no Teams equivalent. Teams verifies your endpoint via the Bot Framework registration in Azure Portal, not via an HTTP challenge. Remove all challenge-response code.
-11. **Add a health check endpoint for production hosting.** Azure App Service, Container Apps, and Kubernetes all use HTTP health probes to determine if the app is alive. Expose `GET /api/health` returning 200 with a JSON body. Configure the probe path in your hosting platform so failed health checks trigger automatic restarts instead of silent failures. [learn.microsoft.com -- Health checks](https://learn.microsoft.com/en-us/azure/app-service/monitor-instances-health-check)
+11. **Transport is inherently asymmetric.** Slack supports both Socket Mode (outbound WebSocket) and HTTP (inbound webhooks), while Teams requires HTTPS exclusively. For Teams → Slack, adding Socket Mode is optional but useful for firewall-restricted environments. A cross-platform bot typically uses HTTP/HTTPS for both platforms, with Socket Mode as an optional Slack-only enhancement.
+12. **Add a health check endpoint for production hosting.** Azure App Service, Container Apps, and Kubernetes all use HTTP health probes to determine if the app is alive. Expose `GET /api/health` returning 200 with a JSON body. Configure the probe path in your hosting platform so failed health checks trigger automatic restarts instead of silent failures. [learn.microsoft.com -- Health checks](https://learn.microsoft.com/en-us/azure/app-service/monitor-instances-health-check)
 
 ## patterns
 
@@ -221,10 +222,10 @@ webApp.listen(process.env.PORT || 3978, () => {
 
 ## instructions
 
-Use this expert when converting a Slack app that uses Socket Mode, RTM, or HTTP Events API to a Teams bot. The core message: **all three Slack transports collapse into one Teams model (inbound HTTPS)**. Focus on: (1) deleting all WebSocket/Socket Mode code and dependencies, (2) removing envelope acknowledgement logic, (3) removing signing secret verification, (4) setting up the HTTPS endpoint with proper TLS, (5) configuring Azure Bot registration. Pair with `slack-events-to-teams-activities-ts.md` for event/activity mapping once the transport layer is resolved, and `../teams/runtime.app-init-ts.md` for Teams app initialization.
+Use this expert when adding cross-platform support in either direction for Slack transport (Socket Mode, HTTP Events API) or Teams Bot Framework HTTPS transport. The core message: **all three Slack transports collapse into one Teams model (inbound HTTPS)**. Transport is inherently asymmetric -- Slack supports both Socket Mode and HTTP, while Teams requires HTTPS. For Teams → Slack, adding Socket Mode is optional but useful for firewall-restricted environments. Focus on: (1) understanding transport differences between platforms, (2) envelope acknowledgement vs HTTP response patterns, (3) setting up the HTTPS endpoint with proper TLS, (4) configuring Azure Bot registration. Pair with `events-activities-ts.md` for event/activity mapping once the transport layer is resolved, and `../teams/runtime.app-init-ts.md` for Teams app initialization.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack transport (Socket Mode WebSocket, RTM, HTTP Events API) to Teams Bot Framework HTTPS transport. Cover: why all three collapse into one model, Socket Mode elimination (connection lifecycle, envelope ack, app-level tokens), RTM deprecation, public HTTPS endpoint requirement, Bot Framework JWT authentication, deployment options (Azure App Service, ngrok, Dev Tunnels), environment variable cleanup, Java SDK SocketModeClient/SocketModeApp deletion, and transport comparison table."
+"Write a micro expert for bridging Slack transport (Socket Mode WebSocket, HTTP Events API) and Teams Bot Framework HTTPS transport in either direction for cross-platform bots. Cover: why all three Slack transports collapse into one Teams model, transport asymmetry (Socket Mode is Slack-only), Socket Mode as optional enhancement for firewall-restricted environments, public HTTPS endpoint requirement, Bot Framework JWT authentication, deployment options (Azure App Service, ngrok, Dev Tunnels), environment variable cleanup, and transport comparison table."

@@ -1,8 +1,10 @@
-# aws-to-azure.compute-ts
+# infra-compute-ts
 
 ## purpose
 
-Migrating bot compute from AWS Lambda/ECS/EC2 to Azure App Service, Azure Functions, or Azure Container Apps for Teams bot hosting.
+Bridges AWS and Azure compute infrastructure for cross-platform bot hosting. Covers Lambda/ECS/EC2 to Azure App Service/Functions/Container Apps (and the reverse). The common direction is AWS → Azure, but the service mappings apply bidirectionally.
+
+> **Note:** AWS → Azure is the most common direction for this expert. For Azure → AWS, reverse the mappings: App Service → EC2/ECS, Azure Functions → Lambda + API Gateway, Container Apps → ECS/Fargate.
 
 ## rules
 
@@ -210,19 +212,21 @@ async function callDataService(query: string) {
 
 ## instructions
 
-This expert covers migrating bot compute infrastructure from AWS to Azure when moving a Slack bot to Microsoft Teams. Use it when you need to:
+This expert bridges compute infrastructure between AWS and Azure for cross-platform bot hosting. Use it when adding cross-platform support in either direction and you need to:
 
-- Decide which Azure compute service replaces your current AWS hosting (Lambda, ECS/Fargate, EC2, App Runner)
+- Map compute services between clouds (Lambda ↔ Azure Functions, ECS ↔ Container Apps, EC2 ↔ App Service)
 - Configure Azure App Service for a Teams bot with proper Always On, WebSocket, and Node.js runtime settings
 - Set up Azure Functions as a Teams bot endpoint while avoiding cold-start pitfalls
 - Deploy containerized bots to Azure Container Apps as a replacement for ECS/Fargate
-- Migrate environment variables and deployment configurations from AWS to Azure App Settings
+- Bridge environment variables and deployment configurations between AWS and Azure
 - Configure health checks, scaling rules, and deployment slots for production bot hosting
 
-Pair with `aws-to-azure.secrets-config-ts.md` for App Settings and environment variable configuration on Azure compute, and `../teams/dev.debug-test-ts.md` for local development setup.
+For Azure → AWS (less common): reverse the mappings. App Service maps to EC2 or Elastic Beanstalk, Azure Functions maps to Lambda + API Gateway, Container Apps maps to ECS/Fargate.
+
+Pair with `infra-secrets-config-ts.md` for App Settings and environment variable configuration, and `../teams/dev.debug-test-ts.md` for local development setup.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating bot compute from AWS to Azure. Provide a decision matrix mapping AWS Lambda+API Gateway, ECS/Fargate, and App Runner to Azure Functions, App Service, and Container Apps. Include Node/TS hosting patterns, ingress/routing, env var configuration, scaling differences, cold start mitigation for Teams 3-second response requirements, and bot endpoint considerations. Include deployment CLI examples."
+"Write a micro expert for bridging bot compute between AWS and Azure. Provide a bidirectional decision matrix mapping AWS Lambda+API Gateway ↔ Azure Functions, ECS/Fargate ↔ Container Apps, and EC2 ↔ App Service. Include Node/TS hosting patterns, ingress/routing, env var configuration, scaling differences, cold start mitigation for Teams 3-second response requirements, and bot endpoint considerations. Include deployment CLI examples for both directions."

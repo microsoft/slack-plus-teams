@@ -1,8 +1,8 @@
-# slack-workflows-to-power-automate-ts
+# workflows-automation-ts
 
 ## purpose
 
-Migrating Slack Workflow Builder workflows and custom workflow steps (`workflow_step_execute`) to Microsoft Power Automate flows, custom connectors, built-in Approvals, and bot-driven workflow alternatives.
+Bridges Slack Workflow Builder and Teams Power Automate / bot-driven orchestration for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack Workflow Builder workflows and custom workflow steps (`workflow_
 8. **Slack workflow variables → Power Automate dynamic content.** Slack workflows pass data between steps via variables set in earlier steps. Power Automate uses "dynamic content" — outputs from previous steps that can be referenced in later steps. The data flow model is similar but the syntax is completely different. [learn.microsoft.com -- Dynamic content](https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions)
 9. **Power Automate flows can call Bot Framework via HTTP.** To integrate your Teams bot into a Power Automate flow, expose REST endpoints on your bot's server and call them from Power Automate's HTTP action. The bot can then send proactive messages based on flow triggers. [learn.microsoft.com -- HTTP connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
 10. **Slack Workflow Builder is free; Power Automate has licensing tiers.** Slack Workflow Builder is included in all plans. Power Automate has a free tier (limited runs) and premium tiers. Custom connectors require a premium license. Factor licensing into migration planning. [learn.microsoft.com -- Power Automate licensing](https://learn.microsoft.com/en-us/power-platform/admin/pricing-billing-skus)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, Power Automate flows can be mapped to Slack Workflow Builder steps or custom `workflow_step_execute` handlers. Power Automate Approvals map to Slack approval workflows using emoji reactions or interactive message buttons. Power Automate custom connectors map to Slack custom workflow steps registered via `workflow_step` events. Power Automate Recurrence triggers map to Slack Workflow Builder scheduled triggers.
 
 ## patterns
 
@@ -237,10 +238,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack Workflow Builder workflows to Teams. It covers: workflow trigger mapping, custom workflow steps to Power Automate custom connectors, approval workflows to the Approvals connector, the Teams Workflows app for simple automations, and bot-driven workflow alternatives using state machines + Adaptive Cards. Pair with `../teams/ui.adaptive-cards-ts.md` for card construction in bot-driven workflows, `../teams/runtime.proactive-messaging-ts.md` for flow-triggered bot messages, and `slack-interactive-responses-to-teams-ts.md` for card replacement patterns in approval flows.
+Use this expert when adding cross-platform support in either direction for workflow automation. It covers: Slack Workflow Builder bridged to Power Automate flows, custom workflow steps bridged to Power Automate custom connectors, approval workflows bridged to the Approvals connector, the Teams Workflows app for simple automations, bot-driven workflow alternatives using state machines + Adaptive Cards, and reverse mapping from Power Automate flows back to Slack Workflow Builder steps and custom workflow_step_execute handlers. Pair with `../teams/ui.adaptive-cards-ts.md` for card construction in bot-driven workflows, `../teams/runtime.proactive-messaging-ts.md` for flow-triggered bot messages, and `slack-interactive-responses-to-teams-ts.md` for card replacement patterns in approval flows.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack Workflow Builder workflows to Microsoft Teams. Cover: Power Automate as the primary replacement, custom connector creation for Slack custom workflow steps, the built-in Approvals connector for approval flows, the Teams Workflows app for simple automations, bot-driven state machine alternative with Adaptive Card buttons, workflow trigger mapping, variable/dynamic content translation, and licensing considerations. Include code examples for bot-driven approvals and a comparison table."
+"Write a micro expert for bridging Slack Workflow Builder and Microsoft Teams Power Automate / bot-driven orchestration in either direction. Cover: Power Automate as the Teams-side replacement, custom connector creation for Slack custom workflow steps, the built-in Approvals connector for approval flows, the Teams Workflows app for simple automations, bot-driven state machine alternative with Adaptive Card buttons, workflow trigger mapping, variable/dynamic content translation, licensing considerations, and reverse mapping from Power Automate flows back to Slack Workflow Builder steps. Include code examples for bot-driven approvals and a comparison table."

@@ -65,11 +65,11 @@ Read:
 - `bulk-conversion-strategy-ts.md` (if 50+ source files)
 - `dependency-mapping-ts.md`
 - `type-mapping-ts.md`
-Cross-domain deps: If also migrating platforms, pair with `../migrate/index.md` for Slack→Teams or AWS→Azure concerns.
+Cross-domain deps: If also bridging platforms, pair with `../bridge/index.md` for Slack↔Teams or AWS↔Azure concerns.
 
 ## combining rule
 
-If a request involves **language conversion** and **platform migration**, read the language-specific expert here first (to rewrite the source), then route through `../migrate/index.md` for platform-specific mapping.
+If a request involves **language conversion** and **platform bridging**, read the language-specific expert here first (to rewrite the source), then route through `../bridge/index.md` for platform-specific mapping.
 
 ## file inventory
 

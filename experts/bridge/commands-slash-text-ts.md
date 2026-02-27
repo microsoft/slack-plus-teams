@@ -1,8 +1,8 @@
-# slack-commands-to-teams-ts
+# commands-slash-text-ts
 
 ## purpose
 
-Converting Slack slash commands to Teams text commands, message extensions, and manifest commands for bot discoverability.
+Bridges Slack slash commands and Teams text commands / message extensions for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -331,6 +331,20 @@ app.start(3978);
 | `command.response_url` | `send()` / `reply()` | Direct methods, no URL-based responses |
 | Manifest: Slack app dashboard | Manifest: `bots[].commands[]` | JSON file instead of web UI |
 
+### Reverse direction (Teams → Slack)
+
+For Teams → Slack, map `app.message(regex)` to `app.command('/name')`, add `ack()` calls, and convert Adaptive Card forms to Block Kit modals. Key reverse mappings:
+- `app.message(/^\/?name$/i, ...)` → `app.command('/name', ...)` with `await ack()` at the top
+- `send(text)` → `respond({ response_type: 'in_channel', text })` or `say(text)`
+- `reply(text)` → `say({ text, thread_ts: message.ts })`
+- Adaptive Card inline form → `views.open(trigger_id, view)` with Block Kit modal
+- `app.on('card.action', ...)` with `data.action` routing → `app.view('callback_id', ...)` for modal submissions, `app.action('action_id', ...)` for button clicks
+- Manifest `bots[].commands[]` → Slack App Dashboard slash command configuration
+- `activity.from.aadObjectId` → `command.user_id` (requires ID mapping table)
+- `activity.text` (after stripping @mention) → `command.text` (clean argument string)
+- Message extensions (search-based) → slash commands returning ephemeral blocks, or external data source selects
+- All visible messages → consider which should be `response_type: 'ephemeral'` for Slack's richer privacy model
+
 ## pitfalls
 
 - **Expecting slash command UX in Teams**: Teams users do not get the same discoverable `/command` experience. Set expectations that commands are triggered by typing text or using the bot commands menu.
@@ -355,10 +369,10 @@ app.start(3978);
 
 ## instructions
 
-This expert covers migrating Slack slash commands to Microsoft Teams bots. Use it when you need to: convert app.command() handlers to Teams app.message() with regex patterns; understand the three Teams alternatives to slash commands (text matching, messaging extensions, manifest commands); remove ack() calls and adapt response patterns (respond/say to send/reply); replace Slack modals opened via trigger_id with Adaptive Card forms or Task Modules; map command payload properties (text, user_id, channel_id, trigger_id, response_url) to their Teams equivalents; handle the lack of ephemeral messages in Teams; and add manifest command entries for discoverability. Pair with `../slack/runtime.slash-commands-ts.md` for the source Slack command patterns, and `../teams/runtime.routing-handlers-ts.md` for the target Teams app.message() patterns.
+This expert covers bridging Slack slash commands and Teams text commands / message extensions. Use it when adding cross-platform support in either direction: converting `app.command()` handlers to Teams `app.message()` with regex patterns, or converting Teams text handlers back to Slack slash commands with `ack()` calls. It covers the three Teams alternatives to slash commands (text matching, messaging extensions, manifest commands), response pattern bridging (`respond`/`say` ↔ `send`/`reply`), modal/form bridging (`trigger_id` + `views.open` ↔ Adaptive Card forms / Task Modules), command payload property mapping, ephemeral message handling, and manifest command entries. Pair with `../slack/runtime.slash-commands-ts.md` for Slack command patterns, and `../teams/runtime.routing-handlers-ts.md` for Teams `app.message()` patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack slash commands to Teams bots. Cover the three Teams alternatives (text pattern matching with app.message regex, messaging extensions, manifest bot commands), side-by-side code examples for each migration path, payload property mapping (command.text to activity.text, trigger_id removal, response_url to send/reply), ack removal, ephemeral response redesign, and manifest configuration. Include a mapping table and common pitfalls."
+"Write a micro expert for bridging Slack slash commands and Teams text commands / message extensions bidirectionally. Cover the three Teams alternatives (text pattern matching with app.message regex, messaging extensions, manifest bot commands), side-by-side code examples for bridging in both directions, payload property mapping (command.text <-> activity.text, trigger_id, response_url <-> send/reply), ack() addition/removal, ephemeral response handling, and manifest configuration. Include a mapping table and common pitfalls for both directions."

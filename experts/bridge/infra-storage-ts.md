@@ -1,8 +1,10 @@
-# aws-to-azure.storage-ts
+# infra-storage-ts
 
 ## purpose
 
-Migrating data storage from AWS S3/DynamoDB/RDS to Azure Blob Storage, Cosmos DB, and Azure SQL for Teams bot state and application data.
+Bridges AWS and Azure data storage for cross-platform bot state and application data. Covers S3/DynamoDB/RDS to Azure Blob Storage/Cosmos DB/Azure SQL (and the reverse). The common direction is AWS → Azure, but the service mappings apply bidirectionally.
+
+> **Note:** AWS → Azure is the most common direction for this expert. For Azure → AWS, reverse the mappings: Blob Storage → S3, Cosmos DB → DynamoDB, Azure SQL → RDS.
 
 ## rules
 
@@ -225,20 +227,20 @@ await container.items.upsert({
 
 ## instructions
 
-This expert covers migrating data storage from AWS to Azure when moving a Slack bot to Microsoft Teams. Use it when you need to:
+This expert bridges data storage between AWS and Azure for cross-platform bot hosting. Use it when adding cross-platform support in either direction and you need to:
 
-- Replace AWS S3 with Azure Blob Storage for file and object storage
-- Replace AWS DynamoDB with Azure Cosmos DB for NoSQL bot state and data storage
-- Replace AWS RDS with Azure SQL or Azure Database for PostgreSQL/MySQL
+- Map storage services between clouds (S3 ↔ Blob Storage, DynamoDB ↔ Cosmos DB, RDS ↔ Azure SQL)
 - Implement the Teams SDK `IStorage` interface backed by Cosmos DB for persistent bot state
 - Choose between Cosmos DB Core SQL API and Table API for DynamoDB migration
 - Set up managed identity access for Cosmos DB and Blob Storage (replacing IAM roles)
 - Plan bulk data migration with AzCopy, Data Migration Tool, or Azure Data Factory
 
-Pair with `../teams/state.storage-patterns-ts.md` for implementing the Teams SDK IStorage interface with Cosmos DB, and `aws-to-azure.secrets-config-ts.md` for securing connection strings.
+For Azure → AWS (less common): reverse the mappings. Blob Storage maps to S3, Cosmos DB maps to DynamoDB, Azure SQL maps to RDS.
+
+Pair with `../teams/state.storage-patterns-ts.md` for implementing the Teams SDK IStorage interface with Cosmos DB, and `infra-secrets-config-ts.md` for securing connection strings.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating bot storage from AWS to Azure. Map S3 to Azure Blob Storage, DynamoDB to Cosmos DB (Core SQL vs Table API), and RDS to Azure SQL/PostgreSQL. Include implementing the Teams SDK IStorage interface with Cosmos DB, managed identity access patterns, data migration strategies with AzCopy and Data Migration Tool, partition key mapping from DynamoDB, and Node.js client code examples with @azure/cosmos and @azure/storage-blob."
+"Write a micro expert for bridging bot storage between AWS and Azure. Map S3 ↔ Azure Blob Storage, DynamoDB ↔ Cosmos DB (Core SQL vs Table API), and RDS ↔ Azure SQL/PostgreSQL bidirectionally. Include implementing the Teams SDK IStorage interface with Cosmos DB, managed identity access patterns, data migration strategies with AzCopy and Data Migration Tool, partition key mapping, and Node.js client code examples."

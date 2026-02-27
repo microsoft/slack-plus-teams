@@ -1,8 +1,8 @@
-# slack-legacy-attachments-to-teams-ts
+# ui-legacy-attachments-cards-ts
 
 ## purpose
 
-Migrating Slack legacy message attachments (pre-Block Kit) and `attachmentAction` handlers to Teams Adaptive Cards and `actionSubmit` handlers.
+Bridges pre-Block Kit Slack legacy attachments and Teams Adaptive Cards for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -15,7 +15,8 @@ Migrating Slack legacy message attachments (pre-Block Kit) and `attachmentAction
 7. Slack `attachment_type: "default"` has no Adaptive Card equivalent — it was a Slack internal marker. Remove it during migration.
 8. Slack legacy attachment `actions[]` with `type: "select"` (dropdown menus) map to Adaptive Card `Input.ChoiceSet` with `style: "compact"`. Remember that Adaptive Card selects require an explicit `Action.Submit` button — they do not fire on selection like Slack.
 9. Slack `respond({ replace_original: true })` (replacing the original message after an attachment action) maps to Teams `updateActivity()` with the original activity ID and a new Adaptive Card attachment.
-10. Messages mixing legacy attachments AND Block Kit blocks should be migrated to a single Adaptive Card. The attachment text becomes header/body `TextBlock` elements and the Block Kit portion follows the standard block-kit-to-adaptive-cards mapping.
+10. Messages mixing legacy attachments AND Block Kit blocks should be bridged to a single Adaptive Card. The attachment text becomes header/body `TextBlock` elements and the Block Kit portion follows the standard block-kit-to-adaptive-cards mapping.
+11. **Reverse direction (Teams → Slack):** While not recommended (Block Kit is preferred), Adaptive Cards can be mapped to legacy attachment format if targeting very old Slack integrations. Map `TextBlock` to `attachments[].text`, `Container` style to `color`, and `Action.Submit` to `actions[].type: "button"`. Prefer converting to Block Kit instead of legacy attachments for new Slack integrations.
 
 ## patterns
 
@@ -196,10 +197,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack apps that use pre-Block Kit legacy attachments (`message.attachments[]` with `callback_id`, `color`, `actions[]`). It covers converting attachment JSON to Adaptive Card JSON, mapping `attachmentAction` handlers to `actionSubmit` handlers, redesigning confirmation dialogs, handling message replacement, and dealing with mixed attachment + Block Kit messages. Pair with `block-kit-to-adaptive-cards-ts.md` if the message also contains Block Kit blocks, and `../teams/ui.adaptive-cards-ts.md` for Adaptive Card construction patterns.
+Use this expert when adding cross-platform support in either direction for Slack legacy attachments or Teams Adaptive Cards. It covers converting attachment JSON to Adaptive Card JSON and vice versa, mapping `attachmentAction` handlers to `actionSubmit` handlers, redesigning confirmation dialogs, handling message replacement, and dealing with mixed attachment + Block Kit messages. For Teams → Slack, Adaptive Cards can be mapped to legacy attachment format if targeting very old Slack integrations, though Block Kit is preferred. Pair with `ui-block-kit-adaptive-cards-ts.md` if the message also contains Block Kit blocks, and `../teams/ui.adaptive-cards-ts.md` for Adaptive Card construction patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert on migrating Slack legacy message attachments (pre-Block Kit) to Teams Adaptive Cards. Cover: attachment text/color/fallback/callback_id/actions mapping, button and select action conversion, confirm dialog redesign with Action.ShowCard, attachmentAction handler migration to adaptiveCards.actionSubmit, replace_original to updateActivity, mixed attachments + Block Kit messages, and color mapping limitations. Include a worked example converting a Slack attachment with buttons and confirm to an Adaptive Card."
+"Write a micro expert on bridging Slack legacy message attachments (pre-Block Kit) and Teams Adaptive Cards in either direction for cross-platform bots. Cover: attachment text/color/fallback/callback_id/actions mapping, button and select action conversion, confirm dialog redesign with Action.ShowCard, attachmentAction handler bridging to adaptiveCards.actionSubmit, replace_original to updateActivity, mixed attachments + Block Kit messages, color mapping limitations, and reverse-direction notes for Teams → Slack legacy attachment mapping. Include a worked example converting between formats."

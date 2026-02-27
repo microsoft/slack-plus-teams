@@ -1,8 +1,8 @@
-# slack-files-to-teams-ts
+# files-upload-download-ts
 
 ## purpose
 
-Migrating Slack file handling (`files.upload`, `files.sharedPublicURL`, file events, file download) to Teams file attachment patterns using FileConsentCard, OneDrive/SharePoint Graph API uploads, and activity attachments.
+Bridges Slack file operations (files.upload, file events) and Teams file consent / OneDrive/SharePoint patterns for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack file handling (`files.upload`, `files.sharedPublicURL`, file eve
 8. **FileConsentCard flow is a 3-step protocol.** Step 1: Bot sends a FileConsentCard with filename and size. Step 2: User accepts or declines. Step 3: On accept, Teams sends a `fileConsent/invoke` activity with an `uploadInfo` containing the upload URL. On decline, Teams sends the same invoke with a `declined` action. Handle both cases. [learn.microsoft.com -- File consent](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/bots-filesv4#send-files-to-personal-chat)
 9. **Slack `files.list` / `files.info` → Graph API drive item queries.** Slack has dedicated file listing APIs. In Teams, files are stored in OneDrive/SharePoint. Use Graph API: `GET /drives/{drive-id}/root/children` to list files, `GET /drives/{drive-id}/items/{item-id}` for file metadata. [learn.microsoft.com -- List items](https://learn.microsoft.com/en-us/graph/api/driveitem-list-children)
 10. **File handling only works in personal (1:1) chat scope.** The `supportsFiles` manifest flag and FileConsentCard only work in personal bot conversations. For channel file operations, use Graph API directly without the consent card flow. This is a significant scope limitation compared to Slack where `files.upload` works in any channel. [learn.microsoft.com -- Bot files](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/bots-filesv4)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, the reverse is simpler: Slack's `files.uploadV2` is a direct single-call API vs Teams' multi-step consent flow. Map OneDrive/SharePoint file URLs to `files.uploadV2` with a buffer, Graph `createLink` sharing links to `files.sharedPublicURL`, and `activity.attachments` file downloads to Slack `file_shared` event handling. The Slack API handles storage transparently.
 
 ## patterns
 
@@ -230,10 +231,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack file handling to Teams. It covers: `files.upload` to FileConsentCard + Graph upload, `files.sharedPublicURL` to Graph sharing links, file event handling via activity attachments, large file resumable uploads, and the personal-chat-only limitation. Pair with `../teams/graph.usergraph-appgraph-ts.md` for Graph API authentication patterns, `../teams/runtime.manifest-ts.md` for the `supportsFiles` manifest flag, and `slack-interactive-responses-to-teams-ts.md` for the consent card invoke handling pattern.
+Use this expert when adding cross-platform support in either direction for Slack file operations or Teams file consent / OneDrive/SharePoint patterns. It covers: `files.upload` to FileConsentCard + Graph upload, `files.sharedPublicURL` to Graph sharing links, file event handling via activity attachments, large file resumable uploads, and the personal-chat-only limitation. For Teams → Slack, the reverse is simpler: Slack's `files.uploadV2` is a direct single-call API vs Teams' multi-step consent flow. Pair with `../teams/graph.usergraph-appgraph-ts.md` for Graph API authentication patterns, `../teams/runtime.manifest-ts.md` for the `supportsFiles` manifest flag, and `interactive-responses-ts.md` for the consent card invoke handling pattern.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack file handling (files.upload, files.sharedPublicURL, file_shared event, file download) to Microsoft Teams. Cover FileConsentCard 3-step flow, OneDrive/SharePoint Graph API uploads, resumable upload sessions for large files, receiving files via activity attachments, the supportsFiles manifest flag, personal-chat-only limitation, and Graph API permission requirements. Include TypeScript code examples and a mapping table."
+"Write a micro expert for bridging Slack file operations (files.upload, files.sharedPublicURL, file_shared event, file download) and Teams file consent / OneDrive/SharePoint patterns in either direction for cross-platform bots. Cover FileConsentCard 3-step flow, OneDrive/SharePoint Graph API uploads, resumable upload sessions for large files, receiving files via activity attachments, the supportsFiles manifest flag, personal-chat-only limitation, Graph API permission requirements, and reverse-direction notes for Teams → Slack (simpler single-call API). Include TypeScript code examples and a mapping table."

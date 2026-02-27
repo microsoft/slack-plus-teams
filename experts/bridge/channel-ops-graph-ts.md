@@ -1,8 +1,8 @@
-# slack-channel-ops-to-teams-ts
+# channel-ops-graph-ts
 
 ## purpose
 
-Migrating Slack channel management operations (`conversations.create`, `conversations.archive`, `conversations.invite`, `conversations.kick`, `conversations.setTopic`) to Microsoft Teams equivalents via the Microsoft Graph API.
+Bridges Slack channel operations (conversations.*) and Teams channel management via Microsoft Graph for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack channel management operations (`conversations.create`, `conversa
 8. **Graph API requires application or delegated permissions.** Channel operations need `Channel.Create`, `ChannelMember.ReadWrite.All`, `Channel.Delete.All` (application permissions) or equivalent delegated permissions. These require Azure AD admin consent. Slack's bot token scopes (`channels:manage`, `channels:write.invites`) have no direct Azure AD equivalent. [learn.microsoft.com -- Graph permissions](https://learn.microsoft.com/en-us/graph/permissions-reference)
 9. **Slack `conversations.list` → Graph `GET /teams/{team-id}/channels`.** List all channels in a team. For listing channels across teams, iterate over `GET /me/joinedTeams` first, then list channels per team. There is no single API to list all channels across all teams (unlike Slack's flat listing). [learn.microsoft.com -- List channels](https://learn.microsoft.com/en-us/graph/api/channel-list)
 10. **Private channels have separate membership management.** Slack private channels (`is_private: true`) map to Teams private channels (`membershipType: 'private'`). Private channel members are managed via the channel members API, not the team membership. Adding a user to the team does NOT add them to private channels — you must add them to both. [learn.microsoft.com -- Private channels](https://learn.microsoft.com/en-us/microsoftteams/private-channels)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map Graph API channel operations to Slack's `conversations.*` API methods. `POST /teams/{team-id}/channels` maps to `conversations.create`. `POST /channels/{id}/members` maps to `conversations.invite`. `DELETE /channels/{id}/members/{id}` maps to `conversations.kick`. `PATCH /channels/{id}` with `description` maps to `conversations.setTopic`. Note that Slack has a flat channel namespace (no team-id required) and supports true channel archiving via `conversations.archive`.
 
 ## patterns
 
@@ -257,10 +258,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack channel management to Teams. It covers: `conversations.create` to Graph channel creation, `conversations.archive` workarounds, `conversations.invite` to Graph member addition, `conversations.kick` with membership ID resolution, `conversations.setTopic` to channel description update, team-id requirement, channel name restrictions, and Graph API permission requirements. Pair with `../teams/graph.usergraph-appgraph-ts.md` for Graph API authentication, `slack-identity-to-aad-ts.md` for user ID mapping (Slack U-ID to AAD Object ID), and `slack-rate-limiting-resilience-ts.md` for Graph API throttling patterns.
+Use this expert when adding cross-platform support in either direction for channel management operations. It covers: Slack `conversations.*` bridged to Graph API channel endpoints, `conversations.archive` workarounds in Teams, `conversations.invite` bridged to Graph member addition, `conversations.kick` with membership ID resolution, `conversations.setTopic` bridged to channel description update, team-id requirement, channel name restrictions, Graph API permission requirements, and reverse mapping from Graph channel operations back to Slack `conversations.*` methods. Pair with `../teams/graph.usergraph-appgraph-ts.md` for Graph API authentication, `identity-oauth-bridge-ts.md` for user ID mapping (Slack U-ID to AAD Object ID), and `rate-limiting-resilience-ts.md` for Graph API throttling patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack channel management operations (conversations.create, conversations.archive, conversations.invite, conversations.kick, conversations.setTopic, conversations.list) to Microsoft Teams via the Graph API. Cover: team-id requirement, channel name restrictions, private channel membership, the lack of channel archive API, membership ID resolution for removal, Graph API permissions, and rate limiting. Include TypeScript code examples and a mapping table."
+"Write a micro expert for bridging Slack channel management operations (conversations.create, conversations.archive, conversations.invite, conversations.kick, conversations.setTopic, conversations.list) and Microsoft Teams channel management via the Graph API in either direction. Cover: team-id requirement, channel name restrictions, private channel membership, the lack of channel archive API in Teams, membership ID resolution for removal, Graph API permissions, rate limiting, and reverse mapping from Graph operations back to Slack conversations.* methods. Include TypeScript code examples and a mapping table."

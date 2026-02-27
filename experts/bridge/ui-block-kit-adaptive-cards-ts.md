@@ -1,8 +1,8 @@
-# block-kit-to-adaptive-cards-ts
+# ui-block-kit-adaptive-cards-ts
 
 ## purpose
 
-Maps Slack Block Kit UI structures to Microsoft Teams Adaptive Card equivalents in TypeScript, covering blocks, interactive elements, inputs, and modal-to-task-module conversion.
+Bridges Slack Block Kit and Teams Adaptive Card UI structures for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -93,6 +93,24 @@ Have an explicit plan for each gap:
 | `static_select`      | `Input.ChoiceSet` + Submit | Slack fires on select; Teams needs explicit submit  |
 | `external_select`    | `Input.ChoiceSet` + `Action.Submit` with `data.query` | Implement typeahead via `Input.ChoiceSet` with `"style": "filtered"` (schema 1.5) |
 | `multi_static_select`| `Input.ChoiceSet` multi    | Teams returns comma-separated string of values      |
+
+### reverse-direction (Teams → Slack)
+
+For Teams → Slack, reverse the mapping table. Adaptive Card elements map back to Block Kit blocks:
+- `TextBlock` Large/Bolder → `header`
+- `FactSet` → `section` with `fields`
+- `Action.Submit` with `data.verb` → `button` with `value`
+- Convert `**bold**` standard Markdown to `*bold*` mrkdwn
+- Replace Unicode emoji with `:emoji_shortcodes:` where Slack supports them
+- Swap button styles: `"positive"` → `"primary"`, `"destructive"` → `"danger"`
+- `ColumnSet`/`Container` layouts → flatten to linear `section` blocks (Block Kit has no grid)
+- `Input.ChoiceSet` with `style: "filtered"` → `external_select` with server-side options handler
+- `Input.ChoiceSet` + `Action.Submit` → `static_select` in `actions` block (fires immediately on select)
+- `Action.Execute` per-user refresh → ephemeral messages for per-user content
+- Client-side validation (`isRequired`, `regex`) → server-side validation in `view_submission` handler
+- Semantic container styles (`"attention"`, `"good"`) → emoji-based status indicators or colored attachment sidebars
+
+Key behavioral shift (Teams → Slack): The Adaptive Card **form-then-submit** model must be decomposed into Slack's **event-per-interaction** model. Each input that previously submitted as part of a batch may need its own `block_actions` handler if the Slack UX expects instant-fire behavior.
 
 ### worked-example-1: button workflow
 
@@ -369,10 +387,10 @@ class TicketBot extends TeamsActivityHandler {
 
 ## instructions
 
-This expert covers the systematic conversion of Slack Block Kit UI components to Microsoft Teams Adaptive Cards in TypeScript. Use it when: (1) migrating a Slack Bolt app to a Teams bot, (2) converting specific Block Kit JSON payloads to Adaptive Card JSON, (3) redesigning Slack modal workflows into Teams task modules, or (4) mapping Slack interactive action handlers to Teams bot invoke handlers. Start with the strategy section to understand the four-phase approach (map for correctness → upgrade layout → rethink interactions → handle gaps), then consult the mapping table and pitfalls for specific element types, and adapt the worked examples to your use case. Pair with `../slack/ui.block-kit-ts.md` for source Block Kit patterns, and `../teams/ui.adaptive-cards-ts.md` for target Adaptive Card patterns and Teams-specific constraints.
+This expert covers bridging Slack Block Kit and Teams Adaptive Card UI structures in TypeScript. Use it when adding cross-platform support in either direction: (1) bridging a Slack Bolt app to also target Teams, (2) bridging a Teams bot to also target Slack, (3) converting Block Kit JSON payloads to Adaptive Card JSON or vice versa, (4) redesigning modal workflows into task modules or task modules into modals, or (5) mapping interactive action handlers between platforms. Start with the strategy section to understand the four-phase approach (map for correctness → upgrade layout → rethink interactions → handle gaps), consult the mapping table and reverse-direction section for specific element types, and adapt the worked examples to your use case. Pair with `../slack/ui.block-kit-ts.md` for Slack Block Kit patterns, and `../teams/ui.adaptive-cards-ts.md` for Teams Adaptive Card patterns and constraints.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert specifically for converting Slack Block Kit to Teams Adaptive Cards. Include: mapping table (Block Kit blocks -> card elements), interactive actions mapping (action_id -> data.action), selects/inputs mapping, modal workflows redesign (Slack modals -> card forms or task modules), unsupported features and redesign recommendations, and 2 worked examples (a button workflow and a modal form)."
+"Write a micro expert for bridging Slack Block Kit and Teams Adaptive Cards bidirectionally. Include: mapping table (Block Kit blocks <-> card elements) in both directions, interactive actions mapping (action_id <-> data.action), selects/inputs mapping, modal/task-module workflow redesign in both directions, unsupported features and redesign recommendations for each platform, and 2 worked examples (a button workflow and a modal form)."

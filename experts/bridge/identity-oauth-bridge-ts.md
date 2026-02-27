@@ -1,8 +1,8 @@
-# slack-identity-to-aad-ts
+# identity-oauth-bridge-ts
 
 ## purpose
 
-Mapping Slack identity (user/channel IDs, signing secret) to Teams/Azure AD identity (AAD object IDs, Bot Framework JWT, OAuth) and planning data migration.
+Bridges Slack and Teams/Azure AD identity systems (user/channel IDs, OAuth, signing) for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -305,6 +305,18 @@ app.message(/^profile$/i, async ({ isSignedIn, signin, userGraph, send }) => {
 | Multi-workspace token lookup | Managed identity / tenant config | Delete entirely |
 | Slack OAuth scopes in code | Azure Portal API Permissions | Configure in portal |
 
+### Reverse direction (Teams → Slack)
+
+For Teams → Slack, the same mapping table applies in reverse. AAD Object IDs need mapping to Slack user IDs via email lookup. Key reverse mappings:
+- `activity.from.aadObjectId` (GUID) → Slack User ID (`U...`) via email-based lookup: query Graph `users/{aadObjectId}` for email, then `users.lookupByEmail` in Slack
+- `activity.conversation.id` (`19:abc@thread.v2`) → Slack Channel ID (`C...`) via channel name mapping or a stored lookup table
+- `CLIENT_ID` + `CLIENT_SECRET` + `TENANT_ID` → `SLACK_BOT_TOKEN` (`xoxb-...`) + `SLACK_SIGNING_SECRET`
+- Azure AD permissions (`ChannelMessage.Send`, `User.Read`) → Slack OAuth scopes (`chat:write`, `users:read`)
+- Teams SSO / OAuth card flow → Slack OAuth with `InstallationService` and `OAuthStateService` (Slack requires explicit token storage and refresh logic that Azure Bot Service handles automatically)
+- Bot Framework JWT validation (automatic) → Slack signing secret HMAC-SHA256 verification (must add `signingSecret` to Bolt config)
+- Azure Managed Identity → no Slack equivalent; use environment variables or secret manager for Slack tokens
+- The email-based user mapping table built for Slack → Teams works identically in reverse
+
 ## pitfalls
 
 - **Assuming Slack IDs can be reused**: Slack IDs (`U...`, `C...`, `T...`) are completely incompatible with Teams/AAD IDs. Any code that stores or references Slack IDs must be updated to use AAD Object IDs and conversation IDs.
@@ -333,10 +345,10 @@ app.message(/^profile$/i, async ({ isSignedIn, signin, userGraph, send }) => {
 
 ## instructions
 
-This expert covers mapping Slack identity and authentication concepts to their Teams/Azure AD equivalents. Use it when you need to: understand the differences between Slack IDs (U/C/T/B prefixed) and Teams IDs (AAD Object IDs, conversation IDs); remove Slack signing secret verification (replaced by automatic Bot Framework JWT validation); map environment variables from Slack (SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET) to Teams (CLIENT_ID, CLIENT_SECRET, TENANT_ID); convert Slack OAuth flows to Teams SSO with Microsoft Graph; plan user data migration by building a Slack-to-AAD mapping table using email as the shared attribute; understand the difference between Slack OAuth scopes and Azure AD permissions; and configure Teams authentication with OAuth connection settings. Pair with `../teams/auth.oauth-sso-ts.md` for the target Teams OAuth/SSO flow, and `../teams/graph.usergraph-appgraph-ts.md` for Graph API user lookup during identity mapping.
+This expert covers bridging Slack and Teams/Azure AD identity and authentication systems. Use it when adding cross-platform support in either direction: understanding the differences between Slack IDs (U/C/T/B prefixed) and Teams IDs (AAD Object IDs, conversation IDs); bridging signing/verification (Slack signing secret ↔ Bot Framework JWT); mapping environment variables (SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET ↔ CLIENT_ID, CLIENT_SECRET, TENANT_ID); converting between Slack OAuth and Teams SSO with Microsoft Graph; building a bidirectional user mapping table using email as the shared attribute; bridging Slack OAuth scopes and Azure AD permissions; and configuring authentication for either platform. Pair with `../teams/auth.oauth-sso-ts.md` for Teams OAuth/SSO flow, and `../teams/graph.usergraph-appgraph-ts.md` for Graph API user lookup during identity mapping.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack identity to Teams/Azure AD. Cover Slack ID formats (U/C/T/B IDs) vs Teams IDs (AAD Object IDs, conversation IDs), signing secret removal (Bot Framework JWT is automatic), environment variable mapping, Slack OAuth to Teams SSO flow, Slack scopes to Azure AD Graph permissions, building a user mapping table via email lookup, data re-keying strategies, and managed identity for production. Include mapping tables and TypeScript examples."
+"Write a micro expert for bridging Slack and Teams/Azure AD identity systems bidirectionally. Cover Slack ID formats (U/C/T/B IDs) vs Teams IDs (AAD Object IDs, conversation IDs), signing/verification bridging (signing secret <-> Bot Framework JWT), environment variable mapping in both directions, Slack OAuth <-> Teams SSO flow, Slack scopes <-> Azure AD Graph permissions, building a bidirectional user mapping table via email lookup, data re-keying strategies, and managed identity for production. Include mapping tables and TypeScript examples."

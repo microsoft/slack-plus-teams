@@ -1,8 +1,8 @@
-# slack-app-home-to-teams-ts
+# ui-app-home-personal-tab-ts
 
 ## purpose
 
-Migrating Slack App Home tab (`AppHomeOpenedEvent` + `views.publish`) to Microsoft Teams equivalents — personal bot chat, static tabs, or bot-powered personal tabs.
+Bridges Slack App Home and Teams personal tab / bot welcome card for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack App Home tab (`AppHomeOpenedEvent` + `views.publish`) to Microso
 8. Teams SDK v2 supports `tab.fetch` and `tab.submit` handlers for Adaptive Card-based tabs (no iframe needed). The bot returns an Adaptive Card in response to `tab.fetch`, and handles form submissions via `tab.submit`. This is the closest behavioral match to Slack's `views.publish` pattern.
 9. When migrating App Home with action buttons, remember that Slack Home tab actions fire `blockAction` events. In Teams, Adaptive Card buttons in 1:1 chat fire `adaptiveCards.actionSubmit` handlers. The routing mechanism changes but the concept is the same.
 10. Slack App Home can show different content per user based on `event.user`. In Teams 1:1 chat, the bot always talks to one user, so personalization is inherent. For tab-based approaches, use `tab.fetch` which receives user context in the activity.
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map `tab.fetch` to `app_home_opened` event with `views.publish` for dynamic content. The Adaptive Card tab content maps to Block Kit views. `tab.submit` actions map to `view_submission` or `block_actions` events. The `install.add` welcome card maps to a `views.publish` call triggered by `app_home_opened`.
 
 ## patterns
 
@@ -273,7 +274,7 @@ webApp.post('/tab/api/action', express.json(), (req, res) => {
 webApp.listen(3000, () => console.log('Tab server on :3000'));
 ```
 
-### Migration decision table
+### Bridging decision table
 
 | Slack App Home Feature | Option A: 1:1 Welcome Card | Option B: Adaptive Card Tab | Option C: Static Tab (iframe) |
 |---|---|---|---|
@@ -289,7 +290,7 @@ webApp.listen(3000, () => console.log('Tab server on :3000'));
 - **No "opened" event in 1:1 chat**: Slack fires `AppHomeOpenedEvent` every time the user navigates to the Home tab. Teams has no equivalent for 1:1 bot chat. The bot is notified when installed, not when the user opens the chat. Use `tab.fetch` (Option B) if you need an on-open trigger.
 - **views.publish is proactive**: Slack's `views.publish` can be called anytime to update the Home tab for any user. In Teams, updating a 1:1 message requires a stored conversation reference and the original activity ID. Set up proactive messaging infrastructure if you need background updates.
 - **Race condition protection gone**: Slack's `view.hash` prevents concurrent updates from clobbering each other. Teams has no equivalent. If multiple processes might update the same card, implement optimistic locking in your application layer.
-- **Block Kit → Adaptive Card**: The home view's Block Kit JSON must be converted to an Adaptive Card. The Home tab often uses `actions` blocks with buttons — these become `Action.Submit` buttons in the Adaptive Card. See `block-kit-to-adaptive-cards-ts.md` for the full mapping.
+- **Block Kit → Adaptive Card**: The home view's Block Kit JSON must be converted to an Adaptive Card. The Home tab often uses `actions` blocks with buttons — these become `Action.Submit` buttons in the Adaptive Card. See `ui-block-kit-adaptive-cards-ts.md` for the full mapping.
 - **Manifest required for tabs**: Options B and C require a `staticTabs` entry in the Teams manifest. Option A (1:1 chat) does not require manifest changes beyond the base bot registration.
 - **Tab card size limits**: Adaptive Card tabs are subject to the same 28 KB card size limit. If the Slack Home tab rendered long lists, paginate or load data on demand.
 - **Static tab requires a hosted web page**: Option C (static tab) requires deploying and hosting a web page accessible via HTTPS. This is a separate hosting concern from the bot itself. Use the same Azure App Service or add a route to your existing Express server.
@@ -308,10 +309,10 @@ webApp.listen(3000, () => console.log('Tab server on :3000'));
 
 ## instructions
 
-Use this expert when migrating a Slack App Home tab to Teams. It covers three migration paths: (A) a welcome Adaptive Card in 1:1 bot chat (simplest), (B) an Adaptive Card-based tab using `tab.fetch`/`tab.submit` (closest to App Home behavior), and (C) a static web tab in an iframe (most flexible). The decision table helps choose the right approach based on requirements. Pair with `block-kit-to-adaptive-cards-ts.md` for converting the Home tab's Block Kit to Adaptive Cards, `../teams/ui.adaptive-cards-ts.md` for card construction, and `../teams/runtime.proactive-messaging-ts.md` for background card updates.
+Use this expert when adding cross-platform support in either direction for Slack App Home or Teams personal tab / bot welcome card. It covers three bridging paths: (A) a welcome Adaptive Card in 1:1 bot chat (simplest), (B) an Adaptive Card-based tab using `tab.fetch`/`tab.submit` (closest to App Home behavior), and (C) a static web tab in an iframe (most flexible). For Teams → Slack, map `tab.fetch` to `app_home_opened` event with `views.publish` for dynamic content. The decision table helps choose the right approach based on requirements. Pair with `ui-block-kit-adaptive-cards-ts.md` for converting between Block Kit and Adaptive Cards, `../teams/ui.adaptive-cards-ts.md` for card construction, and `../teams/runtime.proactive-messaging-ts.md` for background card updates.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert on migrating Slack App Home (AppHomeOpenedEvent, views.publish, dynamic home tab with Block Kit) to Microsoft Teams. Cover three approaches: 1:1 bot welcome card, Adaptive Card-based tabs (tab.fetch/tab.submit), and static tabs (iframe). Include a decision matrix, side-by-side Kotlin-to-TypeScript code examples, and pitfalls around proactive messaging, race conditions, and manifest configuration."
+"Write a micro expert on bridging Slack App Home (AppHomeOpenedEvent, views.publish, dynamic home tab with Block Kit) and Microsoft Teams personal tab / bot welcome card in either direction. Cover three approaches: 1:1 bot welcome card, Adaptive Card-based tabs (tab.fetch/tab.submit), and static tabs (iframe). Include reverse-direction notes for Teams → Slack mapping, a decision matrix, side-by-side code examples, and pitfalls around proactive messaging, race conditions, and manifest configuration."

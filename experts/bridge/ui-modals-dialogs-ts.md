@@ -1,8 +1,8 @@
-# slack-modals-to-teams-dialogs-ts
+# ui-modals-dialogs-ts
 
 ## purpose
 
-Migrating Slack modal workflows (`views.open`, `viewSubmission`, `viewsUpdate`, `viewClosed`, `blockSuggestion` in modals) to Teams task module / dialog flows using the Teams SDK v2.
+Bridges Slack modal workflows and Teams task module / dialog flows for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -216,6 +216,21 @@ app.start(3978);
 | `blockAction` mid-form | *(no equivalent)* | Redesign as multi-step dialog |
 | Modal `title` / `submit` / `close` labels | `value.title` + `Action.Submit.title` | No custom close label |
 
+### Reverse direction (Teams → Slack)
+
+For Teams → Slack, map `dialog.open` to `views.open` with `trigger_id`, `dialog.submit` to `viewSubmission`, and Adaptive Card inputs to Block Kit inputs. Key reverse mappings:
+- `dialog.open` handler returning `continue` → `views.open(trigger_id, view)` -- note: Slack requires a `trigger_id` from a preceding interaction (slash command, button click, etc.)
+- `dialog.submit` handler → `app.view('callback_id', ...)` with `view.state.values[block_id][action_id]`
+- `activity.value.data[inputId]` (flat) → `view.state.values[block_id][action_id].value` (nested)
+- Return `{ task: { type: 'continue', value: { card } } }` → `ctx.ack({ response_action: 'update', view: newView })`
+- Return `{ task: { type: 'message', value } }` → `ctx.ack()` (close modal)
+- Multi-step dialog (routing by `data.step`) → `views.push` for stacked modals (Slack supports stacking)
+- Error `TextBlock` re-render → `ctx.ackWithErrors({ block_id: 'error message' })` for inline field-level errors
+- `Action.Submit.data` hidden fields → `private_metadata` string on the view
+- `Input.ChoiceSet` with `style: "filtered"` → `blockSuggestion` handler for server-side typeahead
+- Adaptive Card `isRequired`/`errorMessage`/`regex` client-side validation → server-side validation in `viewSubmission` with `ackWithErrors`
+- No cancel notification (Teams) → `viewClosed(callback_id)` with `notify_on_close: true` (Slack supports cancel callbacks)
+
 ## pitfalls
 
 - **No modal stacking**: Slack's `views.push` stacks modals. Teams task modules cannot stack. Redesign stacked flows as multi-step forms within a single dialog (route by `data.step` in the submit handler).
@@ -238,10 +253,10 @@ app.start(3978);
 
 ## instructions
 
-Use this expert when migrating Slack modal workflows to Teams dialog/task module flows. It covers the full lifecycle: opening (views.open → dialog.open), submission (viewSubmission → dialog.submit), updating (response_action: update → continue response), stacking (views.push → multi-step redesign), closing (viewClosed → no equivalent), validation (ackWithErrors → client-side + continue), and dynamic selects (blockSuggestion → filtered ChoiceSet). Pair with `block-kit-to-adaptive-cards-ts.md` for converting modal Block Kit to Adaptive Card elements, `../teams/ui.dialogs-task-modules-ts.md` for Teams-side dialog patterns, and `../teams/ui.adaptive-cards-ts.md` for card construction.
+Use this expert when bridging Slack modal workflows and Teams dialog/task module flows in either direction. It covers the full lifecycle: opening (`views.open` ↔ `dialog.open`), submission (`viewSubmission` ↔ `dialog.submit`), updating (`response_action: update` ↔ `continue` response), stacking (`views.push` ↔ multi-step redesign), closing (`viewClosed` ↔ no Teams equivalent), validation (`ackWithErrors` ↔ client-side + `continue`), and dynamic selects (`blockSuggestion` ↔ filtered `ChoiceSet`). Use when adding cross-platform support in either direction. Pair with `ui-block-kit-adaptive-cards-ts.md` for converting modal Block Kit to Adaptive Card elements (or vice versa), `../teams/ui.dialogs-task-modules-ts.md` for Teams-side dialog patterns, and `../teams/ui.adaptive-cards-ts.md` for card construction.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert on migrating Slack modals (views.open, viewSubmission, viewsUpdate, viewClosed, blockSuggestion, blockAction in modals, ackWithErrors, private_metadata, notify_on_close) to Teams task modules / dialogs using Teams SDK v2. Include a comprehensive mapping table, a full worked example converting a Slack modal flow to a Teams dialog flow, and pitfalls around stacking, validation, cancel notification, and dynamic selects."
+"Write a micro expert for bridging Slack modals and Teams task modules / dialogs bidirectionally. Cover views.open <-> dialog.open, viewSubmission <-> dialog.submit, viewsUpdate <-> continue response, viewClosed <-> no equivalent, blockSuggestion <-> filtered ChoiceSet, blockAction <-> no equivalent, ackWithErrors <-> client-side validation, private_metadata <-> Action.Submit.data, and notify_on_close. Include a comprehensive bidirectional mapping table, a full worked example showing both directions, and pitfalls around stacking, validation, cancel notification, and dynamic selects."

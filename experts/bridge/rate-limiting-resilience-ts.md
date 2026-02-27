@@ -1,8 +1,8 @@
-# slack-rate-limiting-resilience-ts
+# rate-limiting-resilience-ts
 
 ## purpose
 
-Migrating Slack rate limiting patterns (429 + `Retry-After`, Bolt retry config) to Microsoft Teams Bot Framework and Graph API throttling, with exponential backoff, send queue concurrency control, and circuit breaker patterns.
+Bridges Slack and Teams rate limiting patterns, retry logic, and resilience strategies for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack rate limiting patterns (429 + `Retry-After`, Bolt retry config) 
 8. **Bot Framework Connector API has a separate 30-second timeout.** Beyond rate limits, the Bot Framework Connector API has a response timeout. If the bot doesn't respond to an invoke within ~3-10 seconds (depending on activity type), the Connector may retry or time out. This is separate from rate limiting but can compound issues under load. [learn.microsoft.com -- Bot Framework](https://learn.microsoft.com/en-us/azure/bot-service/bot-service-overview)
 9. **Graph API batch requests reduce API call volume.** Instead of N individual Graph API calls, batch up to 20 requests in a single `POST /$batch` call. This counts as fewer requests against rate limits and reduces network overhead. Useful for bulk channel operations, user lookups, or file operations. [learn.microsoft.com -- JSON batching](https://learn.microsoft.com/en-us/graph/json-batching)
 10. **Log and monitor throttling events.** Unlike Slack where Bolt logs retries automatically, Teams throttling must be explicitly logged. Track: 429 count, average retry delay, circuit breaker state, queue depth. Use Application Insights custom metrics or console logging. Throttling spikes indicate you're approaching platform limits. [learn.microsoft.com -- App Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/app/nodejs)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, Slack Bolt provides built-in `retryConfig`. Map custom Teams retry plugins to Bolt's retry configuration. Slack rate limits are per-method-per-token (not per-conversation like Teams). The `p-queue` and circuit breaker patterns apply equally in both directions. For Graph API batch requests, there is no Slack equivalent — individual API calls are needed but Bolt's built-in retry handles 429s automatically.
 
 ## patterns
 
@@ -300,10 +301,10 @@ app.message(/^\/?user (.+)$/i, async ({ send, activity }) => {
 
 ## instructions
 
-Use this expert when implementing rate limiting and resilience for a Teams bot, especially when migrating from Slack. It covers: Bolt retry config replacement with exponential backoff + jitter, Teams Bot Framework per-conversation rate limits, Graph API per-app throttling, proactive broadcast with send queue concurrency control, circuit breaker pattern with `opossum`, Graph API batch requests, and monitoring throttling events. Pair with `../teams/runtime.proactive-messaging-ts.md` for proactive send infrastructure, `../teams/graph.usergraph-appgraph-ts.md` for Graph API patterns, and `slack-scheduling-to-teams-ts.md` for rate-limited scheduled sends.
+Use this expert when adding cross-platform support in either direction for rate limiting and resilience. It covers: Slack Bolt `retryConfig` bridged to Teams manual exponential backoff + jitter, Teams Bot Framework per-conversation rate limits, Graph API per-app throttling, proactive broadcast with send queue concurrency control, circuit breaker pattern with `opossum`, Graph API batch requests, monitoring throttling events, and reverse mapping from custom Teams retry logic back to Bolt's built-in retry configuration. Pair with `../teams/runtime.proactive-messaging-ts.md` for proactive send infrastructure, `../teams/graph.usergraph-appgraph-ts.md` for Graph API patterns, and `scheduling-deferred-send-ts.md` for rate-limited scheduled sends.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack rate limiting patterns to Microsoft Teams. Cover: Bolt retryConfig replacement with manual exponential backoff + jitter, Teams Bot Framework per-conversation rate limits (1 msg/sec, 30 msg/min), Graph API per-app throttling, proactive broadcast send queues with concurrency control, circuit breaker pattern with opossum, Graph API $batch for reducing call volume, 429/503 retry handling, and monitoring. Include TypeScript code examples and a comparison table."
+"Write a micro expert for bridging Slack and Teams rate limiting patterns, retry logic, and resilience strategies in either direction. Cover: Bolt retryConfig vs manual exponential backoff + jitter, Teams Bot Framework per-conversation rate limits (1 msg/sec, 30 msg/min), Graph API per-app throttling, proactive broadcast send queues with concurrency control, circuit breaker pattern with opossum, Graph API $batch for reducing call volume, 429/503 retry handling, monitoring, and reverse mapping from Teams retry patterns back to Slack Bolt's built-in retry configuration. Include TypeScript code examples and a comparison table."

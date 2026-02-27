@@ -82,12 +82,12 @@ Signals: Teams SDK, `@microsoft/teams-ai`, Adaptive Cards, ChatPrompt, Graph API
 → Read `.experts/teams/index.md`
 
 ### Slack — build or modify a Slack app
-Signals: Slack Bolt, `@slack/bolt`, Block Kit, `ack()`, Slack events, `app.message`, `app.command`, slash command, Slack OAuth
-→ Read `.experts/slack/index.md`
+Signals: Slack Bolt, `@slack/bolt`, Block Kit, `ack()`, Slack events, `app.message`, `app.command`, `app.event`, `app.action`, `app.shortcut`, `app.view`, slash command, Slack OAuth, `InstallProvider`, `InstallationStore`, multi-workspace, `app.assistant`, Assistant container, `threadStarted`, `userMessage`, `setSuggestedPrompts`, `setStatus`, `setTitle`, `getThreadContext`
+→ Read `experts/slack/index.md`
 
-### Migrate — convert / port between platforms or clouds
-Signals: migrate, migration, convert, port, Slack to Teams, Slack→Teams, Block Kit to Adaptive Cards, AWS to Azure, Lambda to Functions, S3 to Blob, CloudWatch to App Insights, middleware chain, ack(), Socket Mode, RTM, transport, WebSocket to HTTPS, InstallationService, OAuthStateService, views.open, viewSubmission, viewClosed, App Home, views.publish, attachmentAction, legacy attachments, callback_id, modals to dialogs, task module, replace_original, delete_original, chat.update, chat.postEphemeral, response_url, ephemeral, files.upload, file_shared, link_shared, chat.unfurl, unfurl, shortcut, global shortcut, message shortcut, scheduleMessage, reminders.add, conversations.create, conversations.archive, conversations.invite, channel ops, Workflow Builder, workflow_step_execute, Power Automate, App Directory, InstallationStore, sideloading, rate limit, retry, 429, throttle, circuit breaker, Dapr, FileConsentCard, help me migrate, migration advisor, migration decisions, assess migration, migration scope
-→ Read `.experts/migrate/index.md`
+### Bridge — cross-platform bridging between Slack and Teams, or AWS and Azure
+Signals: bridge, cross-platform, migrate, migration, convert, port, Slack to Teams, Teams to Slack, Slack→Teams, Teams→Slack, Slack↔Teams, Block Kit to Adaptive Cards, Adaptive Cards to Block Kit, AWS to Azure, Azure to AWS, Lambda to Functions, S3 to Blob, CloudWatch to App Insights, middleware chain, ack(), Socket Mode, RTM, transport, WebSocket to HTTPS, InstallationService, OAuthStateService, views.open, viewSubmission, viewClosed, App Home, views.publish, attachmentAction, legacy attachments, callback_id, modals to dialogs, task module, replace_original, delete_original, chat.update, chat.postEphemeral, response_url, ephemeral, files.upload, file_shared, link_shared, chat.unfurl, unfurl, shortcut, global shortcut, message shortcut, scheduleMessage, reminders.add, conversations.create, conversations.archive, conversations.invite, channel ops, Workflow Builder, workflow_step_execute, Power Automate, App Directory, InstallationStore, sideloading, rate limit, retry, 429, throttle, circuit breaker, Dapr, FileConsentCard, add Teams support, add Slack support, help me migrate, cross-platform advisor, bridging decisions, assess bridging, bridging scope, dual bot, single server, shared Express, REST API, Java, C#, Go, no SDK, raw HTTP, Bot Framework REST, manual JWT, signature verification
+→ Read `experts/bridge/index.md`
 
 ### Convert — rewrite source code from another language to TypeScript
 Signals: JS to TS, Ruby to TS, Java to TS, Kotlin to TS, convert language, transpile, rewrite in TypeScript, port code, language conversion, gems to npm, Maven to npm, Gradle to npm, type annotations, require to import, add types, snake_case to camelCase, Lombok, @Data, @Builder, Gson, Jackson, @SerializedName, CompletableFuture, bulk conversion, large-scale, trailing lambda, `it` parameter, `trimIndent`, `when` expression, data class, companion object, sealed class, extension function
@@ -114,13 +114,13 @@ If the developer DID choose an escape hatch in the pre-task interview, auto-fill
 
 ### Experts with embedded interviews
 
-Some experts (like `slack-to-teams-ts.md`) have the interview woven into their phased workflow rather than in a separate `## interview` section. These already satisfy the protocol — their Phase 2 / decision walkthrough IS the interview.
+Some experts (like `cross-platform-advisor-ts.md`) have the interview woven into their phased workflow rather than in a separate `## interview` section. These already satisfy the protocol — their Phase 2 / decision walkthrough IS the interview.
 
 ## ambiguity tiebreaker
 
-If the request mixes **migrate** signals with a target-platform signal (e.g., "convert Block Kit to Adaptive Cards"), route to **migrate** first — migration experts already reference the target platform's patterns.
+If the request mixes **bridge** signals with a target-platform signal (e.g., "convert Block Kit to Adaptive Cards"), route to **bridge** first — bridge experts already reference the target platform's patterns.
 
-If the request mixes **convert** signals with **migrate** signals (e.g., "rewrite this Ruby Slack bot in TypeScript for Teams"), route to **convert** first for language translation, then **migrate** for platform mapping. The convert domain's combining rule handles this layering.
+If the request mixes **convert** signals with **bridge** signals (e.g., "rewrite this Ruby Slack bot in TypeScript for Teams"), route to **convert** first for language translation, then **bridge** for platform mapping. The convert domain's combining rule handles this layering.
 
 ## fallback
 
@@ -215,3 +215,4 @@ When fleshing out a stub expert with real content. Provides the step-by-step Dee
 <!-- Updated 2026-02-11: Added kotlin-to-ts to convert domain; added slack-modals-to-teams-dialogs, slack-app-home-to-teams, slack-legacy-attachments-to-teams to migrate domain -->
 <!-- Updated 2026-02-11: Added auto-interview protocol — experts with ## interview sections now auto-trigger AskUserQuestion before implementation. Added interviews to bulk-conversion-strategy-ts, compat.botbuilder-interop-ts. Updated _expert-ts template with interview format. -->
 <!-- Updated 2026-02-11: Added mandatory pre-task interview — every task now starts with a developer interview (scope, approach, specifics) before routing. Always includes "You decide everything" escape hatch. Expert-level interviews respect pre-task choices. -->
+<!-- Updated 2026-02-27: Added Slack experts (bolt-assistant, bolt-events, bolt-oauth-distribution) from @slack/bolt v4.6.0 source. Added bridge experts (cross-platform-architecture, rest-only-integration) for dual-bot hosting and SDK-less Java/C#/Go patterns. Updated Slack and bridge signal words. -->

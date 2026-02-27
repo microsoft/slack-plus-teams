@@ -140,6 +140,10 @@ Read:
 - `runtime.app-init-ts.md`
 - `runtime.manifest-ts.md` (for appPackage/manifest.json setup)
 
+## cross-platform bridging
+
+If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration.
+
 ## combining rule
 
 If a request spans multiple clusters (e.g., "add a function-calling tool that returns an Adaptive Card"), read files from **every** matching cluster. Avoid duplicates.

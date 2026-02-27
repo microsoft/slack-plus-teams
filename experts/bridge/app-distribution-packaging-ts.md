@@ -1,8 +1,8 @@
-# slack-app-distribution-to-teams-ts
+# app-distribution-packaging-ts
 
 ## purpose
 
-Migrating Slack app distribution patterns (App Directory listing, OAuth install flow, `InstallationStore`, workspace/org-level installs) to Microsoft Teams distribution (sideloading, Teams Admin Center, App Store/Partner Center, Azure AD multi-tenant app registration).
+Bridges Slack App Directory distribution and Teams app packaging / Admin Center publishing for cross-platform bots targeting Slack, Teams, or both.
 
 ## rules
 
@@ -16,6 +16,7 @@ Migrating Slack app distribution patterns (App Directory listing, OAuth install 
 8. **Slack app manifest (`manifest.json`) → Teams app manifest (`manifest.json` in app package).** Both platforms use JSON manifests but with completely different schemas. Slack's manifest includes OAuth scopes, event subscriptions, slash commands. Teams manifest includes `bots`, `composeExtensions`, `staticTabs`, `webApplicationInfo`, `validDomains`. No automatic conversion exists. [learn.microsoft.com -- Manifest schema](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
 9. **Slack app icons (512x512 + workspace-specific) → Teams icons (color 192x192 + outline 32x32).** Teams requires exactly two icon files in the app package: a full-color icon (192x192 PNG) and an outline/monochrome icon (32x32 PNG with transparent background). The outline icon is used in the Teams activity bar. [learn.microsoft.com -- App icons](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema#icons)
 10. **Slack app review (hours-days) vs Teams store review (1-2 weeks).** Slack's App Directory review is relatively fast. Teams App Store review via Partner Center is more rigorous and can take 1-2 weeks. Plan for revision cycles — common rejection reasons include missing privacy policy URL, incomplete manifest, and accessibility issues. [learn.microsoft.com -- Store validation](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/deploy-and-publish/appsource/prepare/teams-store-validation-guidelines)
+11. **Reverse direction (Teams → Slack):** For Teams → Slack, map Teams manifest to Slack app manifest, and Teams Admin Center publishing to Slack App Directory submission. Azure Bot registration credentials map to Slack OAuth install flow with `InstallationStore` for per-workspace tokens. Teams sideloading maps to Slack development install via OAuth URL. The Teams color/outline icon pair maps to Slack's single 512x512 app icon. Azure AD multi-tenant registration maps to Slack App Directory multi-workspace distribution with per-workspace OAuth.
 
 ## patterns
 
@@ -180,10 +181,10 @@ my-teams-bot.zip
 
 ## instructions
 
-Use this expert when migrating Slack app distribution to Teams. It covers: App Directory to Teams App Store (Partner Center), OAuth install flow elimination, InstallationStore replacement with conversation reference storage, org-level deployment via Teams Admin Center, sideloading for development, Teams Toolkit for packaging, multi-tenant Azure AD registration, icon requirements, and store review timelines. Pair with `slack-identity-to-aad-ts.md` for the identity/OAuth model change, `../teams/runtime.manifest-ts.md` for Teams manifest creation, and `../teams/runtime.proactive-messaging-ts.md` for conversation reference storage patterns.
+Use this expert when adding cross-platform support in either direction for app distribution and packaging. It covers: Slack App Directory bridged to Teams App Store (Partner Center), OAuth install flow vs Azure Bot registration, InstallationStore vs conversation reference storage, org-level deployment via Teams Admin Center, sideloading for development, Teams Toolkit for packaging, multi-tenant Azure AD registration, icon requirements, store review timelines, and reverse mapping from Teams manifest/Admin Center back to Slack app manifest and App Directory submission. Pair with `identity-oauth-bridge-ts.md` for the identity/OAuth model change, `../teams/runtime.manifest-ts.md` for Teams manifest creation, and `../teams/runtime.proactive-messaging-ts.md` for conversation reference storage patterns.
 
 ## research
 
 Deep Research prompt:
 
-"Write a micro expert for migrating Slack app distribution to Microsoft Teams. Cover: App Directory vs Teams App Store (Partner Center), OAuth install flow elimination, InstallationStore replacement, org-level install vs Teams Admin Center, sideloading, Teams Toolkit packaging, multi-tenant Azure AD app registration, icon requirements, manifest schema differences, OAuth scope to RSC mapping, and store review timeline. Include code examples and a mapping table."
+"Write a micro expert for bridging Slack App Directory distribution and Microsoft Teams app packaging / Admin Center publishing in either direction. Cover: App Directory vs Teams App Store (Partner Center), OAuth install flow vs Azure Bot registration, InstallationStore vs conversation reference storage, org-level install vs Teams Admin Center, sideloading, Teams Toolkit packaging, multi-tenant Azure AD app registration, icon requirements, manifest schema differences, OAuth scope to RSC mapping, store review timeline, and reverse mapping from Teams manifest/publishing back to Slack app manifest and App Directory submission. Include code examples and a mapping table."
