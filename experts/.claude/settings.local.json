@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for f in teams/*.md)",
+      "Bash(do basename \"$f\")",
+      "Bash(done)",
+      "Bash(tr:*)",
+      "Bash(for:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(del \"C:\\\\source\\\\bolt-to-teams\\\\.experts\\\\_rename.ps1\")",
+      "Bash(dir:*)"
+    ]
+  }
+}
