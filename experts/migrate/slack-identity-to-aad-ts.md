@@ -25,11 +25,11 @@ Mapping Slack identity (user/channel IDs, signing secret) to Teams/Azure AD iden
 
 ```env
 # Slack Bot Configuration
-SLACK_BOT_TOKEN=xoxb-1234567890-abcdefghijklmnop
-SLACK_SIGNING_SECRET=abc123def456ghi789
-SLACK_APP_TOKEN=xapp-1-A0123456789-0123456789-abcdef
-SLACK_CLIENT_ID=1234567890.0987654321
-SLACK_CLIENT_SECRET=abcdef123456
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_SIGNING_SECRET=your-signing-secret
+SLACK_APP_TOKEN=xapp-your-app-token
+SLACK_CLIENT_ID=your-slack-client-id
+SLACK_CLIENT_SECRET=your-slack-client-secret
 PORT=3000
 ```
 
