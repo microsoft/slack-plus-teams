@@ -51,7 +51,13 @@ Load the **Bridge** domain. 25 micro-experts cover bidirectional mapping of ever
 
 **Key expert:** `bridge\cross-platform-advisor-ts.md` (orchestrates the full bridging workflow)
 
-### 6. Convert code from another language to TypeScript
+### 6. Deploy your bot to Azure or AWS
+
+Load the **Deploy** domain. The router interviews you on cloud provider preference (Azure or AWS) and bot platform (Teams, Slack, or both), then loads the matching expert for a step-by-step walkthrough from CLI installation through verified deployment.
+
+**Key experts:** `deploy\azure-bot-deploy-ts.md`, `deploy\aws-bot-deploy-ts.md`
+
+### 7. Convert code from another language to TypeScript
 
 Load the **Convert** domain. 8 micro-experts cover JS→TS, Ruby→TS, Java→TS, Kotlin→TS, type mapping, dependency mapping, JSON serialization, and bulk conversion strategy.
 
@@ -88,6 +94,12 @@ Covers: Block Kit ↔ Adaptive Cards, commands, events ↔ activities, identity/
 
 ### Convert Domain (8 files)
 Covers: JS→TS, Ruby→TS, Java→TS, Kotlin→TS, type mapping, dependency mapping, JSON serialization, bulk conversion strategy.
+
+### Deploy Domain (2 files)
+| File | Purpose |
+|------|---------|
+| `azure-bot-deploy-ts.md` | End-to-end Azure deployment: CLI setup, App Registration, Bot Service, App Service/Functions, Agents Toolkit fast path |
+| `aws-bot-deploy-ts.md` | End-to-end AWS deployment: CLI setup, Lambda+API Gateway/EC2/ECS, SAM templates, Teams-on-AWS pattern |
 
 ### Security Domain (2 files)
 Covers: input validation, secrets management.

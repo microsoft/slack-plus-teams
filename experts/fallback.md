@@ -12,7 +12,7 @@ Safety-net invoked when the routed experts don't fully cover the user's request.
 
 ## phase 1 — scan for missed experts
 
-1. List every domain router: `teams/index.md`, `slack/index.md`, `bridge/index.md`, `convert/index.md`, `security/index.md`.
+1. List every domain router: `teams/index.md`, `slack/index.md`, `bridge/index.md`, `convert/index.md`, `security/index.md`, `deploy/index.md`.
 2. For each router, read its `## task clusters` section and compare every **When:** line against the current request.
 3. Collect any expert files whose **When:** signals match but were **not** loaded in the initial routing pass.
 4. Read those missed expert files and incorporate their guidance into the response.
