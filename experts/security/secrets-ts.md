@@ -212,7 +212,7 @@ This expert covers secrets management for Microsoft Teams bots built with the Te
 - Prevent secret leakage in logs with scrubbing patterns
 - Apply least-privilege to Azure AD app registrations and Key Vault access policies
 
-Pair with `../teams/runtime.app-init-ts.md` for App constructor credential configuration, and `../migrate/aws-to-azure.secrets-config-ts.md` when migrating secrets from AWS.
+Pair with `../teams/runtime.app-init-ts.md` for App constructor credential configuration, and `../bridge/infra-secrets-config-ts.md` when bridging secrets between AWS and Azure.
 
 ## research
 

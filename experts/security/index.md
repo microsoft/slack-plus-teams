@@ -16,7 +16,7 @@ Cross-domain deps: `../teams/ui.adaptive-cards-ts.md` (card action payloads that
 When: secrets, credentials, API keys, Key Vault, environment variables, secret rotation
 Read:
 - `secrets-ts.md`
-Cross-domain deps: `../teams/runtime.app-init-ts.md` (App constructor credentials), `../migrate/aws-to-azure.secrets-config-ts.md` (only if migrating from AWS)
+Cross-domain deps: `../teams/runtime.app-init-ts.md` (App constructor credentials), `../bridge/infra-secrets-config-ts.md` (only if bridging between AWS and Azure)
 
 ### General Hardening
 When: broad security review, security audit, hardening checklist, defense in depth

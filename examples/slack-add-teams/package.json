@@ -1,0 +1,25 @@
+{
+  "name": "slack-add-teams-example",
+  "version": "1.0.0",
+  "description": "A Slack bot that adds Teams support — cross-platform example",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\""
+  },
+  "dependencies": {
+    "@microsoft/teams.apps": "^0.3.0",
+    "@microsoft/teams.common": "^0.3.0",
+    "@microsoft/teams.dev": "^0.3.0",
+    "@slack/bolt": "^4.1.0",
+    "express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.1.0",
+    "nodemon": "^3.1.0",
+    "typescript": "^5.7.0"
+  }
+}

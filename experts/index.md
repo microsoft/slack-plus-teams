@@ -79,23 +79,31 @@ Scan the user's message for signal words. Pick the **first matching domain**; if
 
 ### Teams — build or modify a Teams bot / agent
 Signals: Teams SDK, `@microsoft/teams-ai`, Adaptive Cards, ChatPrompt, Graph API, MCP, A2A, `app.ts`, manifest, proactive message, message extension, dialog, task module, Teams Toolkit, Bot Framework, SSO, OAuth, streaming, citations, RAG, function calling, memory, state, storage
-→ Read `.experts/teams/index.md`
+→ Read `experts/teams/index.md`
 
 ### Slack — build or modify a Slack app
-Signals: Slack Bolt, `@slack/bolt`, Block Kit, `ack()`, Slack events, `app.message`, `app.command`, slash command, Slack OAuth
-→ Read `.experts/slack/index.md`
+Signals: Slack Bolt, `@slack/bolt`, Block Kit, `ack()`, Slack events, `app.message`, `app.command`, `app.event`, `app.action`, `app.shortcut`, `app.view`, slash command, Slack OAuth, `InstallProvider`, `InstallationStore`, multi-workspace, `app.assistant`, Assistant container, `threadStarted`, `userMessage`, `setSuggestedPrompts`, `setStatus`, `setTitle`, `getThreadContext`
+→ Read `experts/slack/index.md`
 
-### Migrate — convert / port between platforms or clouds
-Signals: migrate, migration, convert, port, Slack to Teams, Slack→Teams, Block Kit to Adaptive Cards, AWS to Azure, Lambda to Functions, S3 to Blob, CloudWatch to App Insights, middleware chain, ack(), Socket Mode, RTM, transport, WebSocket to HTTPS, InstallationService, OAuthStateService, views.open, viewSubmission, viewClosed, App Home, views.publish, attachmentAction, legacy attachments, callback_id, modals to dialogs, task module, replace_original, delete_original, chat.update, chat.postEphemeral, response_url, ephemeral, files.upload, file_shared, link_shared, chat.unfurl, unfurl, shortcut, global shortcut, message shortcut, scheduleMessage, reminders.add, conversations.create, conversations.archive, conversations.invite, channel ops, Workflow Builder, workflow_step_execute, Power Automate, App Directory, InstallationStore, sideloading, rate limit, retry, 429, throttle, circuit breaker, Dapr, FileConsentCard, help me migrate, migration advisor, migration decisions, assess migration, migration scope
-→ Read `.experts/migrate/index.md`
+### Bridge — cross-platform bridging between Slack and Teams, or AWS and Azure
+Signals: bridge, cross-platform, migrate, migration, convert, port, Slack to Teams, Teams to Slack, Slack→Teams, Teams→Slack, Slack↔Teams, Block Kit to Adaptive Cards, Adaptive Cards to Block Kit, AWS to Azure, Azure to AWS, Lambda to Functions, S3 to Blob, CloudWatch to App Insights, middleware chain, ack(), Socket Mode, RTM, transport, WebSocket to HTTPS, InstallationService, OAuthStateService, views.open, viewSubmission, viewClosed, App Home, views.publish, attachmentAction, legacy attachments, callback_id, modals to dialogs, task module, replace_original, delete_original, chat.update, chat.postEphemeral, response_url, ephemeral, files.upload, file_shared, link_shared, chat.unfurl, unfurl, shortcut, global shortcut, message shortcut, scheduleMessage, reminders.add, conversations.create, conversations.archive, conversations.invite, channel ops, Workflow Builder, workflow_step_execute, Power Automate, App Directory, InstallationStore, sideloading, rate limit, retry, 429, throttle, circuit breaker, Dapr, FileConsentCard, add Teams support, add Slack support, help me migrate, cross-platform advisor, bridging decisions, assess bridging, bridging scope, dual bot, single server, shared Express, REST API, Java, C#, Go, no SDK, raw HTTP, Bot Framework REST, manual JWT, signature verification
+→ Read `experts/bridge/index.md`
+
+### Models — configure and call AI models from any provider
+Signals: OpenAI, Azure OpenAI, GPT-4o, GPT-4, Anthropic, Claude, `@anthropic-ai/sdk`, Bedrock, `@aws-sdk/client-bedrock-runtime`, Converse API, Foundry Local, `foundry model`, `foundry service`, Foundry cloud, MaaS, model-as-a-service, GitHub Models, Ollama, vLLM, LM Studio, llama.cpp, TGI, LocalAI, open-source model, local LLM, OpenAI-compatible, `/v1/chat/completions`, `openai` npm, model provider, AI model, LLM, chat completions, tool use, function calling, Bedrock agents, Bedrock guardrails, Phi-4, Qwen, Llama, Mistral, DeepSeek, embeddings, model selection, Transformers.js, `@huggingface/transformers`, in-process inference, browser inference, WASM, WebGPU, local embeddings, local classification, pipeline API, HuggingFace
+→ Read `experts/models/index.md`
+
+### Deploy — deploy a bot to Azure or AWS
+Signals: deploy, deployment, provision, hosting, publish, go live, production, `az login`, `aws configure`, App Service, Azure Functions, Container Apps, Lambda, EC2, ECS, Fargate, Elastic Beanstalk, Azure Bot, `teamsapp provision`, `teamsapp deploy`, Agents Toolkit deploy, zip deploy, SAM deploy, CDK deploy, API Gateway, deploy to Azure, deploy to AWS, push to cloud, CloudFormation
+→ Read `experts/deploy/index.md`
 
 ### Convert — rewrite source code from another language to TypeScript
 Signals: JS to TS, Ruby to TS, Java to TS, Kotlin to TS, convert language, transpile, rewrite in TypeScript, port code, language conversion, gems to npm, Maven to npm, Gradle to npm, type annotations, require to import, add types, snake_case to camelCase, Lombok, @Data, @Builder, Gson, Jackson, @SerializedName, CompletableFuture, bulk conversion, large-scale, trailing lambda, `it` parameter, `trimIndent`, `when` expression, data class, companion object, sealed class, extension function
-→ Read `.experts/convert/index.md`
+→ Read `experts/convert/index.md`
 
 ### Security — harden inputs, secrets, or credentials
 Signals: input validation, sanitize, secrets, credentials, key vault, PII, injection, XSS
-→ Read `.experts/security/index.md`
+→ Read `experts/security/index.md`
 
 ## auto-interview protocol (expert-level)
 
@@ -114,20 +122,20 @@ If the developer DID choose an escape hatch in the pre-task interview, auto-fill
 
 ### Experts with embedded interviews
 
-Some experts (like `slack-to-teams-ts.md`) have the interview woven into their phased workflow rather than in a separate `## interview` section. These already satisfy the protocol — their Phase 2 / decision walkthrough IS the interview.
+Some experts (like `cross-platform-advisor-ts.md`) have the interview woven into their phased workflow rather than in a separate `## interview` section. These already satisfy the protocol — their Phase 2 / decision walkthrough IS the interview.
 
 ## ambiguity tiebreaker
 
-If the request mixes **migrate** signals with a target-platform signal (e.g., "convert Block Kit to Adaptive Cards"), route to **migrate** first — migration experts already reference the target platform's patterns.
+If the request mixes **bridge** signals with a target-platform signal (e.g., "convert Block Kit to Adaptive Cards"), route to **bridge** first — bridge experts already reference the target platform's patterns.
 
-If the request mixes **convert** signals with **migrate** signals (e.g., "rewrite this Ruby Slack bot in TypeScript for Teams"), route to **convert** first for language translation, then **migrate** for platform mapping. The convert domain's combining rule handles this layering.
+If the request mixes **convert** signals with **bridge** signals (e.g., "rewrite this Ruby Slack bot in TypeScript for Teams"), route to **convert** first for language translation, then **bridge** for platform mapping. The convert domain's combining rule handles this layering.
 
 ## fallback
 
 If no domain matches, ask **one** clarifying question:
 > "Are you working on a Teams bot, a Slack app, a migration between them, or something else?"
 
-If the routed experts don't fully cover the request (gaps remain after the initial pass), read `.experts/fallback.md` for a two-phase recovery: re-scan all domain routers for missed experts, then web-search for any remaining gaps.
+If the routed experts don't fully cover the request (gaps remain after the initial pass), read `experts/fallback.md` for a two-phase recovery: re-scan all domain routers for missed experts, then web-search for any remaining gaps.
 
 ## expert evolution
 
@@ -163,7 +171,7 @@ Create a new expert when **all** of these are true:
 3. **Sufficient depth** — the topic warrants 8+ rules and 2+ code patterns. If it's only 2-3 rules, add them to an existing expert instead.
 
 **Creation steps:**
-1. Copy the template from `.experts/_expert-ts.md`.
+1. Copy the template from `experts/_expert-ts.md`.
 2. Name it `{topic}-ts.md` in the appropriate domain folder.
 3. Fill in all sections: purpose, rules, patterns, pitfalls, references, instructions (with `Pair with` cross-refs), research.
 4. Complete the **post-creation checklist** from `_expert-ts.md`:
@@ -179,8 +187,8 @@ Create a new domain (folder + `index.md` router) when **all** of these are true:
 3. **Separable routing** — moving these experts out of an existing domain simplifies that domain's router, not complicates it.
 
 **Creation steps:**
-1. Create the folder: `.experts/{domain-name}/`.
-2. Create `.experts/{domain-name}/index.md` following the router pattern from any existing domain index (purpose, task clusters with `When:`/`Read:`, combining rule, file inventory).
+1. Create the folder: `experts/{domain-name}/`.
+2. Create `experts/{domain-name}/index.md` following the router pattern from any existing domain index (purpose, task clusters with `When:`/`Read:`, combining rule, file inventory).
 3. Move or create the expert files in the new folder.
 4. Add a new routing entry to this root `index.md` under `## routing rules` with `Signals:` and a `→ Read` directive.
 5. Remove any moved experts from their old domain's `index.md`.
@@ -199,15 +207,15 @@ This lets future sessions see what evolved and when, without cluttering the rout
 These files support the expert system itself — not a specific domain.
 
 ### Fallback recovery
-→ Read `.experts/fallback.md`
+→ Read `experts/fallback.md`
 When the initial routing pass leaves knowledge gaps.
 
 ### New expert template
-→ Read `.experts/_expert-ts.md`
+→ Read `experts/_expert-ts.md`
 When creating a new micro-expert file. Provides the canonical stub structure and a post-creation checklist.
 
 ### Research workflow
-→ Read `.experts/researcher.md`
+→ Read `experts/researcher.md`
 When fleshing out a stub expert with real content. Provides the step-by-step Deep Research workflow.
 
 <!-- Updated 2026-02-11: Added convert domain (js-to-ts, ruby-to-ts, java-to-ts, dependency-mapping, type-mapping) for language conversion to TypeScript -->
@@ -215,3 +223,6 @@ When fleshing out a stub expert with real content. Provides the step-by-step Dee
 <!-- Updated 2026-02-11: Added kotlin-to-ts to convert domain; added slack-modals-to-teams-dialogs, slack-app-home-to-teams, slack-legacy-attachments-to-teams to migrate domain -->
 <!-- Updated 2026-02-11: Added auto-interview protocol — experts with ## interview sections now auto-trigger AskUserQuestion before implementation. Added interviews to bulk-conversion-strategy-ts, compat.botbuilder-interop-ts. Updated _expert-ts template with interview format. -->
 <!-- Updated 2026-02-11: Added mandatory pre-task interview — every task now starts with a developer interview (scope, approach, specifics) before routing. Always includes "You decide everything" escape hatch. Expert-level interviews respect pre-task choices. -->
+<!-- Updated 2026-02-27: Added Slack experts (bolt-assistant, bolt-events, bolt-oauth-distribution) from @slack/bolt v4.6.0 source. Added bridge experts (cross-platform-architecture, rest-only-integration) for dual-bot hosting and SDK-less Java/C#/Go patterns. Updated Slack and bridge signal words. -->
+<!-- Updated 2026-02-28: Added deploy domain (azure-bot-deploy, aws-bot-deploy) for step-by-step cloud deployment walkthroughs with CLI setup, provisioning, and verification. Includes cloud provider interview. -->
+<!-- Updated 2026-02-28: Added models domain (openai-azure-openai, anthropic, bedrock, foundry-local, foundry-cloud, oss-openai-compatible) for AI model provider integration. Covers 6 providers with unified OpenAI SDK patterns and provider abstraction. -->
