@@ -206,6 +206,160 @@ app.start(3978);
 | *(no equivalent)* | `app.on('install.remove')` | Bot uninstalled event |
 | *(no equivalent)* | `app.on('typing')` | User typing indicator |
 
+### Reaction workflow workaround: Adaptive Card buttons (R2)
+
+Replace Slack's custom emoji reaction workflows with explicit `Action.Submit` buttons on Adaptive Cards — the recommended Teams alternative.
+
+```typescript
+// Slack (before): reaction-based approval
+app.event("reaction_added", async ({ event, client }) => {
+  if (event.reaction === "white_check_mark") {
+    await client.chat.postMessage({
+      channel: event.item.channel,
+      text: `Approved by <@${event.user}>`,
+      thread_ts: event.item.ts,
+    });
+  }
+});
+
+// Teams (after): button-based approval
+app.on("card.action" as any, async ({ activity }) => {
+  const data = activity.value?.action?.data ?? activity.value;
+  if (data?.action === "approve") {
+    return {
+      status: 200,
+      body: {
+        type: "AdaptiveCard", version: "1.5",
+        body: [{
+          type: "TextBlock",
+          text: `Approved by ${activity.from?.name}`,
+          color: "Good", weight: "Bolder",
+        }],
+        // No actions = card becomes read-only
+      },
+    };
+  }
+});
+
+// Send the approval card (replaces posting a message users react to)
+function buildApprovalCard(requestId: string): object {
+  return {
+    type: "AdaptiveCard", version: "1.5",
+    body: [
+      { type: "TextBlock", text: `Request #${requestId} needs approval`, weight: "Bolder" },
+    ],
+    actions: [
+      { type: "Action.Submit", title: "Approve", style: "positive",
+        data: { action: "approve", requestId } },
+      { type: "Action.Submit", title: "Reject", style: "destructive",
+        data: { action: "reject", requestId } },
+    ],
+  };
+}
+```
+
+**Why buttons are better:** Buttons provide explicit typed actions with an audit trail. Reactions are ambiguous (`:thumbsup:` vs `:+1:` vs `:white_check_mark:`) and produce no structured data.
+
+**Reverse (Teams → Slack):** Slack supports unlimited custom emoji — map directly or keep the button pattern (works on both platforms).
+
+### Thread broadcast helper (Y2)
+
+Slack's `reply_broadcast: true` sends a thread reply that also appears in the channel. Teams has no single-call equivalent — use a helper that makes both calls.
+
+```typescript
+// Teams: replicate reply_broadcast behavior
+async function replyWithBroadcast(
+  ctx: { reply: (text: string) => Promise<any>; send: (text: string) => Promise<any> },
+  text: string
+): Promise<void> {
+  await ctx.reply(text);  // threaded reply
+  await ctx.send(text);   // also post to channel
+}
+
+// Usage in a handler
+app.on("message", async (ctx) => {
+  if (ctx.activity.text?.includes("broadcast")) {
+    await replyWithBroadcast(ctx, "This appears in both the thread and the channel.");
+  }
+});
+```
+
+**Don't:** Try to batch into a single API call — Teams doesn't support it. Two calls is the correct pattern.
+
+**Reverse (Teams → Slack):** Use `say({ text, thread_ts: message.ts, reply_broadcast: true })` natively — single call.
+
+### Thread discovery via Graph API (Y3)
+
+Fetching thread replies in Teams requires the Graph API, unlike Slack's simple `conversations.replies()`.
+
+```typescript
+import { Client } from "@microsoft/microsoft-graph-client";
+
+async function getThreadReplies(
+  graphClient: Client,
+  teamId: string,
+  channelId: string,
+  messageId: string,
+  top: number = 50
+): Promise<any[]> {
+  const response = await graphClient
+    .api(`/teams/${teamId}/channels/${channelId}/messages/${messageId}/replies`)
+    .top(top)
+    .get();
+  return response.value;
+}
+
+// Usage in a handler (requires ChannelMessage.Read.All application permission)
+app.on("message", async ({ activity, send }) => {
+  if (activity.text?.match(/^\/?replies/i)) {
+    const replies = await getThreadReplies(
+      graphClient,
+      activity.channelData?.teamsTeamId,
+      activity.channelData?.teamsChannelId,
+      activity.conversation?.id?.split(";")[0] ?? ""
+    );
+    await send(`Found ${replies.length} replies in this thread.`);
+  }
+});
+```
+
+**Watch out for:** `ChannelMessage.Read.All` is an application permission requiring admin consent. If you only need replies in the bot's own conversations, delegated permissions may suffice.
+
+**Reverse (Teams → Slack):** Use `conversations.replies({ channel, ts: thread_ts })` natively — no special permissions needed.
+
+### RSC permission for all channel messages (Y16)
+
+Add RSC permission to the Teams manifest so the bot receives all channel messages without @mention — matching Slack's default behavior.
+
+```json
+{
+  "webApplicationInfo": {
+    "id": "{{CLIENT_ID}}",
+    "resource": "api://{{CLIENT_ID}}"
+  },
+  "authorization": {
+    "permissions": {
+      "resourceSpecific": [
+        { "name": "ChannelMessage.Read.Group", "type": "Application" }
+      ]
+    }
+  }
+}
+```
+
+Also strip @mention text from messages that do include a mention:
+
+```typescript
+const app = new App({
+  // ... other options
+  activity: { mentions: { stripText: true } },
+});
+```
+
+**Don't:** Change your UX to require @mention unless your bot genuinely shouldn't listen to all messages.
+
+**Reverse (Teams → Slack):** Slack bots receive all messages in channels they're added to by default — no config needed.
+
 ### Reverse direction (Teams → Slack)
 
 For Teams → Slack, reverse the mapping -- Teams routes map back to Slack events:

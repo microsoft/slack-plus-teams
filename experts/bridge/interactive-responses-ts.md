@@ -239,6 +239,102 @@ async function generateReport() {
 app.start(3978);
 ```
 
+### Ephemeral workaround: `refresh.userIds` (R1)
+
+Use `Action.Execute` with `refresh.userIds` to show personalized card content to specific users — the closest Teams equivalent to Slack's `chat.postEphemeral()`.
+
+```typescript
+// Send a card where only the acting user sees personalized content
+async function sendWithEphemeralView(
+  send: (msg: any) => Promise<any>,
+  actingUserId: string,
+  publicText: string,
+  privateData: Record<string, unknown>
+): Promise<void> {
+  await send({
+    attachments: [{
+      contentType: "application/vnd.microsoft.card.adaptive",
+      content: {
+        type: "AdaptiveCard",
+        version: "1.4",
+        refresh: {
+          action: {
+            type: "Action.Execute",
+            verb: "personalView",
+            data: privateData,
+          },
+          userIds: [actingUserId], // max 60 IDs
+        },
+        body: [
+          { type: "TextBlock", text: publicText }, // everyone sees this
+        ],
+      },
+    }],
+  });
+}
+
+// When the specified user views the card, Teams invokes the bot:
+app.on("card.action" as any, async ({ activity }) => {
+  const data = activity.value?.action?.data ?? activity.value;
+  if (data?.verb === "personalView") {
+    return {
+      status: 200,
+      body: {
+        type: "AdaptiveCard",
+        version: "1.4",
+        body: [
+          { type: "TextBlock", text: "This content is only visible to you.", weight: "Bolder" },
+          { type: "FactSet", facts: [
+            { title: "Request ID", value: data.requestId },
+            { title: "Status", value: "Pending your review" },
+          ]},
+        ],
+      },
+    };
+  }
+});
+```
+
+**Key constraints:** Max 60 user IDs per card. Requires `Action.Execute` (not `Action.Submit`). Manifest version must be ≥1.12.
+
+**Reverse (Teams → Slack):** Map card refresh to `chat.postEphemeral(channel, user, { blocks })`.
+
+### Card version checking (Y11)
+
+Inject a `_version` counter into `Action.Submit.data` to prevent race conditions — the Teams equivalent of Slack's `view_hash` parameter.
+
+```typescript
+// Track version per card instance
+const cardVersions = new Map<string, number>();
+
+function buildVersionedCard(cardId: string, data: any): object {
+  const version = (cardVersions.get(cardId) ?? 0) + 1;
+  cardVersions.set(cardId, version);
+  return {
+    type: "AdaptiveCard", version: "1.5",
+    body: [/* card content */],
+    actions: [{
+      type: "Action.Submit", title: "Update",
+      data: { ...data, _cardId: cardId, _version: version },
+    }],
+  };
+}
+
+app.on("card.action" as any, async ({ activity, send }) => {
+  const submitted = activity.value?.action?.data ?? activity.value;
+  const currentVersion = cardVersions.get(submitted?._cardId);
+  if (submitted?._version !== currentVersion) {
+    await send("This card is outdated. Please use the latest version.");
+    return { status: 200 };
+  }
+  // Process the update safely...
+});
+```
+
+**Don't:** Skip version checking even for low-traffic bots — fast double-clicks and multiple tabs cause race conditions.
+
+**Reverse (Teams → Slack):** Use `view_hash` from `views.open()` / `views.update()` responses natively.
+
 ### Response pattern mapping table
 
 | Slack Pattern | Teams Equivalent | Notes |

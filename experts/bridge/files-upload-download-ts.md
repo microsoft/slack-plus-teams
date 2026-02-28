@@ -197,6 +197,98 @@ app.on("message", async ({ activity, send }) => {
 app.start(3978);
 ```
 
+### Reusable `sendFile()` helper (Y4/5/6 best practice)
+
+Build a unified helper that auto-detects personal vs. channel context and handles chunking. This eliminates the 30-line FileConsentCard footgun.
+
+```typescript
+import { Client } from "@microsoft/microsoft-graph-client";
+
+interface SendFileOptions {
+  filename: string;
+  content: Buffer;
+  description?: string;
+}
+
+async function sendFile(
+  ctx: { send: (msg: any) => Promise<any>; activity: any },
+  graphClient: Client,
+  options: SendFileOptions
+): Promise<void> {
+  const { filename, content, description } = options;
+  const conversationType = ctx.activity.conversation?.conversationType;
+
+  if (conversationType === "personal") {
+    // Personal chat → FileConsentCard flow
+    await ctx.send({
+      attachments: [{
+        contentType: "application/vnd.microsoft.teams.card.file.consent",
+        name: filename,
+        content: {
+          description: description ?? filename,
+          sizeInBytes: content.length,
+          acceptContext: { filename, size: content.length },
+          declineContext: { filename },
+        },
+      }],
+    });
+    // Store content for the fileConsent handler to pick up
+    pendingUploads.set(ctx.activity.conversation?.id ?? "", { content, filename });
+  } else {
+    // Channel → Direct Graph API upload to SharePoint
+    const teamId = ctx.activity.channelData?.teamsTeamId;
+    const channelId = ctx.activity.channelData?.teamsChannelId;
+    const driveId = await getChannelDriveId(graphClient, teamId, channelId);
+
+    if (content.length <= 4 * 1024 * 1024) {
+      // Small file: simple PUT
+      await graphClient
+        .api(`/drives/${driveId}/root:/${filename}:/content`)
+        .put(content);
+    } else {
+      // Large file (>4 MB): resumable upload session
+      const session = await graphClient
+        .api(`/drives/${driveId}/root:/${filename}:/createUploadSession`)
+        .post({ item: { name: filename } });
+
+      const chunkSize = 320 * 1024; // 320 KB chunks
+      for (let offset = 0; offset < content.length; offset += chunkSize) {
+        const chunk = content.subarray(offset, offset + chunkSize);
+        const end = Math.min(offset + chunkSize, content.length);
+        await fetch(session.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Range": `bytes ${offset}-${end - 1}/${content.length}`,
+            "Content-Type": "application/octet-stream",
+          },
+          body: chunk,
+        });
+      }
+    }
+
+    await ctx.send(`File uploaded: ${filename}`);
+  }
+}
+
+async function getChannelDriveId(
+  graphClient: Client, teamId: string, channelId: string
+): Promise<string> {
+  const response = await graphClient
+    .api(`/teams/${teamId}/channels/${channelId}/filesFolder`)
+    .get();
+  return response.parentReference.driveId;
+}
+```
+
+**Key decisions:**
+- Personal chat → FileConsentCard flow (requires `supportsFiles: true` in manifest)
+- Channel → Direct Graph API upload to SharePoint (no consent card)
+- Files >4 MB → Graph resumable upload session with 320 KB chunks
+
+**Don't:** Store pending file buffers in memory for long periods. Upload promptly or stream to a temporary blob.
+
+**Reverse (Teams → Slack):** Use `files.uploadV2({ channel_id, file: buffer, filename })` — single call, no consent step.
+
 ### File operation mapping table
 
 | Slack API | Teams Equivalent | Notes |

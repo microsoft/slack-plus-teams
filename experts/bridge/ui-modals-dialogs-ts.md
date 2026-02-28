@@ -216,6 +216,195 @@ app.start(3978);
 | `blockAction` mid-form | *(no equivalent)* | Redesign as multi-step dialog |
 | Modal `title` / `submit` / `close` labels | `value.title` + `Action.Submit.title` | No custom close label |
 
+### Dynamic selects best practice (Y9)
+
+Pre-populate `Input.ChoiceSet` with `style: "filtered"` for datasets under 500 items. For larger datasets, use a two-step dialog.
+
+```typescript
+// Small dataset (<500 items): pre-populate with client-side filtering
+function buildSelectCard(users: { name: string; email: string }[]): object {
+  return {
+    type: "AdaptiveCard", version: "1.5",
+    body: [{
+      type: "Input.ChoiceSet",
+      id: "user_select",
+      label: "Assign to",
+      style: "filtered", // enables client-side typeahead search
+      choices: users.map(u => ({ title: u.name, value: u.email })),
+    }],
+    actions: [{ type: "Action.Submit", title: "Assign", data: { action: "assign" } }],
+  };
+}
+
+// Large dataset (>500 items): two-step dialog
+// Step 1: text input for search query
+function buildSearchStep(): object {
+  return {
+    type: "AdaptiveCard", version: "1.5",
+    body: [{
+      type: "Input.Text", id: "search_query",
+      label: "Search users", placeholder: "Type a name...",
+    }],
+    actions: [{ type: "Action.Submit", title: "Search", data: { action: "search_users", step: 1 } }],
+  };
+}
+
+// Step 2: submit handler queries server, returns filtered ChoiceSet
+app.on("dialog.submit", async ({ activity }) => {
+  const data = activity.value.data;
+  if (data?.action === "search_users" && data.step === 1) {
+    const results = await searchUsers(data.search_query); // server-side query
+    return {
+      status: 200,
+      body: { task: { type: "continue", value: {
+        title: "Select User",
+        card: {
+          contentType: "application/vnd.microsoft.card.adaptive",
+          content: buildSelectCard(results), // now a small filtered set
+        },
+      }}},
+    };
+  }
+});
+```
+
+**Don't:** Build a web-based task module just for a searchable dropdown. The effort (16–24 hrs) rarely justifies the marginal UX improvement over two-step.
+
+**Reverse (Teams → Slack):** Use `external_data_source: true` on select elements with `app.options()` for server-side typeahead.
+
+### Cancel detection workaround: TTL + Cancel button (R3)
+
+Teams does not notify the bot when a dialog is dismissed. Add an explicit "Cancel" button and a timeout to handle cleanup.
+
+```typescript
+// Track pending dialog state with TTL
+const pendingDialogs = new Map<string, { userId: string; lockedResource: string; expiresAt: number }>();
+
+// When opening a dialog, record the pending state
+app.on('dialog.open', async ({ activity }) => {
+  const userId = activity.from?.aadObjectId ?? '';
+  const dialogId = `dlg_${Date.now()}`;
+  pendingDialogs.set(dialogId, {
+    userId,
+    lockedResource: 'ticket-123',
+    expiresAt: Date.now() + 5 * 60_000, // 5-minute TTL
+  });
+  return {
+    status: 200,
+    body: {
+      task: {
+        type: 'continue',
+        value: {
+          title: 'Edit Ticket',
+          card: buildFormCard(dialogId), // embed dialogId in Action.Submit.data
+        },
+      },
+    },
+  };
+});
+
+// Handle explicit Cancel button (inside the dialog)
+app.on('dialog.submit', async ({ activity }) => {
+  const data = activity.value.data;
+  if (data?.action === 'cancel') {
+    pendingDialogs.delete(data.dialogId);
+    releaseLock(data.dialogId);
+    return { status: 200, body: { task: { type: 'message', value: 'Cancelled.' } } };
+  }
+  // Handle normal submit...
+  pendingDialogs.delete(data.dialogId);
+  return { status: 200, body: { task: { type: 'message', value: 'Saved!' } } };
+});
+
+// Periodic cleanup of expired dialogs (user closed without clicking Cancel)
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, state] of pendingDialogs) {
+    if (state.expiresAt < now) {
+      releaseLock(id);
+      pendingDialogs.delete(id);
+    }
+  }
+}, 60_000); // check every minute
+```
+
+**Reverse (Teams → Slack):** Use `notify_on_close: true` in `views.open()` and handle `viewClosed` natively.
+
+### Multi-step dialog workaround: step routing (R4/R6)
+
+Replace Slack's `views.push()` stacking and `dispatch_action` mid-form updates with a single dialog using step routing.
+
+```typescript
+app.on('dialog.submit', async ({ activity }) => {
+  const data = activity.value.data;
+  const step = data?.step ?? 1;
+
+  if (data?.action === 'back') {
+    return buildStepResponse(step - 1, data);
+  }
+  if (data?.action === 'next') {
+    // Validate current step
+    const errors = validateStep(step, data);
+    if (errors.length > 0) {
+      return buildStepResponse(step, data, errors); // re-render with errors (R5)
+    }
+    if (step >= 3) {
+      // Final step — process all data
+      await processWizard(data);
+      return { status: 200, body: { task: { type: 'message', value: 'Done!' } } };
+    }
+    return buildStepResponse(step + 1, data);
+  }
+});
+
+function buildStepResponse(step: number, previousData: Record<string, unknown>, errors: string[] = []) {
+  return {
+    status: 200,
+    body: {
+      task: {
+        type: 'continue',
+        value: {
+          title: `Step ${step} of 3`,
+          card: {
+            contentType: 'application/vnd.microsoft.card.adaptive',
+            content: {
+              type: 'AdaptiveCard', version: '1.5',
+              body: [
+                // Show validation errors if any (R5 workaround)
+                ...errors.map(e => ({
+                  type: 'TextBlock', text: e, color: 'Attention', weight: 'Bolder',
+                })),
+                // Step-specific fields
+                ...getStepFields(step, previousData),
+              ],
+              actions: [
+                ...(step > 1 ? [{
+                  type: 'Action.Submit', title: 'Back',
+                  data: { ...previousData, step, action: 'back' },
+                }] : []),
+                {
+                  type: 'Action.Submit',
+                  title: step === 3 ? 'Finish' : 'Next',
+                  data: { ...previousData, step, action: 'next' },
+                },
+                {
+                  type: 'Action.Submit', title: 'Cancel',
+                  data: { ...previousData, step, action: 'cancel' },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+  };
+}
+```
+
+**Key principle:** Every step's `Action.Submit.data` must carry forward ALL data from previous steps, since there's no persistent modal state like Slack's `private_metadata`.
+
+**Reverse (Teams → Slack):** Use `views.push()` for stacking (up to 3 levels) and `dispatch_action: true` + `views.update()` for mid-form dynamics.
+
 ### Reverse direction (Teams → Slack)
 
 For Teams → Slack, map `dialog.open` to `views.open` with `trigger_id`, `dialog.submit` to `viewSubmission`, and Adaptive Card inputs to Block Kit inputs. Key reverse mappings:

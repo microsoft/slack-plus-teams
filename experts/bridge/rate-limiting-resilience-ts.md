@@ -266,6 +266,63 @@ app.message(/^\/?user (.+)$/i, async ({ send, activity }) => {
 });
 ```
 
+### Best practice: retry utility + p-queue broadcast (Y17)
+
+**Always build a retry utility with exponential backoff and jitter.** Apply it to all outbound API calls. For proactive broadcasts, combine with `p-queue` concurrency control.
+
+```typescript
+// Production retry utility — apply to all outbound calls
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      if (attempt === maxRetries) throw err;
+      const retryAfter = err?.response?.headers?.["retry-after"];
+      const baseDelay = retryAfter ? parseInt(retryAfter) * 1000 : 1000 * 2 ** attempt;
+      const jitter = Math.random() * 1000;
+      await new Promise(r => setTimeout(r, baseDelay + jitter));
+    }
+  }
+  throw new Error("Unreachable");
+}
+
+// Proactive broadcast with concurrency control
+import PQueue from "p-queue";
+
+const broadcastQueue = new PQueue({ concurrency: 5, interval: 200, intervalCap: 1 });
+
+async function broadcastToAll(
+  conversationIds: string[],
+  message: string
+): Promise<{ sent: number; failed: number }> {
+  let sent = 0, failed = 0;
+
+  const promises = conversationIds.map(convId =>
+    broadcastQueue.add(async () => {
+      try {
+        await withRetry(() => app.send(convId, message));
+        sent++;
+      } catch {
+        failed++;
+      }
+    })
+  );
+
+  await Promise.all(promises);
+  return { sent, failed };
+}
+```
+
+**Key rules:**
+- **Always add jitter.** Without it, multiple bot instances retry simultaneously (thundering herd).
+- **Set a max queue depth.** Unbounded queues accumulate thousands of items in memory.
+- **Treat 503 the same as 429.** Both are retryable with backoff.
+
+**Don't:** Retry without jitter, or use Bolt's `retryConfig` and assume it covers Graph API calls (it only covers Slack API calls).
+
+**Reverse (Teams → Slack):** Configure Bolt's built-in `retryConfig: { retries: 3, factor: 2 }` for Slack API calls. The `p-queue` pattern applies equally for Slack broadcasts.
+
 ### Rate limit comparison table
 
 | Aspect | Slack | Teams Bot Framework | Teams Graph API |

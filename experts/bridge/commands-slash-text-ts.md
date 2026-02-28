@@ -331,6 +331,38 @@ app.start(3978);
 | `command.response_url` | `send()` / `reply()` | Direct methods, no URL-based responses |
 | Manifest: Slack app dashboard | Manifest: `bots[].commands[]` | JSON file instead of web UI |
 
+### Best practice: text matching + manifest commands together (Y1)
+
+Use **both** text pattern matching and manifest bot commands for the best UX. Manifest commands give discoverability (users see them in the command menu); text matching ensures the bot responds to both `/weather` and `weather` so users migrating from Slack don't retrain muscle memory.
+
+```typescript
+// Accept both "/weather" and "weather" — regex makes slash optional
+app.message(/^\/?weather$/i, async ({ send }) => {
+  const weather = await getWeather();
+  await send(`Current weather: ${weather}`);
+});
+```
+
+**Manifest (add commands for discoverability):**
+
+```json
+{
+  "bots": [{
+    "botId": "${{BOT_ID}}",
+    "scopes": ["personal", "team", "groupChat"],
+    "commands": [
+      { "title": "weather", "description": "Check the current weather" },
+      { "title": "status", "description": "Check system status" },
+      { "title": "help", "description": "Show available commands" }
+    ]
+  }]
+}
+```
+
+**Don't:** Create a message extension for every slash command. Reserve extensions for commands that benefit from rich search results or task module UI.
+
+**Reverse (Teams → Slack):** Register commands via `app.command("/name", handler)` with `await ack()`. Configure in the Slack app dashboard.
+
 ### Reverse direction (Teams → Slack)
 
 For Teams → Slack, map `app.message(regex)` to `app.command('/name')`, add `ack()` calls, and convert Adaptive Card forms to Block Kit modals. Key reverse mappings:

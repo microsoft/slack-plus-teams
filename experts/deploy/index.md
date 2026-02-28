@@ -51,11 +51,23 @@ Read:
 - `azure-bot-deploy-ts.md`
 Cross-domain deps: `../teams/project.scaffold-files-ts.md` (project structure), `../teams/runtime.manifest-ts.md` (Teams manifest for sideloading), `../teams/dev.debug-test-ts.md` (Agents Toolkit reference), `../security/secrets-ts.md` (secrets hygiene), `../bridge/infra-compute-ts.md` (if also migrating from AWS)
 
+### Azure CLI Reference
+When: looking up Azure CLI commands, "what az commands do I need", az bot commands, az cognitiveservices commands, az ad app commands, az webapp commands, az containerapp commands, az keyvault commands, Azure CLI CRUD reference, list all az commands for bots
+Read:
+- `azure-cli-reference-ts.md`
+Cross-domain deps: `azure-bot-deploy-ts.md` (step-by-step deployment), `../security/secrets-ts.md` (secrets hygiene)
+
 ### Deploy to AWS
 When: deploying a bot to AWS, Lambda, EC2, ECS, Elastic Beanstalk, Fargate, AWS CLI, `aws configure`, API Gateway, CloudFormation, SAM, CDK, deploy Slack bot to AWS
 Read:
 - `aws-bot-deploy-ts.md`
 Cross-domain deps: `../slack/bolt-oauth-distribution-ts.md` (Slack OAuth for multi-workspace), `../security/secrets-ts.md` (secrets hygiene), `../bridge/infra-compute-ts.md` (if also deploying to Azure)
+
+### AWS CLI Reference
+When: looking up AWS CLI commands, "what aws commands do I need", aws lambda commands, aws ecs commands, aws bedrock commands, aws iam commands, aws secretsmanager commands, aws dynamodb commands, aws sqs commands, AWS CLI CRUD reference, list all aws commands for bots, Bedrock agents, Lex bots
+Read:
+- `aws-cli-reference-ts.md`
+Cross-domain deps: `aws-bot-deploy-ts.md` (step-by-step deployment), `../security/secrets-ts.md` (secrets hygiene)
 
 ### Deploy Both (Dual Bot)
 When: deploying a dual-platform bot to the cloud, deploy to both Azure and AWS, single server deployment for both Slack and Teams
@@ -72,6 +84,6 @@ If deploying a **Slack-only bot**, either cloud works independently.
 
 ## file inventory
 
-`aws-bot-deploy-ts.md` | `azure-bot-deploy-ts.md`
+`aws-bot-deploy-ts.md` | `aws-cli-reference-ts.md` | `azure-bot-deploy-ts.md` | `azure-cli-reference-ts.md`
 
 <!-- Created 2026-02-28: Deploy domain with cloud provider interview, Azure and AWS deployment experts -->

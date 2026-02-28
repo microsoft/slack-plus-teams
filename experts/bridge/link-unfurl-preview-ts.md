@@ -214,14 +214,101 @@ app.start(3978);
 | `is_bot_token_only` flag | *(not applicable)* | Always bot identity |
 | Attachment unfurl format | Adaptive Card in composeExtension result | Richer card format |
 
+### Cache middleware best practice (Y7)
+
+The 5-second Teams deadline makes caching non-optional. Always use a cache layer for unfurl handlers.
+
+```typescript
+// Reusable cache-first unfurl wrapper
+const unfurlCache = new Map<string, { data: any; expires: number }>();
+
+function withUnfurlCache<T>(
+  fetchFn: (url: string) => Promise<T>,
+  ttlMs: number = 300_000 // 5 min default
+) {
+  return async (url: string): Promise<T> => {
+    const cached = unfurlCache.get(url);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data as T;
+    }
+    const data = await fetchFn(url); // must complete in <4 seconds
+    unfurlCache.set(url, { data, expires: Date.now() + ttlMs });
+    return data;
+  };
+}
+
+// Usage
+const cachedFetchIssue = withUnfurlCache(
+  async (url: string) => {
+    const id = url.match(/\/issues\/(\d+)/)?.[1];
+    return id ? await fetchIssue(id) : null;
+  },
+  5 * 60_000 // 5 min TTL
+);
+
+app.on("message.ext.query-link" as any, async ({ activity }) => {
+  const url: string = activity.value?.url ?? "";
+  const issue = await cachedFetchIssue(url);
+  if (!issue) return { status: 200, body: {} };
+  return buildUnfurlResponse(issue);
+});
+```
+
+**Best practices:**
+- Set TTL based on data freshness needs (5–60 minutes)
+- Pre-populate cache for known high-traffic URLs on startup
+- Never make multiple API calls inside the unfurl handler — pre-fetch or batch
+- For production, replace the `Map` with Redis or a shared cache
+
+**Don't:** Skip caching even for "fast" data sources. Network latency + cold starts can push you past 5 seconds.
+
+**Reverse (Teams → Slack):** Slack's 30-minute async model makes caching less critical, but still recommended for performance.
+
 ## pitfalls
 
 - **Missing `messageHandlers` in manifest**: Without the `messageHandlers` array in `composeExtensions`, link unfurling never triggers. The bot receives no activity for matching URLs. This is the #1 deployment issue for link unfurling.
 - **5-second deadline with no fallback**: If data fetching exceeds 5 seconds, the unfurl silently fails — no error card, no retry. Users see a plain URL with no preview. Implement aggressive caching and fast-path responses.
 - **Bot must be installed in the conversation**: Unlike Slack where workspace-level app installation enables unfurling everywhere, Teams requires the bot to be installed in each team/chat where unfurling should work. Users may not understand why links aren't unfurling in some conversations.
 - **No retroactive unfurling**: Existing messages with matching URLs are never unfurled when the bot is installed later. Only new messages trigger the handler. Slack supports unfurling existing messages.
-- **Exact domain matching**: `*.example.com` is not supported. If your app has URLs across `app.example.com`, `api.example.com`, and `docs.example.com`, all three must be listed separately in the manifest.
+- **Exact domain matching**: `*.example.com` is not supported. If your app has URLs across `app.example.com`, `api.example.com`, and `docs.example.com`, all three must be listed separately in the manifest. For apps with many subdomains, use a build-time manifest generator script (see Y15 pattern below).
 - **Adaptive Card size limit**: Link preview cards are subject to the standard 28 KB Adaptive Card size limit. Keep previews concise — unfurl cards with embedded images or long descriptions may be silently truncated.
+
+### Domain wildcard workaround: manifest generator (Y15)
+
+Teams requires exact domain listing — no wildcards. For apps with many subdomains, automate manifest generation at build time.
+
+```typescript
+// scripts/generate-manifest-domains.ts
+import fs from "fs";
+
+// Source of truth: your subdomain list (from config, DNS, or API)
+const BASE_DOMAIN = "example.com";
+const SUBDOMAINS = ["app", "docs", "api", "staging", "portal", "admin"];
+
+function generateManifestDomains(): string[] {
+  return SUBDOMAINS.map(sub => `${sub}.${BASE_DOMAIN}`);
+}
+
+// Read the template manifest
+const manifest = JSON.parse(fs.readFileSync("manifest.template.json", "utf8"));
+
+// Inject domains into composeExtensions messageHandlers
+manifest.composeExtensions[0].messageHandlers[0].value.domains = generateManifestDomains();
+
+// Also inject into validDomains (required for link unfurling)
+manifest.validDomains = [
+  ...new Set([...(manifest.validDomains ?? []), ...generateManifestDomains()]),
+];
+
+fs.writeFileSync("manifest.json", JSON.stringify(manifest, null, 2));
+console.log(`Generated manifest with ${SUBDOMAINS.length} domains.`);
+```
+
+Add to your build pipeline: `ts-node scripts/generate-manifest-domains.ts` before packaging.
+
+**Don't:** Try to register a single wildcard domain — Teams silently rejects it with no error message.
+
+**Reverse (Teams → Slack):** Slack supports `*.example.com` wildcards natively in the app dashboard.
 
 ## references
 

@@ -359,6 +359,63 @@ class TicketBot extends TeamsActivityHandler {
 }
 ```
 
+### Confirmation dialog pattern (Y14)
+
+Use `Action.ShowCard` for inline confirmation — the Teams equivalent of Slack's native `confirm` object on buttons.
+
+```typescript
+// Slack: button with confirm dialog
+const slackButton = {
+  type: "button",
+  text: { type: "plain_text", text: "Delete" },
+  style: "danger",
+  action_id: "delete_item",
+  value: "42",
+  confirm: {
+    title: { type: "plain_text", text: "Are you sure?" },
+    text: { type: "mrkdwn", text: "This action cannot be undone." },
+    confirm: { type: "plain_text", text: "Yes, delete" },
+    deny: { type: "plain_text", text: "Cancel" },
+  },
+};
+
+// Teams: Action.ShowCard inline confirmation
+const teamsConfirmAction = {
+  type: "Action.ShowCard",
+  title: "Delete",
+  card: {
+    type: "AdaptiveCard",
+    body: [
+      {
+        type: "TextBlock",
+        text: "Are you sure? This action cannot be undone.",
+        weight: "Bolder",
+        color: "Attention",
+      },
+    ],
+    actions: [
+      {
+        type: "Action.Submit",
+        title: "Yes, delete",
+        style: "destructive",
+        data: { action: "confirm_delete", itemId: "42" },
+      },
+      {
+        type: "Action.Submit",
+        title: "Cancel",
+        data: { action: "cancel_delete" },
+      },
+    ],
+  },
+};
+```
+
+**Why `Action.ShowCard`:** Expands inline without leaving the current context — closest to Slack's native `confirm` popup. No task module overhead.
+
+**Don't:** Open a full task module dialog for a simple yes/no confirmation. It's too heavy for the interaction.
+
+**Reverse (Teams → Slack):** Add a `confirm` object directly to the button element. Platform-rendered popup with zero effort.
+
 ## pitfalls
 
 - **mrkdwn vs Markdown**: Slack uses `*bold*` and `~strike~`; Adaptive Cards expect `**bold**` and `~~strike~~`. Failing to convert produces literal asterisks in Teams.

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "version": "1.0.0",
+  "id": "{{BOT_ID}}",
+  "developer": {
+    "name": "Your Company",
+    "websiteUrl": "https://example.com",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/terms"
+  },
+  "name": {
+    "short": "DualBot",
+    "full": "Dual Platform Bot"
+  },
+  "description": {
+    "short": "A bot that works on both Slack and Teams",
+    "full": "Production-ready dual-platform bot template demonstrating the adapter pattern for cross-platform bot development."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#4A154B",
+  "bots": [
+    {
+      "botId": "{{BOT_ID}}",
+      "scopes": ["personal", "team", "groupChat"],
+      "commandLists": [
+        {
+          "scopes": ["personal", "team", "groupChat"],
+          "commands": [
+            {
+              "title": "help",
+              "description": "Show available commands"
+            },
+            {
+              "title": "status",
+              "description": "Check system status"
+            },
+            {
+              "title": "ticket",
+              "description": "Create a support ticket"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validDomains": []
+}

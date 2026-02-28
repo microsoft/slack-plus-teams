@@ -235,6 +235,65 @@ app.message(/^\/?remind (.+)$/i, async ({ send, activity }) => {
 });
 ```
 
+### Azure Service Bus scheduled messages (R7 — production, exact-time)
+
+The most production-ready approach for exact-time delivery with native cancellation support.
+
+```typescript
+import { ServiceBusClient } from "@azure/service-bus";
+
+const sbClient = new ServiceBusClient(process.env.SERVICEBUS_CONNECTION!);
+const sender = sbClient.createSender("scheduled-messages");
+
+// Schedule a message for exact-time delivery
+async function scheduleMessage(
+  conversationId: string, text: string, sendAt: Date
+): Promise<Long> {
+  const [sequenceNumber] = await sender.scheduleMessages(
+    { body: { conversationId, text } },
+    sendAt
+  );
+  return sequenceNumber; // store this for cancellation
+}
+
+// Cancel a scheduled message
+async function cancelScheduled(sequenceNumber: Long): Promise<void> {
+  await sender.cancelScheduledMessages(sequenceNumber);
+}
+
+// Receiver (runs as a separate process or Azure Function)
+const receiver = sbClient.createReceiver("scheduled-messages");
+receiver.subscribe({
+  processMessage: async (msg) => {
+    const { conversationId, text } = msg.body;
+    await app.send(conversationId, text);
+  },
+  processError: async (err) => console.error(err),
+});
+```
+
+**Bot handler integration:**
+
+```typescript
+app.message(/^\/?schedule (.+) at (.+)$/i, async ({ send, activity }) => {
+  const match = activity.text?.match(/schedule (.+) at (.+)/i);
+  const text = match?.[1] ?? "";
+  const sendAt = new Date(match?.[2] ?? "");
+  const convId = activity.conversation?.id ?? "";
+
+  const seqNum = await scheduleMessage(convId, text, sendAt);
+  // Store seqNum in database for cancellation
+  await send(`Scheduled for ${sendAt.toISOString()}. Cancel ID: ${seqNum}`);
+});
+```
+
+**When to use Service Bus vs other approaches:**
+- **Service Bus:** High-volume, exact-time delivery, native cancellation. Best overall.
+- **Queue Storage:** Simple delays under 7 days. Cheaper. No native cancellation.
+- **Cosmos DB + Timer:** Unlimited delay. Minute-level precision. Most flexible.
+
+**Reverse (Teams → Slack):** Use `chat.scheduleMessage({ channel, text, post_at })` natively.
+
 ### Scheduling approach comparison
 
 | Approach | Durability | Precision | Max Delay | Cancellation | Best For |
