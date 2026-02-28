@@ -79,7 +79,7 @@ Scan the user's message for signal words. Pick the **first matching domain**; if
 
 ### Teams — build or modify a Teams bot / agent
 Signals: Teams SDK, `@microsoft/teams-ai`, Adaptive Cards, ChatPrompt, Graph API, MCP, A2A, `app.ts`, manifest, proactive message, message extension, dialog, task module, Teams Toolkit, Bot Framework, SSO, OAuth, streaming, citations, RAG, function calling, memory, state, storage
-→ Read `.experts/teams/index.md`
+→ Read `experts/teams/index.md`
 
 ### Slack — build or modify a Slack app
 Signals: Slack Bolt, `@slack/bolt`, Block Kit, `ack()`, Slack events, `app.message`, `app.command`, `app.event`, `app.action`, `app.shortcut`, `app.view`, slash command, Slack OAuth, `InstallProvider`, `InstallationStore`, multi-workspace, `app.assistant`, Assistant container, `threadStarted`, `userMessage`, `setSuggestedPrompts`, `setStatus`, `setTitle`, `getThreadContext`
@@ -99,11 +99,11 @@ Signals: deploy, deployment, provision, hosting, publish, go live, production, `
 
 ### Convert — rewrite source code from another language to TypeScript
 Signals: JS to TS, Ruby to TS, Java to TS, Kotlin to TS, convert language, transpile, rewrite in TypeScript, port code, language conversion, gems to npm, Maven to npm, Gradle to npm, type annotations, require to import, add types, snake_case to camelCase, Lombok, @Data, @Builder, Gson, Jackson, @SerializedName, CompletableFuture, bulk conversion, large-scale, trailing lambda, `it` parameter, `trimIndent`, `when` expression, data class, companion object, sealed class, extension function
-→ Read `.experts/convert/index.md`
+→ Read `experts/convert/index.md`
 
 ### Security — harden inputs, secrets, or credentials
 Signals: input validation, sanitize, secrets, credentials, key vault, PII, injection, XSS
-→ Read `.experts/security/index.md`
+→ Read `experts/security/index.md`
 
 ## auto-interview protocol (expert-level)
 
@@ -135,7 +135,7 @@ If the request mixes **convert** signals with **bridge** signals (e.g., "rewrite
 If no domain matches, ask **one** clarifying question:
 > "Are you working on a Teams bot, a Slack app, a migration between them, or something else?"
 
-If the routed experts don't fully cover the request (gaps remain after the initial pass), read `.experts/fallback.md` for a two-phase recovery: re-scan all domain routers for missed experts, then web-search for any remaining gaps.
+If the routed experts don't fully cover the request (gaps remain after the initial pass), read `experts/fallback.md` for a two-phase recovery: re-scan all domain routers for missed experts, then web-search for any remaining gaps.
 
 ## expert evolution
 
@@ -171,7 +171,7 @@ Create a new expert when **all** of these are true:
 3. **Sufficient depth** — the topic warrants 8+ rules and 2+ code patterns. If it's only 2-3 rules, add them to an existing expert instead.
 
 **Creation steps:**
-1. Copy the template from `.experts/_expert-ts.md`.
+1. Copy the template from `experts/_expert-ts.md`.
 2. Name it `{topic}-ts.md` in the appropriate domain folder.
 3. Fill in all sections: purpose, rules, patterns, pitfalls, references, instructions (with `Pair with` cross-refs), research.
 4. Complete the **post-creation checklist** from `_expert-ts.md`:
@@ -187,8 +187,8 @@ Create a new domain (folder + `index.md` router) when **all** of these are true:
 3. **Separable routing** — moving these experts out of an existing domain simplifies that domain's router, not complicates it.
 
 **Creation steps:**
-1. Create the folder: `.experts/{domain-name}/`.
-2. Create `.experts/{domain-name}/index.md` following the router pattern from any existing domain index (purpose, task clusters with `When:`/`Read:`, combining rule, file inventory).
+1. Create the folder: `experts/{domain-name}/`.
+2. Create `experts/{domain-name}/index.md` following the router pattern from any existing domain index (purpose, task clusters with `When:`/`Read:`, combining rule, file inventory).
 3. Move or create the expert files in the new folder.
 4. Add a new routing entry to this root `index.md` under `## routing rules` with `Signals:` and a `→ Read` directive.
 5. Remove any moved experts from their old domain's `index.md`.
@@ -207,15 +207,15 @@ This lets future sessions see what evolved and when, without cluttering the rout
 These files support the expert system itself — not a specific domain.
 
 ### Fallback recovery
-→ Read `.experts/fallback.md`
+→ Read `experts/fallback.md`
 When the initial routing pass leaves knowledge gaps.
 
 ### New expert template
-→ Read `.experts/_expert-ts.md`
+→ Read `experts/_expert-ts.md`
 When creating a new micro-expert file. Provides the canonical stub structure and a post-creation checklist.
 
 ### Research workflow
-→ Read `.experts/researcher.md`
+→ Read `experts/researcher.md`
 When fleshing out a stub expert with real content. Provides the step-by-step Deep Research workflow.
 
 <!-- Updated 2026-02-11: Added convert domain (js-to-ts, ruby-to-ts, java-to-ts, dependency-mapping, type-mapping) for language conversion to TypeScript -->
