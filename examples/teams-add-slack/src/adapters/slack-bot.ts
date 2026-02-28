@@ -47,14 +47,18 @@ export function createSlackApp(): App {
   app.action("assign_ticket", async ({ ack, respond, body }) => {
     await ack();
     const userName = body.user?.name ?? "User";
-    const response = await handleTicketAction("assign_ticket", "unknown", userName);
+    const action = "actions" in body ? body.actions?.[0] : undefined;
+    const ticketId = action && "value" in action ? JSON.parse(action.value ?? "{}").ticketId ?? "unknown" : "unknown";
+    const response = await handleTicketAction("assign_ticket", ticketId, userName);
     await respond({ text: response.text, replace_original: false });
   });
 
   app.action("close_ticket", async ({ ack, respond, body }) => {
     await ack();
     const userName = body.user?.name ?? "User";
-    const response = await handleTicketAction("close_ticket", "unknown", userName);
+    const action = "actions" in body ? body.actions?.[0] : undefined;
+    const ticketId = action && "value" in action ? JSON.parse(action.value ?? "{}").ticketId ?? "unknown" : "unknown";
+    const response = await handleTicketAction("close_ticket", ticketId, userName);
     await respond({ text: response.text, replace_original: false });
   });
 

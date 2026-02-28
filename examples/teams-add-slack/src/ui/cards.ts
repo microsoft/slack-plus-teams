@@ -39,7 +39,7 @@ export function toAdaptiveCard(response: BotResponse): object {
     type: "Action.Submit",
     title: a.label,
     style: a.style === "primary" ? "positive" : a.style === "danger" ? "destructive" : "default",
-    data: { action: a.id },
+    data: { action: a.id, ...a.data },
   }));
 
   return {

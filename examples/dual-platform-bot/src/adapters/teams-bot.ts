@@ -35,8 +35,8 @@ export function createTeamsApp(config: AppConfig): App {
     const text = ctx.activity.text ?? "";
     const userName = ctx.activity.from?.name ?? "User";
     const fromId = ctx.activity.from?.aadObjectId ?? ctx.activity.from?.id ?? "";
-    const channelId = ctx.activity.channelId ?? "";
-    const threadId = ctx.activity.conversation?.id;
+    const channelId = ctx.activity.conversation?.id ?? "";
+    const threadId = ctx.activity.replyToId;
 
     const user = await resolveUser(fromId, "teams", userName);
 
@@ -79,13 +79,13 @@ export function createTeamsApp(config: AppConfig): App {
 
     const userName = ctx.activity.from?.name ?? "User";
     const fromId = ctx.activity.from?.aadObjectId ?? ctx.activity.from?.id ?? "";
-    const channelId = ctx.activity.channelId ?? "";
+    const conversationId = ctx.activity.conversation?.id ?? "";
 
     const user = await resolveUser(fromId, "teams", userName);
 
     const context: ConversationContext = {
       platform: "teams",
-      channelId,
+      channelId: conversationId,
       user,
     };
 

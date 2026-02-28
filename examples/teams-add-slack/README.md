@@ -42,6 +42,8 @@ src/
    - `SLACK_APP_TOKEN` — App-Level Token with `connections:write` scope (starts with `xapp-`)
    - `SLACK_SIGNING_SECRET` — from Slack app settings
 
+> **Note:** This example reads env vars directly via `process.env`. Either export them in your shell, or add `dotenv` (`npm install dotenv`) and `import 'dotenv/config'` at the top of `src/index.ts`.
+
 ## Running Locally
 
 ```bash

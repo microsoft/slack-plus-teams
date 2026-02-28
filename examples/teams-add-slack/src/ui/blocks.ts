@@ -57,6 +57,7 @@ export function toBlockKit(response: BotResponse): KnownBlock[] {
         type: "button" as const,
         text: { type: "plain_text" as const, text: a.label },
         action_id: a.id,
+        ...(a.data ? { value: JSON.stringify(a.data) } : {}),
         ...(a.style === "primary"
           ? { style: "primary" as const }
           : a.style === "danger"

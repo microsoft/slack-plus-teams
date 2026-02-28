@@ -25,43 +25,43 @@ A curated knowledge base for building conversational bots and AI agents across S
 
 Load the **Teams** domain. 28 micro-experts cover app initialization, routing, Adaptive Cards, dialogs, message extensions, OAuth/SSO, Graph API, AI (ChatPrompt, function calling, RAG, streaming, memory), MCP, A2A, and more.
 
-**Key experts:** `teams\runtime.app-init-ts.md`, `teams\runtime.routing-handlers-ts.md`, `teams\ui.adaptive-cards-ts.md`
+**Key experts:** `teams/runtime.app-init-ts.md`, `teams/runtime.routing-handlers-ts.md`, `teams/ui.adaptive-cards-ts.md`
 
 ### 2. Build a Slack bot (TypeScript)
 
 Load the **Slack** domain. 7 micro-experts cover Bolt.js app setup, handler registration, ack rules, slash commands, Block Kit UI, Events API, Assistant containers, and OAuth/multi-workspace distribution.
 
-**Key experts:** `slack\runtime.bolt-foundations-ts.md`, `slack\bolt-events-ts.md`, `slack\bolt-assistant-ts.md`
+**Key experts:** `slack/runtime.bolt-foundations-ts.md`, `slack/bolt-events-ts.md`, `slack/bolt-assistant-ts.md`
 
 ### 3. Host both bots in a single server
 
 Load the **Bridge** domain's architecture cluster. Covers shared Express server with route separation, Socket Mode + HTTP dual receiver, platform-agnostic service layer, and identity normalization.
 
-**Key expert:** `bridge\cross-platform-architecture-ts.md`
+**Key expert:** `bridge/cross-platform-architecture-ts.md`
 
 ### 4. Integrate from Java, C#, or Go (no native SDK)
 
 Load the **Bridge** domain's REST-only cluster. Language-agnostic pseudocode for Bot Framework REST API (Teams) and Slack Events API + Web API — manual JWT validation, HMAC signature verification, token acquisition, and message sending.
 
-**Key expert:** `bridge\rest-only-integration-ts.md`
+**Key expert:** `bridge/rest-only-integration-ts.md`
 
 ### 5. Bridge features between Slack and Teams
 
 Load the **Bridge** domain. 25 micro-experts cover bidirectional mapping of every feature: Block Kit ↔ Adaptive Cards, commands, events ↔ activities, identity, modals ↔ dialogs, files, shortcuts ↔ extensions, workflows ↔ Power Automate, infrastructure (Lambda ↔ Functions, S3 ↔ Blob), and more.
 
-**Key expert:** `bridge\cross-platform-advisor-ts.md` (orchestrates the full bridging workflow)
+**Key expert:** `bridge/cross-platform-advisor-ts.md` (orchestrates the full bridging workflow)
 
 ### 6. Deploy your bot to Azure or AWS
 
 Load the **Deploy** domain. The router interviews you on cloud provider preference (Azure or AWS) and bot platform (Teams, Slack, or both), then loads the matching expert for a step-by-step walkthrough from CLI installation through verified deployment.
 
-**Key experts:** `deploy\azure-bot-deploy-ts.md`, `deploy\aws-bot-deploy-ts.md`
+**Key experts:** `deploy/azure-bot-deploy-ts.md`, `deploy/aws-bot-deploy-ts.md`
 
 ### 7. Convert code from another language to TypeScript
 
 Load the **Convert** domain. 8 micro-experts cover JS→TS, Ruby→TS, Java→TS, Kotlin→TS, type mapping, dependency mapping, JSON serialization, and bulk conversion strategy.
 
-**Key experts:** `convert\java-to-ts-ts.md`, `convert\kotlin-to-ts-ts.md`, `convert\type-mapping-ts.md`
+**Key experts:** `convert/java-to-ts-ts.md`, `convert/kotlin-to-ts-ts.md`, `convert/type-mapping-ts.md`
 
 ## Expert Inventory
 
@@ -95,11 +95,13 @@ Covers: Block Kit ↔ Adaptive Cards, commands, events ↔ activities, identity/
 ### Convert Domain (8 files)
 Covers: JS→TS, Ruby→TS, Java→TS, Kotlin→TS, type mapping, dependency mapping, JSON serialization, bulk conversion strategy.
 
-### Deploy Domain (2 files)
+### Deploy Domain (4 files)
 | File | Purpose |
 |------|---------|
 | `azure-bot-deploy-ts.md` | End-to-end Azure deployment: CLI setup, App Registration, Bot Service, App Service/Functions, Agents Toolkit fast path |
 | `aws-bot-deploy-ts.md` | End-to-end AWS deployment: CLI setup, Lambda+API Gateway/EC2/ECS, SAM templates, Teams-on-AWS pattern |
+| `azure-cli-reference-ts.md` | Comprehensive Azure CLI reference for bot/agent resource CRUD |
+| `aws-cli-reference-ts.md` | Comprehensive AWS CLI reference for bot/agent resource CRUD |
 
 ### Security Domain (2 files)
 Covers: input validation, secrets management.

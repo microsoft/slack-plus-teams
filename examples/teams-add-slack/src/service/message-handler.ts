@@ -10,6 +10,7 @@ export interface CardAction {
   label: string;
   id: string;
   style?: "primary" | "danger";
+  data?: Record<string, string>;
 }
 
 export interface BotResponse {
@@ -84,8 +85,8 @@ export async function handleCreateTicket(
         { label: "Status", value: "Open" },
       ],
       actions: [
-        { label: "Assign to me", id: "assign_ticket", style: "primary" },
-        { label: "Close", id: "close_ticket", style: "danger" },
+        { label: "Assign to me", id: "assign_ticket", style: "primary", data: { ticketId: String(ticketId) } },
+        { label: "Close", id: "close_ticket", style: "danger", data: { ticketId: String(ticketId) } },
       ],
     },
   };

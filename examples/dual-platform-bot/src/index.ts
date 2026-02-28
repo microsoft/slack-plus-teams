@@ -5,7 +5,7 @@
  *   - Teams: HTTP endpoint on port 3978 (app.start() serves /api/messages)
  *   - Slack: Socket Mode (WebSocket, no HTTP endpoint needed)
  *   - Both bots share the same service layer
- *   - Health endpoint on same port as Teams
+ *   - Optional health endpoint can be added separately if needed
  *
  * This is the simplest dual-bot pattern: Slack Socket Mode avoids
  * Express body-parsing conflicts and port collisions.
