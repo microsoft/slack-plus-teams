@@ -17,8 +17,9 @@ import { createSlackApp } from "./adapters/slack-bot.js";
 async function main(): Promise<void> {
   // --- Teams bot (original) ---
   const teamsApp = createTeamsApp();
-  await teamsApp.start(Number(process.env.PORT) || 3978);
-  console.log("Teams bot running on :3978/api/messages");
+  const port = Number(process.env.PORT) || 3978;
+  await teamsApp.start(port);
+  console.log(`Teams bot running on :${port}/api/messages`);
 
   // --- Slack bot (new) ---
   const slackApp = createSlackApp();
