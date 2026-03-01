@@ -140,6 +140,18 @@ Read:
 - `runtime.app-init-ts.md`
 - `runtime.manifest-ts.md` (for appPackage/manifest.json setup)
 
+### Teams SDK for Python
+When: Python, `microsoft_teams`, `microsoft_teams.apps`, `microsoft_teams.ai`, `ActivityContext`, `@app.on_message`, `@app.on_message_pattern`, `ChatPrompt`, `OpenAICompletionsAIModel`, Pydantic, FastAPI, Python Teams bot
+Read:
+- `teams-python.md`
+Note: All TS experts provide architectural patterns. This expert provides Python API mappings. Load the relevant TS expert for concepts, then this expert for Python translation.
+
+### Teams SDK for .NET (C#)
+When: C#, .NET, `Microsoft.Teams.Apps`, `Microsoft.Teams.AI`, `AddTeams()`, `UseTeams()`, `IContext<TActivity>`, `OnMessage`, `OnAdaptiveCardAction`, `OpenAIChatPrompt`, `[Prompt]`, `[Function]`, ASP.NET Core, NuGet
+Read:
+- `teams-dotnet.md`
+Note: C# has SDK support for Teams only (Tier 3). For the Slack side, route to `../bridge/rest-only-integration-ts.md`.
+
 ## cross-platform bridging
 
 If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration.
@@ -150,4 +162,4 @@ If a request spans multiple clusters (e.g., "add a function-calling tool that re
 
 ## file inventory
 
-`a2a.client-basics-ts.md` | `a2a.orchestrator-patterns-ts.md` | `a2a.server-basics-ts.md` | `ai.chatprompt-basics-ts.md` | `ai.citations-feedback-ts.md` | `ai.function-calling-design-ts.md` | `ai.function-calling-implementation-ts.md` | `ai.memory-localmemory-ts.md` | `ai.model-setup-ts.md` | `ai.rag-retrieval-ts.md` | `ai.rag-vectorstores-ts.md` | `ai.streaming-ts.md` | `auth.oauth-sso-ts.md` | `compat.botbuilder-interop-ts.md` | `dev.debug-test-ts.md` | `graph.usergraph-appgraph-ts.md` | `mcp.client-basics-ts.md` | `mcp.expose-chatprompt-tools-ts.md` | `mcp.security-ts.md` | `mcp.server-basics-ts.md` | `project.scaffold-files-ts.md` | `runtime.app-init-ts.md` | `runtime.manifest-ts.md` | `runtime.proactive-messaging-ts.md` | `runtime.routing-handlers-ts.md` | `state.storage-patterns-ts.md` | `ui.adaptive-cards-ts.md` | `ui.dialogs-task-modules-ts.md` | `ui.message-extensions-ts.md`
+`a2a.client-basics-ts.md` | `a2a.orchestrator-patterns-ts.md` | `a2a.server-basics-ts.md` | `ai.chatprompt-basics-ts.md` | `ai.citations-feedback-ts.md` | `ai.function-calling-design-ts.md` | `ai.function-calling-implementation-ts.md` | `ai.memory-localmemory-ts.md` | `ai.model-setup-ts.md` | `ai.rag-retrieval-ts.md` | `ai.rag-vectorstores-ts.md` | `ai.streaming-ts.md` | `auth.oauth-sso-ts.md` | `compat.botbuilder-interop-ts.md` | `dev.debug-test-ts.md` | `graph.usergraph-appgraph-ts.md` | `mcp.client-basics-ts.md` | `mcp.expose-chatprompt-tools-ts.md` | `mcp.security-ts.md` | `mcp.server-basics-ts.md` | `project.scaffold-files-ts.md` | `runtime.app-init-ts.md` | `runtime.manifest-ts.md` | `runtime.proactive-messaging-ts.md` | `runtime.routing-handlers-ts.md` | `state.storage-patterns-ts.md` | `teams-dotnet.md` | `teams-python.md` | `ui.adaptive-cards-ts.md` | `ui.dialogs-task-modules-ts.md` | `ui.message-extensions-ts.md`

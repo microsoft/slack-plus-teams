@@ -50,6 +50,48 @@ Read:
 - `bolt-oauth-distribution-ts.md`
 - `runtime.bolt-foundations-ts.md` (App constructor OAuth options)
 
+### Socket Mode
+When: Socket Mode, `socketMode`, `appToken`, `xapp-`, WebSocket, local development, no public URL, `SocketModeReceiver`, `@slack/socket-mode`, connection lifecycle, reconnect, `connections:write`
+Read:
+- `runtime.socket-mode-ts.md`
+- `runtime.bolt-foundations-ts.md` (App constructor setup)
+Depends on: `runtime.bolt-foundations-ts.md` (App constructor options)
+
+### Web API & Proactive Messaging
+When: `client.chat.postMessage`, `chat.update`, `chat.delete`, proactive messages, `chat.postEphemeral`, ephemeral, scheduled messages, `chat.scheduleMessage`, `users.info`, `users.lookupByEmail`, `conversations.list`, `conversations.history`, `filesUploadV2`, file upload, say vs respond vs client, pagination, cursor, rate limits
+Read:
+- `web-api-proactive-ts.md`
+- `runtime.bolt-foundations-ts.md` (App setup and client initialization)
+Depends on: `runtime.bolt-foundations-ts.md` (client property and token management)
+
+### Shortcuts
+When: shortcuts, global shortcut, message shortcut, `app.shortcut()`, `message_action`, compose menu, message context menu, `callback_id`, shortcut payload
+Read:
+- `runtime.shortcuts-ts.md`
+- `runtime.ack-rules-ts.md` (shortcuts require ack within 3 seconds)
+- `ui.modals-lifecycle-ts.md` (shortcuts typically open modals via trigger_id)
+Depends on: `runtime.bolt-foundations-ts.md` (handler registration context)
+
+### Modal Lifecycle
+When: modals, `views.open`, `views.update`, `views.push`, `view_submission`, `view_closed`, `app.view()`, `response_action`, `private_metadata`, multi-step modal, modal validation, modal stack, `notify_on_close`, `trigger_id`
+Read:
+- `ui.modals-lifecycle-ts.md`
+- `runtime.ack-rules-ts.md` (view submission ack patterns)
+- `ui.block-kit-ts.md` (block layout for modal content)
+Depends on: `runtime.bolt-foundations-ts.md` (App setup for view handler registration)
+
+### Bolt for Python
+When: Python, `slack_bolt`, `AsyncApp`, Flask adapter, FastAPI adapter, Django adapter, `SocketModeHandler`, Python Slack SDK, `@app.message`, `@app.command`, `@app.action`, `@app.event`, `@app.view`, `@app.shortcut`, `client.chat_postMessage`, `client.views_open`, argument injection, decorator listeners
+Read:
+- `bolt-python.md`
+Note: All TS experts provide architectural patterns. This expert provides Python API mappings. Load the relevant TS expert for concepts, then this expert for Python translation.
+
+### Bolt for Java
+When: Java, `slack-bolt-java`, `com.slack.api.bolt`, Spring Boot, `SlackAppServlet`, `AppConfig.builder()`, `MethodsClient`, `ctx.client()`, `ctx.ack()`, `ctx.say()`, request configurator lambdas, `app.command`, `app.event`, `app.blockAction`, `app.viewSubmission`, `app.globalShortcut`, `SocketModeApp`
+Read:
+- `bolt-java.md`
+Note: Java has SDK support for Slack only (Tier 3). For the Teams side, route to `../bridge/rest-only-integration-ts.md`.
+
 ## cross-platform bridging
 
 If the developer wants to **add Teams support** to an existing Slack app, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Slack↔Teams feature mapping, UI conversion, identity bridging, and infrastructure migration.
@@ -60,6 +102,6 @@ If a request spans multiple clusters (e.g., "add a slash command that opens a Bl
 
 ## file inventory
 
-`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-oauth-distribution-ts.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.slash-commands-ts.md` | `ui.block-kit-ts.md`
+`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-java.md` | `bolt-oauth-distribution-ts.md` | `bolt-python.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.shortcuts-ts.md` | `runtime.slash-commands-ts.md` | `runtime.socket-mode-ts.md` | `ui.block-kit-ts.md` | `ui.modals-lifecycle-ts.md` | `web-api-proactive-ts.md`
 
 <!-- Updated 2026-02-27: Added bolt-assistant-ts (Assistant container), bolt-events-ts (Events API), bolt-oauth-distribution-ts (OAuth/multi-workspace) experts based on @slack/bolt v4.6.0 source -->
