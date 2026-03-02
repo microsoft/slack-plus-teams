@@ -50,6 +50,7 @@ When: deploying a bot to Azure, Azure App Service, Azure Functions, Azure Contai
 Read:
 - `azure-bot-deploy-ts.md`
 Cross-domain deps: `../teams/project.scaffold-files-ts.md` (project structure), `../teams/runtime.manifest-ts.md` (Teams manifest for sideloading), `../teams/dev.debug-test-ts.md` (Agents Toolkit reference), `../security/secrets-ts.md` (secrets hygiene), `../bridge/infra-compute-ts.md` (if also migrating from AWS)
+Note: For Agents Toolkit automated deployment (alternative to manual Azure CLI), see `../teams/toolkit.lifecycle-cli.md`.
 
 ### Azure CLI Reference
 When: looking up Azure CLI commands, "what az commands do I need", az bot commands, az cognitiveservices commands, az ad app commands, az webapp commands, az containerapp commands, az keyvault commands, Azure CLI CRUD reference, list all az commands for bots
@@ -87,3 +88,4 @@ If deploying a **Slack-only bot**, either cloud works independently.
 `aws-bot-deploy-ts.md` | `aws-cli-reference-ts.md` | `azure-bot-deploy-ts.md` | `azure-cli-reference-ts.md`
 
 <!-- Created 2026-02-28: Deploy domain with cloud provider interview, Azure and AWS deployment experts -->
+<!-- Updated 2026-03-01: Added cross-reference to teams/toolkit.lifecycle-cli.md as Agents Toolkit alternative to manual Azure deployment -->

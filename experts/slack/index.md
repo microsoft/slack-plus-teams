@@ -92,6 +92,37 @@ Read:
 - `bolt-java.md`
 Note: Java has SDK support for Slack only (Tier 3). For the Teams side, route to `../bridge/rest-only-integration-ts.md`.
 
+### CLI: Getting Started
+When: Slack CLI, `slack` command, install CLI, `slack auth login`, `slack auth list`, `slack create`, `slack project create`, `slack project init`, `slack project samples`, `slack doctor`, `.slack/` config, `project.json`, `cli-config.json`, hooks, `slack upgrade`, `slack version`, CLI setup
+Read:
+- `cli.getting-started.md`
+
+### CLI: Local Dev & Deploy
+When: `slack run`, `slack deploy`, `slack activity`, local development, deploy to Slack, hosted platform, dev server, activity logs, hot reload, file watching, Socket Mode dev, `--cleanup`, `--activity-level`, hooks system
+Read:
+- `cli.local-dev-deploy.md`
+- `cli.getting-started.md` (only if project not yet set up)
+Depends on: `cli.getting-started.md` (project must exist before run/deploy)
+
+### CLI: Manifest & Triggers
+When: `slack manifest`, `slack manifest validate`, `slack manifest info`, `manifest.ts`, `slack.json`, `slack trigger`, trigger create, trigger list, trigger update, trigger delete, trigger access, trigger types, shortcut trigger, event trigger, scheduled trigger, webhook trigger, `slack function`, function distribute, workflow trigger, trigger definition file
+Read:
+- `cli.manifest-triggers.md`
+Depends on: `cli.getting-started.md` (project must exist before manifest/trigger ops)
+
+### CLI: Datastore & Environment
+When: `slack datastore`, datastore put, datastore get, datastore delete, datastore query, datastore count, bulk-put, bulk-get, bulk-delete, datastore update, `slack env`, `slack env add`, environment variable, `slack external-auth`, external OAuth provider, DefineDatastore
+Read:
+- `cli.datastore-env.md`
+- `cli.manifest-triggers.md` (datastores must be declared in manifest)
+Depends on: `cli.local-dev-deploy.md` (app must be deployed before datastore/env ops)
+
+### CLI: App Management
+When: `slack app install`, `slack app uninstall`, `slack app delete`, `slack app link`, `slack app unlink`, `slack app list`, `slack app settings`, `slack collaborator`, collaborator add, collaborator remove, collaborator list, multi-workspace, workspace management
+Read:
+- `cli.app-management.md`
+Depends on: `cli.local-dev-deploy.md` (app must be deployed before install/collaborator ops)
+
 ## cross-platform bridging
 
 If the developer wants to **add Teams support** to an existing Slack app, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Slack↔Teams feature mapping, UI conversion, identity bridging, and infrastructure migration.
@@ -102,6 +133,7 @@ If a request spans multiple clusters (e.g., "add a slash command that opens a Bl
 
 ## file inventory
 
-`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-java.md` | `bolt-oauth-distribution-ts.md` | `bolt-python.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.shortcuts-ts.md` | `runtime.slash-commands-ts.md` | `runtime.socket-mode-ts.md` | `ui.block-kit-ts.md` | `ui.modals-lifecycle-ts.md` | `web-api-proactive-ts.md`
+`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-java.md` | `bolt-oauth-distribution-ts.md` | `bolt-python.md` | `cli.app-management.md` | `cli.datastore-env.md` | `cli.getting-started.md` | `cli.local-dev-deploy.md` | `cli.manifest-triggers.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.shortcuts-ts.md` | `runtime.slash-commands-ts.md` | `runtime.socket-mode-ts.md` | `ui.block-kit-ts.md` | `ui.modals-lifecycle-ts.md` | `web-api-proactive-ts.md`
 
 <!-- Updated 2026-02-27: Added bolt-assistant-ts (Assistant container), bolt-events-ts (Events API), bolt-oauth-distribution-ts (OAuth/multi-workspace) experts based on @slack/bolt v4.6.0 source -->
+<!-- Updated 2026-03-01: Added 5 Slack CLI experts (getting-started, local-dev-deploy, manifest-triggers, datastore-env, app-management) based on slack-cli Go source -->

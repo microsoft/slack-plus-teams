@@ -1,12 +1,12 @@
 # Slack + Teams Expert System
 
-A knowledge base for AI coding agents that build, bridge, and deploy Slack and Teams bots. This is **not** a library or framework — it's a collection of 107 micro-expert files that teach AI agents (Claude Code, GitHub Copilot, Cursor) how to work with both platforms.
+A knowledge base for AI coding agents that build, bridge, and deploy Slack and Teams bots. This is **not** a library or framework — it's a collection of 116 micro-expert files that teach AI agents (Claude Code, GitHub Copilot, Cursor) how to work with both platforms.
 
 ## What's Inside
 
 | Directory | Contents | Count |
 |---|---|---|
-| `experts/` | Micro-expert Markdown files organized by domain | 102 files |
+| `experts/` | Micro-expert Markdown files organized by domain | 111 files |
 | `docs/` | Platform comparison guides (Slack vs Teams) | 10 files |
 | `examples/` | Working TypeScript projects | 3 projects |
 
@@ -68,9 +68,9 @@ This repo includes `.github/copilot-instructions.md` which configures Copilot co
 
 | Domain | Experts | What It Covers |
 |---|---|---|
-| **teams/** | 32 | Teams AI SDK, Adaptive Cards, Bot Framework, SSO, Graph API, Python SDK, .NET SDK |
+| **teams/** | 36 | Teams AI SDK, Adaptive Cards, Bot Framework, SSO, Graph API, Python SDK, .NET SDK, Agents Toolkit |
 | **bridge/** | 27 | Cross-platform bridging, Block Kit ↔ Adaptive Cards, REST-only patterns, Python cross-platform |
-| **slack/** | 14 | Slack Bolt, Block Kit, events, OAuth, assistant containers, Socket Mode, Web API, shortcuts, modals, Python SDK, Java SDK |
+| **slack/** | 19 | Slack Bolt, Block Kit, events, OAuth, assistant containers, Socket Mode, Web API, shortcuts, modals, Python SDK, Java SDK, Slack CLI |
 | **convert/** | 9 | Language conversion to TypeScript (JS, Ruby, Java, Kotlin) |
 | **models/** | 8 | AI model providers (OpenAI, Anthropic, Bedrock, Foundry, OSS) |
 | **deploy/** | 5 | Azure and AWS deployment (App Service, Functions, Lambda, ECS) |
