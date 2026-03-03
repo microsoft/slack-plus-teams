@@ -2,6 +2,38 @@
 
 A knowledge base for AI coding agents that build, bridge, and deploy Slack and Teams bots. This is **not** a library or framework — it's a collection of 116 micro-expert files that teach AI agents (Claude Code, GitHub Copilot, Cursor) how to work with both platforms.
 
+## Executive Summary
+
+### The Problem
+
+Organizations running both Slack and Microsoft Teams face a persistent challenge: the two platforms have fundamentally different APIs, UI systems, identity models, and deployment targets. The institutional knowledge required to bridge them is deep, scattered, and error-prone — and general-purpose AI tools lack reliable coverage of both ecosystems.
+
+### How It Works
+
+- **Intelligent Routing** — A root dispatcher scans the developer's request and loads only the relevant experts (Teams, Slack, Bridge, Models, Deploy, Security), keeping AI context lean and focused.
+- **Cross-Platform Bridging** — 27 dedicated bridge experts cover every conversion category: UI (Block Kit vs. Adaptive Cards), events, identity/SSO, file handling, transport, and infrastructure — each with a GREEN/YELLOW/RED gap analysis.
+- **Guided Interview Protocol** — Every task begins with a structured scoping interview so the AI makes the right architectural decisions before writing code.
+- **Working References** — Three functional TypeScript example projects demonstrate building from scratch, adding Teams to Slack, and adding Slack to Teams.
+
+### Key Numbers
+
+| | |
+|---|---|
+| **Expert files** | 116+ across 7 domains |
+| **Bridge experts** | 27 (the core differentiator) |
+| **Example projects** | 3 working TypeScript bots |
+| **Supported AI providers** | 8 (OpenAI, Azure, Anthropic, Bedrock, etc.) |
+| **Cloud deploy targets** | Azure & AWS (5 experts) |
+| **Language tiers** | 4 (TS/JS, Python, Java/C#, REST-only) |
+
+### Target Audience
+
+Development teams building or maintaining bots on Slack and/or Microsoft Teams who use AI-assisted development workflows. Particularly valuable for organizations migrating a bot from one platform to the other or adding a second platform to an existing bot.
+
+### Strategic Value
+
+This is **structured prompt engineering at scale** — a domain-specific knowledge system that converts AI coding agents from general assistants into platform specialists. It reduces cross-platform bot development from weeks of trial-and-error into a guided, repeatable process, lowering both risk and time-to-delivery.
+
 ## What's Inside
 
 | Directory | Contents | Count |

@@ -157,6 +157,31 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 ```
 
+### Pattern 4: Cross-Platform Projects (no m365agents.yml)
+
+Standalone cross-platform examples (Teams + Slack) can skip `m365agents.yml` entirely. These projects:
+
+- Use a single `.env` file at the project root (loaded via `dotenv`) instead of `env/.env.{name}` pairs
+- Still include `appPackage/manifest.json` for sideloading into Teams
+- Run with `tsx watch` or `node` directly — no `teamsapp provision` or `teamsapp deploy` needed
+- Manage Azure resources manually (Bot Registration, App Service) rather than through lifecycle actions
+
+```
+cross-platform-bot/
+├── appPackage/
+│   └── manifest.json          # v1.20 schema, ${{VAR}} placeholders for sideloading
+├── src/
+│   ├── adapters/
+│   │   ├── teams-bot.ts       # @microsoft/teams.apps handler
+│   │   └── slack-bot.ts       # @slack/bolt handler
+│   └── index.ts               # Starts both platforms
+├── .env                       # All credentials (Teams + Slack) in one file
+├── package.json
+└── tsconfig.json              # extends @microsoft/teams.config/tsconfig.node.json
+```
+
+> **When to add `m365agents.yml`:** Only when you want `teamsapp provision` / `teamsapp deploy` to manage Azure resources automatically. For teaching examples and local development, manual `.env` + sideloading is simpler.
+
 ## pitfalls
 
 - **Running `deploy` before `provision`** — Cloud resources must exist first. Always provision before the first deploy. Subsequent deploys can skip provision if resources haven't changed.

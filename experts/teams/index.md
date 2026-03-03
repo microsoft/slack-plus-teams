@@ -159,7 +159,7 @@ Read:
 Depends on: `project.scaffold-files-ts.md` (project must exist before lifecycle commands apply)
 
 ### Toolkit: Environments
-When: env files, environment variables, `${{VAR}}`, `SECRET_` prefix, multi-environment, staging, production env, `.env.dev`, `.env.staging`, `.env.*.user`, `environmentFolderPath`, `TEAMS_APP_ID`, `BOT_ID`
+When: env files, environment variables, `${{VAR}}`, `SECRET_` prefix, multi-environment, staging, production env, `.env.dev`, `.env.staging`, `.env.*.user`, `environmentFolderPath`, `TEAMS_APP_ID`, `BOT_ID`, cross-platform env vars, Slack + Teams env coexistence
 Read:
 - `toolkit.environments.md`
 Depends on: `toolkit.lifecycle-cli.md` (environments are consumed by lifecycle hooks)
@@ -178,7 +178,7 @@ Read:
 
 ## cross-platform bridging
 
-If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration.
+If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration. The Toolkit experts (`toolkit.environments.md`, `toolkit.lifecycle-cli.md`) also cover dual-platform patterns — cross-platform env var layout and projects that skip `m365agents.yml`.
 
 ## combining rule
 

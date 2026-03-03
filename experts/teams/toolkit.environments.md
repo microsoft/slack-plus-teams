@@ -102,6 +102,34 @@ teamsapp deploy --env staging
 teamsapp preview --env staging
 ```
 
+### Pattern 4: Cross-Platform Environment Variables
+
+Cross-platform bots (Teams + Slack) keep both platforms' credentials in a single `.env` file at the project root. Toolkit `${{VAR}}` placeholders live only in `appPackage/manifest.json` — they are **not** the same as runtime `process.env` vars consumed by Slack or Express.
+
+```ini
+# .env — cross-platform bot (single file, project root)
+
+# Teams credentials (used at runtime by @microsoft/teams.apps)
+CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+CLIENT_SECRET=your-client-secret
+TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Agents Toolkit vars (used in appPackage/manifest.json ${{VAR}} placeholders)
+BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+BOT_DOMAIN=mybot.azurewebsites.net
+TEAMS_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Slack credentials (used at runtime by @slack/bolt)
+SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+SLACK_APP_TOKEN=xapp-your-slack-app-token
+SLACK_SIGNING_SECRET=your-slack-signing-secret
+
+# Server
+PORT=3978
+```
+
+> **Key difference from Toolkit-managed projects:** Standalone cross-platform examples use a single `.env` file (loaded via `dotenv`) instead of the `env/.env.dev` + `env/.env.dev.user` pair. This is intentional — these examples don't ship `m365agents.yml` or run `teamsapp provision`.
+
 ## pitfalls
 
 - **Committing `.env.*.user` files** — These contain `SECRET_*` values. Verify `.gitignore` includes `env/.env.*.user` before any commit.
@@ -110,6 +138,7 @@ teamsapp preview --env staging
 - **Reusing resource groups across environments** — Dev and staging sharing a resource group causes resource name conflicts and accidental overwrites during provisioning.
 - **Stale env files after re-provisioning** — If you delete cloud resources and re-provision, old IDs in env files may not update. Delete the env files and re-provision from scratch.
 - **`${{VAR}}` vs `${VAR}` confusion** — Agents Toolkit uses double-brace `${{VAR}}`. Shell-style `${VAR}` is not recognized and will not resolve.
+- **Confusing Toolkit `${{VAR}}` placeholders with Slack runtime env vars** — Toolkit placeholders resolve at package/provision time in manifest files. Slack env vars (`SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`) are read at runtime by `@slack/bolt`. They live in different worlds — don't put Slack tokens inside `${{}}` brackets in the manifest.
 - **Missing variables at package time** — If a `${{VAR}}` in manifest.json has no matching env entry, packaging fails. Run `teamsapp validate` first to catch these.
 - **CI/CD without `.user` files** — In CI, secrets come from pipeline secrets, not `.user` files. Set `SECRET_*` vars as environment variables in the CI runner.
 

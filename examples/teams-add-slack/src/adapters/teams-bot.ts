@@ -7,7 +7,7 @@
  */
 
 import { App } from "@microsoft/teams.apps";
-import { ConsoleLogger } from "@microsoft/teams.common";
+import { ConsoleLogger } from "@microsoft/teams.common/logging";
 import { DevtoolsPlugin } from "@microsoft/teams.dev";
 import { handleMessage, handleTicketAction } from "../service/message-handler.js";
 import { toAdaptiveCard } from "../ui/cards.js";
@@ -22,14 +22,14 @@ export function createTeamsApp(): App {
   });
 
   // Handle incoming messages
-  app.on("message", async (ctx) => {
-    const text = ctx.activity.text ?? "";
-    const userName = ctx.activity.from?.name ?? "User";
+  app.on("message", async ({ activity, send }) => {
+    const text = activity.text ?? "";
+    const userName = activity.from?.name ?? "User";
 
     const response = await handleMessage(text, userName);
 
     if (response.card) {
-      await ctx.send({
+      await send({
         type: "message",
         attachments: [
           {
@@ -39,26 +39,26 @@ export function createTeamsApp(): App {
         ],
       });
     } else {
-      await ctx.send(response.text);
+      await send(response.text);
     }
   });
 
   // Handle Adaptive Card action submissions
-  app.on("card.action", async (ctx) => {
-    const data = ctx.activity.value?.action?.data as
+  app.on("card.action", async ({ activity, send }) => {
+    const data = activity.value?.action?.data as
       | { action: string; ticketId?: string }
       | undefined;
 
     if (!data?.action) return;
 
-    const userName = ctx.activity.from?.name ?? "User";
+    const userName = activity.from?.name ?? "User";
     const response = await handleTicketAction(
       data.action,
       data.ticketId ?? "unknown",
       userName
     );
 
-    await ctx.send(response.text);
+    await send(response.text);
   });
 
   app.event("error", ({ error, log }) => {
