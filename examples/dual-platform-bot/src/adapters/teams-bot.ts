@@ -9,7 +9,7 @@
  */
 
 import { App } from "@microsoft/teams.apps";
-import { ConsoleLogger } from "@microsoft/teams.common";
+import { ConsoleLogger } from "@microsoft/teams.common/logging";
 import { DevtoolsPlugin } from "@microsoft/teams.dev";
 import type { AppConfig } from "../config/env.js";
 import type { ConversationContext } from "../types/index.js";
@@ -31,12 +31,12 @@ export function createTeamsApp(config: AppConfig): App {
   });
 
   // --- Message handler ---
-  app.on("message", async (ctx) => {
-    const text = ctx.activity.text ?? "";
-    const userName = ctx.activity.from?.name ?? "User";
-    const fromId = ctx.activity.from?.aadObjectId ?? ctx.activity.from?.id ?? "";
-    const channelId = ctx.activity.conversation?.id ?? "";
-    const threadId = ctx.activity.replyToId;
+  app.on("message", async ({ activity, send }) => {
+    const text = activity.text ?? "";
+    const userName = activity.from?.name ?? "User";
+    const fromId = activity.from?.aadObjectId ?? activity.from?.id ?? "";
+    const channelId = activity.conversation?.id ?? "";
+    const threadId = activity.replyToId;
 
     const user = await resolveUser(fromId, "teams", userName);
 
@@ -50,7 +50,7 @@ export function createTeamsApp(config: AppConfig): App {
     const response = await handleMessage(text, context);
 
     if (response.card) {
-      await ctx.send({
+      await send({
         type: "message",
         attachments: [
           {
@@ -60,13 +60,13 @@ export function createTeamsApp(config: AppConfig): App {
         ],
       });
     } else {
-      await ctx.send(response.text);
+      await send(response.text);
     }
   });
 
   // --- Card action handler ---
-  app.on("card.action", async (ctx) => {
-    const data = ctx.activity.value?.action?.data as
+  app.on("card.action", async ({ activity, send }) => {
+    const data = activity.value?.action?.data as
       | Record<string, unknown>
       | undefined;
 
@@ -77,9 +77,9 @@ export function createTeamsApp(config: AppConfig): App {
     // Ignore cancel actions from confirmation cards
     if (actionId === "cancel") return;
 
-    const userName = ctx.activity.from?.name ?? "User";
-    const fromId = ctx.activity.from?.aadObjectId ?? ctx.activity.from?.id ?? "";
-    const conversationId = ctx.activity.conversation?.id ?? "";
+    const userName = activity.from?.name ?? "User";
+    const fromId = activity.from?.aadObjectId ?? activity.from?.id ?? "";
+    const conversationId = activity.conversation?.id ?? "";
 
     const user = await resolveUser(fromId, "teams", userName);
 
@@ -92,7 +92,7 @@ export function createTeamsApp(config: AppConfig): App {
     const response = await handleAction(actionId, data, context);
 
     if (response.card) {
-      await ctx.send({
+      await send({
         type: "message",
         attachments: [
           {
@@ -102,7 +102,7 @@ export function createTeamsApp(config: AppConfig): App {
         ],
       });
     } else {
-      await ctx.send(response.text);
+      await send(response.text);
     }
   });
 

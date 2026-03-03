@@ -150,6 +150,12 @@ Read:
 - `cross-platform-architecture-ts.md`
 Cross-domain deps: `../slack/runtime.bolt-foundations-ts.md` (Slack setup), `../teams/runtime.app-init-ts.md` (Teams setup)
 
+### Python Cross-Platform
+When: Python dual-platform, Python unified server, `slack_bolt` + `microsoft_teams`, FastAPI shared server, Python Slack + Teams, Tier 2, Python adaptation
+Read:
+- `python-cross-platform.md`
+Cross-domain deps: `../slack/bolt-python.md` (Slack Python SDK), `../teams/teams-python.md` (Teams Python SDK), `cross-platform-architecture-ts.md` (architecture patterns to adapt)
+
 ### REST-Only Integration
 When: Java, C#, Go, Ruby, no SDK, raw HTTP, Bot Framework REST API, Slack Events API, Slack Web API, manual JWT validation, manual signature verification, language without native SDK
 Read:
@@ -194,7 +200,7 @@ If a request involves both Slack↔Teams app bridging **and** AWS↔Azure infra 
 
 ## file inventory
 
-`app-distribution-packaging-ts.md` | `channel-ops-graph-ts.md` | `commands-slash-text-ts.md` | `cross-platform-advisor-ts.md` | `cross-platform-architecture-ts.md` | `events-activities-ts.md` | `files-upload-download-ts.md` | `identity-oauth-bridge-ts.md` | `infra-compute-ts.md` | `infra-observability-ts.md` | `infra-secrets-config-ts.md` | `infra-storage-ts.md` | `interactive-responses-ts.md` | `link-unfurl-preview-ts.md` | `middleware-handlers-ts.md` | `rate-limiting-resilience-ts.md` | `rest-only-integration-ts.md` | `scheduling-deferred-send-ts.md` | `shortcuts-extensions-ts.md` | `transport-socketmode-https-ts.md` | `ui-app-home-personal-tab-ts.md` | `ui-block-kit-adaptive-cards-ts.md` | `ui-legacy-attachments-cards-ts.md` | `ui-modals-dialogs-ts.md` | `workflows-automation-ts.md`
+`app-distribution-packaging-ts.md` | `channel-ops-graph-ts.md` | `commands-slash-text-ts.md` | `cross-platform-advisor-ts.md` | `cross-platform-architecture-ts.md` | `events-activities-ts.md` | `files-upload-download-ts.md` | `identity-oauth-bridge-ts.md` | `infra-compute-ts.md` | `infra-observability-ts.md` | `infra-secrets-config-ts.md` | `infra-storage-ts.md` | `interactive-responses-ts.md` | `link-unfurl-preview-ts.md` | `middleware-handlers-ts.md` | `python-cross-platform.md` | `rate-limiting-resilience-ts.md` | `rest-only-integration-ts.md` | `scheduling-deferred-send-ts.md` | `shortcuts-extensions-ts.md` | `transport-socketmode-https-ts.md` | `ui-app-home-personal-tab-ts.md` | `ui-block-kit-adaptive-cards-ts.md` | `ui-legacy-attachments-cards-ts.md` | `ui-modals-dialogs-ts.md` | `workflows-automation-ts.md`
 
 <!-- Updated 2026-02-27: Reframed from migrate-router to bridge-router — bidirectional cross-platform bridging between Slack↔Teams and AWS↔Azure. Renamed all files to platform-neutral names. -->
 <!-- Updated 2026-02-27: Added cross-platform-architecture-ts (dual-bot hosting) and rest-only-integration-ts (SDK-less HTTP patterns for Java/C#/Go). -->

@@ -140,9 +140,45 @@ Read:
 - `runtime.app-init-ts.md`
 - `runtime.manifest-ts.md` (for appPackage/manifest.json setup)
 
+### Teams SDK for Python
+When: Python, `microsoft_teams`, `microsoft_teams.apps`, `microsoft_teams.ai`, `ActivityContext`, `@app.on_message`, `@app.on_message_pattern`, `ChatPrompt`, `OpenAICompletionsAIModel`, Pydantic, FastAPI, Python Teams bot
+Read:
+- `teams-python.md`
+Note: All TS experts provide architectural patterns. This expert provides Python API mappings. Load the relevant TS expert for concepts, then this expert for Python translation.
+
+### Teams SDK for .NET (C#)
+When: C#, .NET, `Microsoft.Teams.Apps`, `Microsoft.Teams.AI`, `AddTeams()`, `UseTeams()`, `IContext<TActivity>`, `OnMessage`, `OnAdaptiveCardAction`, `OpenAIChatPrompt`, `[Prompt]`, `[Function]`, ASP.NET Core, NuGet
+Read:
+- `teams-dotnet.md`
+Note: C# has SDK support for Teams only (Tier 3). For the Slack side, route to `../bridge/rest-only-integration-ts.md`.
+
+### Toolkit: Lifecycle & CLI
+When: `m365agents.yml`, `teamsapp` CLI, `teamsapp provision`, `teamsapp deploy`, `teamsapp publish`, `teamsapp new`, lifecycle hooks, CI/CD pipeline, built-in actions, `uses:`, `runs:`, `arm/deploy`, `azureAppService/deploy`, `teamsApp/create`, `writeToEnvironmentFile`
+Read:
+- `toolkit.lifecycle-cli.md`
+Depends on: `project.scaffold-files-ts.md` (project must exist before lifecycle commands apply)
+
+### Toolkit: Environments
+When: env files, environment variables, `${{VAR}}`, `SECRET_` prefix, multi-environment, staging, production env, `.env.dev`, `.env.staging`, `.env.*.user`, `environmentFolderPath`, `TEAMS_APP_ID`, `BOT_ID`, cross-platform env vars, Slack + Teams env coexistence
+Read:
+- `toolkit.environments.md`
+Depends on: `toolkit.lifecycle-cli.md` (environments are consumed by lifecycle hooks)
+
+### Toolkit: Agents Playground
+When: Agents Playground, local testing, `teamsapp preview`, test harness, mock activity, playground config, `.m365agentsplayground.yml`, browser-based testing
+Read:
+- `toolkit.playground-ts.md`
+- `dev.debug-test-ts.md` (broader debug patterns)
+
+### Toolkit: Publishing
+When: publish to org, Teams Store, Partner Center, admin approval, `teamsapp publish`, `teamsapp validate`, `teamsapp package`, `teamsapp update`, app validation, sideload to org, org catalog, version bump
+Read:
+- `toolkit.publish.md`
+- `runtime.manifest-ts.md` (manifest must be valid before publishing)
+
 ## cross-platform bridging
 
-If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration.
+If the developer wants to **add Slack support** to an existing Teams bot, route to `../bridge/index.md` for cross-platform bridging experts. The bridge domain covers Teams↔Slack feature mapping, UI conversion, identity bridging, and infrastructure migration. The Toolkit experts (`toolkit.environments.md`, `toolkit.lifecycle-cli.md`) also cover dual-platform patterns — cross-platform env var layout and projects that skip `m365agents.yml`.
 
 ## combining rule
 
@@ -150,4 +186,6 @@ If a request spans multiple clusters (e.g., "add a function-calling tool that re
 
 ## file inventory
 
-`a2a.client-basics-ts.md` | `a2a.orchestrator-patterns-ts.md` | `a2a.server-basics-ts.md` | `ai.chatprompt-basics-ts.md` | `ai.citations-feedback-ts.md` | `ai.function-calling-design-ts.md` | `ai.function-calling-implementation-ts.md` | `ai.memory-localmemory-ts.md` | `ai.model-setup-ts.md` | `ai.rag-retrieval-ts.md` | `ai.rag-vectorstores-ts.md` | `ai.streaming-ts.md` | `auth.oauth-sso-ts.md` | `compat.botbuilder-interop-ts.md` | `dev.debug-test-ts.md` | `graph.usergraph-appgraph-ts.md` | `mcp.client-basics-ts.md` | `mcp.expose-chatprompt-tools-ts.md` | `mcp.security-ts.md` | `mcp.server-basics-ts.md` | `project.scaffold-files-ts.md` | `runtime.app-init-ts.md` | `runtime.manifest-ts.md` | `runtime.proactive-messaging-ts.md` | `runtime.routing-handlers-ts.md` | `state.storage-patterns-ts.md` | `ui.adaptive-cards-ts.md` | `ui.dialogs-task-modules-ts.md` | `ui.message-extensions-ts.md`
+`a2a.client-basics-ts.md` | `a2a.orchestrator-patterns-ts.md` | `a2a.server-basics-ts.md` | `ai.chatprompt-basics-ts.md` | `ai.citations-feedback-ts.md` | `ai.function-calling-design-ts.md` | `ai.function-calling-implementation-ts.md` | `ai.memory-localmemory-ts.md` | `ai.model-setup-ts.md` | `ai.rag-retrieval-ts.md` | `ai.rag-vectorstores-ts.md` | `ai.streaming-ts.md` | `auth.oauth-sso-ts.md` | `compat.botbuilder-interop-ts.md` | `dev.debug-test-ts.md` | `graph.usergraph-appgraph-ts.md` | `mcp.client-basics-ts.md` | `mcp.expose-chatprompt-tools-ts.md` | `mcp.security-ts.md` | `mcp.server-basics-ts.md` | `project.scaffold-files-ts.md` | `runtime.app-init-ts.md` | `runtime.manifest-ts.md` | `runtime.proactive-messaging-ts.md` | `runtime.routing-handlers-ts.md` | `state.storage-patterns-ts.md` | `teams-dotnet.md` | `teams-python.md` | `toolkit.environments.md` | `toolkit.lifecycle-cli.md` | `toolkit.playground-ts.md` | `toolkit.publish.md` | `ui.adaptive-cards-ts.md` | `ui.dialogs-task-modules-ts.md` | `ui.message-extensions-ts.md`
+
+<!-- Updated 2026-03-01: Added 4 Agents Toolkit experts (lifecycle-cli, environments, playground, publish) and 5 Slack CLI experts to slack/ domain -->

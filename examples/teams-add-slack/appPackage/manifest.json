@@ -1,8 +1,8 @@
 {
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
-  "manifestVersion": "1.19",
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.20/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.20",
   "version": "1.0.0",
-  "id": "{{BOT_ID}}",
+  "id": "${{TEAMS_APP_ID}}",
   "developer": {
     "name": "Your Company",
     "websiteUrl": "https://example.com",
@@ -10,21 +10,31 @@
     "termsOfUseUrl": "https://example.com/terms"
   },
   "name": {
-    "short": "DualBot",
-    "full": "Dual Platform Bot"
+    "short": "TeamsAddSlack",
+    "full": "Teams Add Slack Example"
   },
   "description": {
-    "short": "A bot that works on both Slack and Teams",
-    "full": "Production-ready dual-platform bot template demonstrating the adapter pattern for cross-platform bot development."
+    "short": "A Teams bot that adds Slack support",
+    "full": "Cross-platform example showing how to add Slack support to an existing Teams bot using the adapter pattern."
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
   "accentColor": "#4A154B",
+  "staticTabs": [
+    {
+      "entityId": "conversations",
+      "scopes": ["personal"]
+    },
+    {
+      "entityId": "about",
+      "scopes": ["personal"]
+    }
+  ],
   "bots": [
     {
-      "botId": "{{BOT_ID}}",
+      "botId": "${{BOT_ID}}",
       "scopes": ["personal", "team", "groupChat"],
       "commandLists": [
         {
@@ -35,10 +45,6 @@
               "description": "Show available commands"
             },
             {
-              "title": "status",
-              "description": "Check system status"
-            },
-            {
               "title": "ticket",
               "description": "Create a support ticket"
             }
@@ -47,5 +53,9 @@
       ]
     }
   ],
-  "validDomains": []
+  "validDomains": ["${{BOT_DOMAIN}}"],
+  "webApplicationInfo": {
+    "id": "${{BOT_ID}}",
+    "resource": "api://${{BOT_DOMAIN}}/${{BOT_ID}}"
+  }
 }
