@@ -1,0 +1,23 @@
+# Pattern compilation test cases
+# Each entry specifies which expert files to extract and compile TypeScript blocks from.
+
+- domain: slack
+  tags: [patterns, slack]
+
+- domain: teams
+  tags: [patterns, teams]
+
+- domain: bridge
+  tags: [patterns, bridge]
+
+- domain: models
+  tags: [patterns, models]
+
+- domain: deploy
+  tags: [patterns, deploy]
+
+- domain: convert
+  tags: [patterns, convert]
+
+- domain: security
+  tags: [patterns, security]

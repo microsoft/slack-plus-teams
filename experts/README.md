@@ -75,33 +75,23 @@ Load the **Convert** domain. 8 micro-experts cover JS→TS, Ruby→TS, Java→TS
 | `analyzer.md` | Analyze project and recommend new experts |
 | `builder.md` | Build new experts from analysis recommendations |
 
-### Slack Domain (7 files)
-| File | Purpose |
-|------|---------|
-| `runtime.bolt-foundations-ts.md` | App constructor, handlers, middleware, event loop |
-| `runtime.ack-rules-ts.md` | Ack semantics, timing, async patterns |
-| `runtime.slash-commands-ts.md` | Slash command registration and response patterns |
-| `ui.block-kit-ts.md` | Block Kit messages, modals, interactive elements |
-| `bolt-events-ts.md` | Events API, event types, retry handling, middleware |
-| `bolt-assistant-ts.md` | Assistant container, thread lifecycle, utilities |
-| `bolt-oauth-distribution-ts.md` | OAuth, InstallProvider, multi-workspace distribution |
+### Slack Domain (18 files)
+Covers: Bolt.js foundations, ack rules, slash commands, shortcuts, Socket Mode, Block Kit, modals lifecycle, events API, assistant containers, OAuth/distribution, Web API/proactive messaging, Slack CLI (getting started, app management, manifest/triggers, datastore/env, local dev/deploy), Bolt for Python, Bolt for Java.
 
-### Teams Domain (28 files)
-Covers: app init, routing, manifest, proactive messaging, Adaptive Cards, dialogs, message extensions, OAuth/SSO, Graph API, state/storage, AI (ChatPrompt, model setup, function calling, RAG, streaming, citations, memory), MCP (server, client, security, expose tools), A2A (server, client, orchestrator), BotBuilder interop, debug/test, and scaffolding.
+### Teams Domain (35 files)
+Covers: app init, routing, manifest, proactive messaging, Adaptive Cards, dialogs, message extensions, OAuth/SSO, Graph API, state/storage, AI (ChatPrompt, model setup, function calling, RAG, streaming, citations, memory), MCP (server, client, security, expose tools), A2A (server, client, orchestrator), BotBuilder interop, debug/test, scaffolding, Agents Toolkit (playground, environments, lifecycle CLI, publish), Teams for Python, Teams for .NET.
 
-### Bridge Domain (25 files)
-Covers: Block Kit ↔ Adaptive Cards, commands, events ↔ activities, identity/OAuth bridge, middleware ↔ handlers, modals ↔ dialogs, App Home ↔ personal tab, legacy attachments, transport, infrastructure (compute, storage, secrets, observability), interactive responses, files, link unfurl ↔ preview, shortcuts ↔ extensions, scheduling, channel ops, workflows ↔ automation, distribution/packaging, rate limiting, cross-platform advisor, cross-platform architecture, and REST-only integration.
+### Bridge Domain (26 files)
+Covers: Block Kit ↔ Adaptive Cards, commands, events ↔ activities, identity/OAuth bridge, middleware ↔ handlers, modals ↔ dialogs, App Home ↔ personal tab, legacy attachments, transport, infrastructure (compute, storage, secrets, observability), interactive responses, files, link unfurl ↔ preview, shortcuts ↔ extensions, scheduling, channel ops, workflows ↔ automation, distribution/packaging, rate limiting, cross-platform advisor, cross-platform architecture, REST-only integration, Python cross-platform.
 
 ### Convert Domain (8 files)
 Covers: JS→TS, Ruby→TS, Java→TS, Kotlin→TS, type mapping, dependency mapping, JSON serialization, bulk conversion strategy.
 
+### Models Domain (7 files)
+Covers: OpenAI/Azure OpenAI, Anthropic, AWS Bedrock, Azure AI Foundry (cloud), Foundry Local, OSS/OpenAI-compatible, Transformers.js.
+
 ### Deploy Domain (4 files)
-| File | Purpose |
-|------|---------|
-| `azure-bot-deploy-ts.md` | End-to-end Azure deployment: CLI setup, App Registration, Bot Service, App Service/Functions, Agents Toolkit fast path |
-| `aws-bot-deploy-ts.md` | End-to-end AWS deployment: CLI setup, Lambda+API Gateway/EC2/ECS, SAM templates, Teams-on-AWS pattern |
-| `azure-cli-reference-ts.md` | Comprehensive Azure CLI reference for bot/agent resource CRUD |
-| `aws-cli-reference-ts.md` | Comprehensive AWS CLI reference for bot/agent resource CRUD |
+Covers: Azure deployment (App Service, Functions, Agents Toolkit), AWS deployment (Lambda, API Gateway, ECS, SAM), Azure CLI reference, AWS CLI reference.
 
 ### Security Domain (2 files)
 Covers: input validation, secrets management.
@@ -114,9 +104,30 @@ Covers: input validation, secrets management.
 4. **Expert-level interviews** (if present) → clarify implementation decisions
 5. **Implementation** → expert rules, patterns, and pitfalls guide code generation
 
+## Eval Harness
+
+The [`evals/`](../evals/) directory contains an automated test harness that validates the expert system across three dimensions:
+
+| Dimension | What it checks | LLM required? |
+|-----------|---------------|----------------|
+| **Patterns** | TypeScript code blocks in experts still compile | No |
+| **Routing** | User queries route to the correct domain/clusters/experts | Optional (improves accuracy) |
+| **Completeness** | Experts cover all required concepts for their domain | Yes |
+
+```bash
+cd evals && npm install
+npm run eval:patterns    # fast, no API key
+npm run eval             # all dimensions (needs OPENAI_API_KEY in .env)
+```
+
+Current results: 294/294 patterns compile, 41/51 routing cases pass (all 7 domains covered), 9/9 completeness cases pass. The ~10 routing failures are LLM judge scoring edge cases where the deterministic router is correct but the judge scores conservatively on ambiguous or cross-domain queries. See [`evals/README.md`](../evals/README.md) for details.
+
+After adding or editing experts, run `npm run eval:patterns` to verify code examples still compile. For new domains or significant expert changes, add test cases to `evals/cases/` and run the full suite.
+
 ## Adding New Experts
 
 Use the `analyzer.md` → `builder.md` workflow:
 1. Run `analyzer.md` against a codebase to identify coverage gaps
 2. Hand off recommendations to `builder.md` to create expert files
 3. New experts auto-wire into domain routers via the post-creation checklist in `_expert-ts.md`
+4. Run `cd evals && npm run eval:patterns` to verify new code examples compile

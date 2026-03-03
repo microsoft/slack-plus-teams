@@ -1,0 +1,57 @@
+# Slack routing test cases
+
+- name: "Slack Bolt app setup"
+  input: "I want to create a new Slack app using @slack/bolt with Socket Mode"
+  expectedDomain: slack
+  expectedClusters: ["Bolt Foundations", "Socket Mode"]
+  expectedExperts: ["runtime.bolt-foundations-ts.md", "runtime.ack-rules-ts.md", "runtime.socket-mode-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack slash command"
+  input: "Add a /command slash command that responds with the user's current task"
+  expectedDomain: slack
+  expectedClusters: ["Slash Commands"]
+  expectedExperts: ["runtime.slash-commands-ts.md", "runtime.ack-rules-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack Block Kit modal"
+  input: "Build a Block Kit modal with a form that has text inputs and a dropdown"
+  expectedDomain: slack
+  expectedClusters: ["Block Kit UI"]
+  expectedExperts: ["ui.block-kit-ts.md", "runtime.ack-rules-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack event handler"
+  input: "Handle the app_mention event and reply in the thread using app.event()"
+  expectedDomain: slack
+  expectedClusters: ["Events API", "Bolt for Java"]
+  expectedExperts: ["bolt-events-ts.md", "runtime.bolt-foundations-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack OAuth multi-workspace"
+  input: "Set up InstallProvider for multi-workspace OAuth distribution with InstallationStore"
+  expectedDomain: slack
+  expectedClusters: ["OAuth & Distribution"]
+  expectedExperts: ["bolt-oauth-distribution-ts.md", "runtime.bolt-foundations-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack Assistant container"
+  input: "Implement a Slack Assistant with threadStarted and userMessage handlers using app.assistant"
+  expectedDomain: slack
+  expectedClusters: ["Assistant Container"]
+  expectedExperts: ["bolt-assistant-ts.md", "runtime.bolt-foundations-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack shortcuts and modals"
+  input: "Create a global shortcut that opens a modal with views.open"
+  expectedDomain: slack
+  expectedClusters: ["Shortcuts", "Modal Lifecycle"]
+  expectedExperts: ["runtime.shortcuts-ts.md", "runtime.ack-rules-ts.md", "ui.modals-lifecycle-ts.md"]
+  tags: [routing, slack]
+
+- name: "Slack proactive message"
+  input: "Send proactive messages to a Slack channel using client.chat.postMessage"
+  expectedDomain: slack
+  expectedClusters: ["Web API & Proactive Messaging"]
+  expectedExperts: ["web-api-proactive-ts.md", "runtime.bolt-foundations-ts.md"]
+  tags: [routing, slack]

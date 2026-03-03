@@ -1,0 +1,43 @@
+# Convert routing test cases
+
+- name: "JavaScript to TypeScript conversion"
+  input: "JS to TS language conversion — add type annotations, change require to import, enable strict mode"
+  expectedDomain: convert
+  expectedClusters: ["JS → TypeScript"]
+  expectedExperts: ["js-to-ts-ts.md"]
+  tags: [routing, convert]
+
+- name: "Ruby to TypeScript rewrite"
+  input: "Ruby to TS language conversion — translate Ruby idioms, map snake_case to camelCase, convert gems to npm"
+  expectedDomain: convert
+  expectedClusters: ["Ruby → TypeScript"]
+  expectedExperts: ["ruby-to-ts-ts.md", "dependency-mapping-ts.md"]
+  tags: [routing, convert]
+
+- name: "Java to TypeScript with Gson"
+  input: "Rewrite Java code with Gson @SerializedName and CompletableFuture to TypeScript"
+  expectedDomain: convert
+  expectedClusters: ["Java → TypeScript"]
+  expectedExperts: ["java-to-ts-ts.md", "json-serialization-ts.md", "dependency-mapping-ts.md"]
+  tags: [routing, convert]
+
+- name: "Kotlin to TypeScript conversion"
+  input: "Convert Kotlin data classes with sealed classes and companion objects to TypeScript"
+  expectedDomain: convert
+  expectedClusters: ["Kotlin → TypeScript"]
+  expectedExperts: ["kotlin-to-ts-ts.md", "java-to-ts-ts.md", "dependency-mapping-ts.md"]
+  tags: [routing, convert]
+
+- name: "Cross-language type mapping"
+  input: "Help me with type mapping for a Java to TS language conversion — translate nullable, generic, and enum patterns to TypeScript"
+  expectedDomain: convert
+  expectedClusters: ["Cross-language type mapping"]
+  expectedExperts: ["type-mapping-ts.md"]
+  tags: [routing, convert]
+
+- name: "Bulk large-scale conversion"
+  input: "Plan converting 50+ source files in a bulk conversion to TypeScript — need a phased large-scale strategy"
+  expectedDomain: convert
+  expectedClusters: ["Bulk/large-scale conversion"]
+  expectedExperts: ["bulk-conversion-strategy-ts.md"]
+  tags: [routing, convert]

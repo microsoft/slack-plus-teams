@@ -1,0 +1,36 @@
+# Security routing test cases
+
+- name: "Input validation and sanitization"
+  input: "Add input validation for sanitizing user input and preventing injection in my bot"
+  expectedDomain: security
+  expectedClusters: ["Input Validation"]
+  expectedExperts: ["input-validation-ts.md"]
+  tags: [routing, security]
+
+- name: "Secrets and Key Vault management"
+  input: "Store API keys and credentials in Key Vault with secret rotation"
+  expectedDomain: security
+  expectedClusters: ["Secrets Management"]
+  expectedExperts: ["secrets-ts.md"]
+  tags: [routing, security]
+
+- name: "XSS prevention in bot messages"
+  input: "I need XSS prevention and content validation for user-submitted messages in my bot"
+  expectedDomain: security
+  expectedClusters: ["Input Validation"]
+  expectedExperts: ["input-validation-ts.md"]
+  tags: [routing, security]
+
+- name: "Security hardening checklist"
+  input: "Run a security audit with input validation and secrets hardening for defense in depth"
+  expectedDomain: security
+  expectedClusters: ["General Hardening"]
+  expectedExperts: ["input-validation-ts.md", "secrets-ts.md"]
+  tags: [routing, security]
+
+- name: "Environment variable credential management"
+  input: "Manage credentials and API keys securely using Key Vault and environment variables"
+  expectedDomain: security
+  expectedClusters: ["Secrets Management"]
+  expectedExperts: ["secrets-ts.md"]
+  tags: [routing, security]

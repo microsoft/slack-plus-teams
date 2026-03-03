@@ -1,0 +1,25 @@
+{
+  "name": "expert-evals",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "tsx src/runner.ts",
+    "eval:routing": "tsx src/runner.ts --dimension routing",
+    "eval:completeness": "tsx src/runner.ts --dimension completeness",
+    "eval:patterns": "tsx src/runner.ts --dimension patterns",
+    "eval:report": "tsx src/runner.ts --output reports/latest.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "chalk": "^5.4.1",
+    "dotenv": "^17.3.1",
+    "openai": "^4.85.0",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

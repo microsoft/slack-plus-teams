@@ -39,7 +39,9 @@ appInsights
   .start();
 
 export const telemetryClient = appInsights.defaultClient;
+```
 
+```typescript
 // src/index.ts
 import { telemetryClient } from "./instrumentation.js"; // import first!
 import { App } from "@microsoft/teams.apps";

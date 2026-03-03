@@ -1,0 +1,36 @@
+# Ambiguous / edge case routing test cases
+
+- name: "Bridge vs Teams - Adaptive Cards from Block Kit"
+  input: "Convert Block Kit to Adaptive Cards"
+  expectedDomain: bridge
+  expectedClusters: []
+  expectedExperts: ["ui-block-kit-adaptive-cards-ts.md"]
+  tags: [routing, ambiguous]
+
+- name: "Convert vs Bridge - Ruby Slack bot to Teams TS"
+  input: "Rewrite this Ruby to TS Slack bot for Teams"
+  expectedDomain: convert
+  expectedClusters: []
+  expectedExperts: ["ruby-to-ts-ts.md"]
+  tags: [routing, ambiguous]
+
+- name: "Deploy vs Teams - publish Teams app"
+  input: "Deploy my Teams bot to Azure App Service and publish it"
+  expectedDomain: deploy
+  expectedClusters: ["Deploy to Azure"]
+  expectedExperts: ["azure-bot-deploy-ts.md"]
+  tags: [routing, ambiguous]
+
+- name: "Models vs Teams - configure Azure OpenAI for Teams bot"
+  input: "Set up Azure OpenAI GPT-4o model for my Teams AI bot"
+  expectedDomain: models
+  expectedClusters: ["OpenAI / Azure OpenAI"]
+  expectedExperts: ["openai-azure-openai-ts.md"]
+  tags: [routing, ambiguous]
+
+- name: "Security signal in Teams context"
+  input: "Add input validation and sanitize user inputs in my Teams bot"
+  expectedDomain: security
+  expectedClusters: ["Input Validation"]
+  expectedExperts: ["input-validation-ts.md"]
+  tags: [routing, ambiguous]
