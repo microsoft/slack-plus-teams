@@ -1,0 +1,41 @@
+# Teams completeness test cases
+
+- name: "Teams AI bot with function calling"
+  task: "Create a Teams AI bot using @microsoft/teams-ai that has a ChatPrompt with a function calling tool to look up user information."
+  expertFiles:
+    - teams/runtime.app-init-ts.md
+    - teams/ai.chatprompt-basics-ts.md
+    - teams/ai.function-calling-design-ts.md
+  requiredConcepts:
+    - "Application class initialization"
+    - "ChatPrompt or prompt configuration"
+    - "Function/tool definition with name and description"
+    - "Function handler implementation"
+    - "Activity handler registration"
+  tags: [completeness, teams]
+
+- name: "Teams Adaptive Card with action handler"
+  task: "Build a Teams bot that sends an Adaptive Card with an Action.Submit button and handles the card action response."
+  expertFiles:
+    - teams/runtime.app-init-ts.md
+    - teams/ui.adaptive-cards-ts.md
+    - teams/runtime.routing-handlers-ts.md
+  requiredConcepts:
+    - "Adaptive Card JSON structure"
+    - "Action.Submit element"
+    - "Card action handler registration"
+    - "Sending card via activity or message"
+  tags: [completeness, teams]
+
+- name: "Teams proactive messaging with storage"
+  task: "Implement proactive messaging in a Teams bot that stores conversation references and sends notifications on an external trigger."
+  expertFiles:
+    - teams/runtime.app-init-ts.md
+    - teams/runtime.proactive-messaging-ts.md
+    - teams/state.storage-patterns-ts.md
+  requiredConcepts:
+    - "ConversationReference storage"
+    - "continueConversation or proactive send API"
+    - "Storage interface implementation"
+    - "External trigger endpoint (HTTP route)"
+  tags: [completeness, teams]

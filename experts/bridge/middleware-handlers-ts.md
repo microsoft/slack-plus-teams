@@ -11,9 +11,9 @@ Bridges Slack Bolt middleware chains and Teams SDK handler patterns for cross-pl
 3. Slack global middleware (`app.use()`) runs on EVERY request before any listener. In Teams, register a `app.on('message', ...)` handler FIRST (before other message handlers) to achieve the same effect. Handler registration order determines execution order.
 4. Slack listener middleware (per-handler) like `app.message(authMiddleware, actualHandler)` has no direct Teams equivalent. Refactor as: (a) a shared guard function called at the top of each handler, (b) a wrapper/decorator function that wraps handlers, or (c) a first-registered catch-all handler that sets context.
 5. Slack's `ack()` (acknowledge within 3 seconds) has NO equivalent in Teams. Teams does not require acknowledgement — the Bot Framework handles the HTTP response automatically. Remove all `ack()` calls and restructure code that splits work into "before ack" and "after ack" phases.
-6. Slack's `respond()` (respond to the original webhook URL) maps to `send()` for new messages or using `ctx.updateActivity()` for updating the original message. The webhook URL pattern does not exist in Teams.
+6. Slack's `say()` (post to the conversation where the event occurred) maps directly to Teams' `send()`. Both send a message to the current conversation. Slack's `respond()` (respond to the original webhook URL) maps to `send()` for new messages or `ctx.updateActivity()` for updating the original message. The webhook URL pattern does not exist in Teams.
 7. Slack's `context` object (custom properties attached via middleware) → Teams uses the activity object and handler arguments directly. For shared state across handlers, use `app.state` or closure-scoped variables.
-8. Slack error middleware (`app.error(async (error) => { ... })`) → Teams error handling via try/catch in individual handlers or a global `app.on('error', ...)` handler if available. The error shape differs: Slack provides `{ error, context, body }`, Teams provides the raw Error object.
+8. Slack error middleware (`app.error(async (error) => { ... })`) → Teams error handling via try/catch in individual handlers or a global `app.on('error', ...)` handler. The error shape differs significantly: Slack provides a destructured object `{ error, context, body }` where `context` contains bot/team metadata and `body` contains the full event payload, while Teams provides the raw `Error` object plus the activity context via handler arguments. For Teams → Slack: wrap the raw Error with context/body metadata to match Slack's shape.
 9. The Java Slack SDK's formal middleware chain (`Middleware` interface with `apply(req, resp, chain)` → `chain.next(req, resp)`) is structurally identical to Express middleware. When converting Java middleware, first understand the intent, then rewrite as a Teams guard function or wrapper.
 10. Slack's authorization middleware (built-in, validates tokens per workspace in multi-tenant apps) is replaced by Bot Framework JWT validation (automatic) and Azure AD authentication. Remove custom authorization middleware entirely.
 
@@ -245,6 +245,43 @@ app.message(/^\/deploy\s*(.*)/i, async ({ send, activity }) => {
   const target = activity.text?.match(/^\/deploy\s*(.*)/i)?.[1] ?? '';
   const result = await runDeployment(target);
   await send(`Deployment ${result.status}: ${result.url}`);
+});
+```
+
+### say() → send() and error handling differences
+
+**Slack (before):**
+
+```typescript
+// say() posts to the conversation where the event occurred
+app.message(/help/i, async ({ say, message }) => {
+  await say(`Hey <@${message.user}>, here's what I can do...`);
+});
+
+// Global error handler — receives { error, context, body }
+app.error(async ({ error, context, body }) => {
+  console.error(`Error in team ${context.teamId}:`, error.message);
+  console.error('Event body:', body.type);
+  // context has botUserId, teamId, etc. set by middleware
+  // body has the full Slack event payload
+});
+```
+
+**Teams (after):**
+
+```typescript
+// send() is the Teams equivalent of say() — posts to the current conversation
+app.message(/help/i, async ({ send, activity }) => {
+  await send(`Hey ${activity.from.name}, here's what I can do...`);
+});
+
+// Global error handler — receives the raw Error + activity context
+app.on('error', async ({ error, activity }) => {
+  // Teams provides the raw Error object, not { error, context, body }
+  console.error(`Error in tenant ${activity?.conversation?.tenantId}:`, (error as Error).message);
+  console.error('Activity type:', activity?.type);
+  // No context bag — use activity properties directly
+  // No body — the activity IS the event payload
 });
 ```
 

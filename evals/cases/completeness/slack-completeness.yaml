@@ -1,0 +1,43 @@
+# Slack completeness test cases
+
+- name: "Bolt app with slash command and modal"
+  task: "Create a Slack Bolt app that registers a /feedback slash command which opens a modal with a text input, handles the view_submission, and sends the result to a channel."
+  expertFiles:
+    - slack/runtime.bolt-foundations-ts.md
+    - slack/runtime.slash-commands-ts.md
+    - slack/runtime.ack-rules-ts.md
+    - slack/ui.block-kit-ts.md
+  requiredConcepts:
+    - "App constructor with token and signingSecret"
+    - "app.command() handler registration"
+    - "ack() called within 3 seconds"
+    - "views.open() to launch modal"
+    - "app.view() handler for view_submission"
+    - "Block Kit blocks in modal (input block with plain_text_input)"
+    - "chat.postMessage to send result"
+  tags: [completeness, slack]
+
+- name: "Socket Mode event handler"
+  task: "Create a Slack app using Socket Mode that listens for app_mention events and replies in the thread."
+  expertFiles:
+    - slack/runtime.bolt-foundations-ts.md
+    - slack/bolt-events-ts.md
+  requiredConcepts:
+    - "App constructor with socketMode: true and appToken"
+    - "app.event('app_mention') handler"
+    - "Thread reply using thread_ts"
+    - "say() or client.chat.postMessage()"
+  tags: [completeness, slack]
+
+- name: "OAuth multi-workspace distribution"
+  task: "Set up a Slack Bolt app for multi-workspace distribution with OAuth, including InstallationStore and token management."
+  expertFiles:
+    - slack/runtime.bolt-foundations-ts.md
+    - slack/bolt-oauth-distribution-ts.md
+  requiredConcepts:
+    - "clientId and clientSecret in App constructor"
+    - "InstallationStore with storeInstallation and fetchInstallation"
+    - "OAuth scopes configuration"
+    - "stateSecret for CSRF protection"
+    - "authorize function or installationStore"
+  tags: [completeness, slack]

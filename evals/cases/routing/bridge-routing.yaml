@@ -1,0 +1,43 @@
+# Bridge routing test cases
+
+- name: "Block Kit to Adaptive Cards conversion"
+  input: "Convert Block Kit blocks to Adaptive Cards for my cross-platform bridge"
+  expectedDomain: bridge
+  expectedClusters: ["Block Kit <-> Adaptive Cards"]
+  expectedExperts: ["ui-block-kit-adaptive-cards-ts.md"]
+  tags: [routing, bridge]
+
+- name: "Slack to Teams migration overview"
+  input: "I need to migrate my Slack bot to Teams, help me assess the bridging scope"
+  expectedDomain: bridge
+  expectedClusters: []
+  expectedExperts: ["cross-platform-advisor-ts.md"]
+  tags: [routing, bridge]
+
+- name: "Middleware to handlers bridge"
+  input: "Convert my Slack Bolt middleware chain and ack() patterns to Teams handler patterns"
+  expectedDomain: bridge
+  expectedClusters: ["Middleware <-> Handlers"]
+  expectedExperts: ["middleware-handlers-ts.md"]
+  tags: [routing, bridge]
+
+- name: "Identity OAuth bridge"
+  input: "Bridge Slack OAuth identity with Azure AD for cross-platform user mapping"
+  expectedDomain: bridge
+  expectedClusters: ["Identity & OAuth Bridge"]
+  expectedExperts: ["identity-oauth-bridge-ts.md"]
+  tags: [routing, bridge]
+
+- name: "Lambda to Azure Functions"
+  input: "Migrate my bot from Lambda to Azure Functions as part of a cross-platform bridge"
+  expectedDomain: bridge
+  expectedClusters: ["Infrastructure: Compute"]
+  expectedExperts: ["infra-compute-ts.md", "infra-secrets-config-ts.md"]
+  tags: [routing, bridge]
+
+- name: "Cross-platform architecture"
+  input: "Design a dual bot single server architecture for Slack and Teams on shared Express"
+  expectedDomain: bridge
+  expectedClusters: ["Cross-Platform Architecture"]
+  expectedExperts: ["cross-platform-architecture-ts.md"]
+  tags: [routing, bridge]

@@ -1,0 +1,57 @@
+# Teams routing test cases
+
+- name: "Teams bot with ChatPrompt"
+  input: "Create a Teams bot using @microsoft/teams-ai with ChatPrompt for conversation"
+  expectedDomain: teams
+  expectedClusters: ["Runtime: App Initialisation", "Teams SDK for Python"]
+  expectedExperts: ["runtime.app-init-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams Adaptive Cards"
+  input: "Build Teams Adaptive Cards with an Action.Submit button and card action handler"
+  expectedDomain: teams
+  expectedClusters: ["UI: Adaptive Cards"]
+  expectedExperts: ["ui.adaptive-cards-ts.md", "runtime.routing-handlers-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams manifest setup"
+  input: "Configure the Teams app manifest.json with bot scopes and permissions"
+  expectedDomain: teams
+  expectedClusters: ["Runtime: Manifest"]
+  expectedExperts: ["runtime.manifest-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams proactive message"
+  input: "Send a proactive message to a Teams channel outside a conversation turn"
+  expectedDomain: teams
+  expectedClusters: ["Runtime: Proactive Messaging"]
+  expectedExperts: ["runtime.proactive-messaging-ts.md", "state.storage-patterns-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams function calling"
+  input: "Add function calling tools to a Teams AI bot for data lookup"
+  expectedDomain: teams
+  expectedClusters: []
+  expectedExperts: ["ai.function-calling-design-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams MCP server"
+  input: "Set up an MCP server to expose ChatPrompt tools in my Teams bot"
+  expectedDomain: teams
+  expectedClusters: ["MCP: Model Context Protocol", "Teams SDK for Python"]
+  expectedExperts: ["mcp.server-basics-ts.md", "mcp.expose-chatprompt-tools-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams OAuth SSO"
+  input: "Implement SSO with OAuth for a Teams bot using Azure AD"
+  expectedDomain: teams
+  expectedClusters: ["Auth & Graph"]
+  expectedExperts: ["auth.oauth-sso-ts.md"]
+  tags: [routing, teams]
+
+- name: "Teams dialog task module"
+  input: "Open a dialog from task modules in a card action for my Teams bot"
+  expectedDomain: teams
+  expectedClusters: ["UI: Dialogs & Task Modules"]
+  expectedExperts: ["ui.dialogs-task-modules-ts.md", "ui.adaptive-cards-ts.md"]
+  tags: [routing, teams]

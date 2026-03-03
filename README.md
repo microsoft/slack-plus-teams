@@ -1,6 +1,6 @@
 # Slack + Teams Expert System
 
-A knowledge base for AI coding agents that build, bridge, and deploy Slack and Teams bots. This is **not** a library or framework — it's a collection of 116 micro-expert files that teach AI agents (Claude Code, GitHub Copilot, Cursor) how to work with both platforms.
+A knowledge base for AI coding agents that build, bridge, and deploy Slack and Teams bots. This is **not** a library or framework — it's a collection of 107 micro-expert files that teach AI agents (Claude Code, GitHub Copilot, Cursor) how to work with both platforms.
 
 ## Executive Summary
 
@@ -19,7 +19,7 @@ Organizations running both Slack and Microsoft Teams face a persistent challenge
 
 | | |
 |---|---|
-| **Expert files** | 116+ across 7 domains |
+| **Expert files** | 107 across 7 domains |
 | **Bridge experts** | 27 (the core differentiator) |
 | **Example projects** | 3 working TypeScript bots |
 | **Supported AI providers** | 8 (OpenAI, Azure, Anthropic, Bedrock, etc.) |
@@ -38,9 +38,10 @@ This is **structured prompt engineering at scale** — a domain-specific knowled
 
 | Directory | Contents | Count |
 |---|---|---|
-| `experts/` | Micro-expert Markdown files organized by domain | 111 files |
+| `experts/` | Micro-expert Markdown files organized by domain | 107 files |
 | `docs/` | Platform comparison guides (Slack vs Teams) | 10 files |
 | `examples/` | Working TypeScript projects | 3 projects |
+| `evals/` | Automated eval harness (routing, completeness, pattern compilation) | 354 tests |
 
 ## SDK Language Support
 
@@ -100,15 +101,15 @@ This repo includes `.github/copilot-instructions.md` which configures Copilot co
 
 | Domain | Experts | What It Covers |
 |---|---|---|
-| **teams/** | 36 | Teams AI SDK, Adaptive Cards, Bot Framework, SSO, Graph API, Python SDK, .NET SDK, Agents Toolkit |
-| **bridge/** | 27 | Cross-platform bridging, Block Kit ↔ Adaptive Cards, REST-only patterns, Python cross-platform |
-| **slack/** | 19 | Slack Bolt, Block Kit, events, OAuth, assistant containers, Socket Mode, Web API, shortcuts, modals, Python SDK, Java SDK, Slack CLI |
-| **convert/** | 9 | Language conversion to TypeScript (JS, Ruby, Java, Kotlin) |
-| **models/** | 8 | AI model providers (OpenAI, Anthropic, Bedrock, Foundry, OSS) |
-| **deploy/** | 5 | Azure and AWS deployment (App Service, Functions, Lambda, ECS) |
-| **security/** | 3 | Input validation, secrets management, credential hardening |
+| **teams/** | 35 | Teams AI SDK, Adaptive Cards, Bot Framework, SSO, Graph API, Python SDK, .NET SDK, Agents Toolkit |
+| **bridge/** | 26 | Cross-platform bridging, Block Kit ↔ Adaptive Cards, REST-only patterns, Python cross-platform |
+| **slack/** | 18 | Slack Bolt, Block Kit, events, OAuth, assistant containers, Socket Mode, Web API, shortcuts, modals, Python SDK, Java SDK, Slack CLI |
+| **convert/** | 8 | Language conversion to TypeScript (JS, Ruby, Java, Kotlin) |
+| **models/** | 7 | AI model providers (OpenAI, Anthropic, Bedrock, Foundry, OSS) |
+| **deploy/** | 4 | Azure and AWS deployment (App Service, Functions, Lambda, ECS) |
+| **security/** | 2 | Input validation, secrets management |
 
-Plus 9 root-level utility files (router, fallback, templates, analyzer, researcher).
+Plus 7 domain index routers and 6 root-level utility files (router, fallback, template, analyzer, researcher, builder).
 
 ## Platform Comparison Docs
 
@@ -131,3 +132,15 @@ The `docs/` directory contains detailed Slack vs Teams comparison guides:
 | `examples/dual-platform-bot/` | A bot that runs on both Slack and Teams from a single codebase |
 | `examples/slack-add-teams/` | An existing Slack bot with Teams support added |
 | `examples/teams-add-slack/` | An existing Teams bot with Slack support added |
+
+## Eval Harness
+
+The `evals/` directory contains an automated test harness that validates the expert system. Run it after editing experts to catch regressions.
+
+```bash
+cd evals && npm install
+npm run eval:patterns    # No API key — checks all TypeScript code examples compile
+npm run eval             # Full suite (needs OPENAI_API_KEY in .env)
+```
+
+Three dimensions: **routing accuracy** (do queries route to the right experts?), **expert completeness** (do experts cover required concepts?), and **pattern compilation** (do code examples parse?). See [`evals/README.md`](evals/README.md) for details.

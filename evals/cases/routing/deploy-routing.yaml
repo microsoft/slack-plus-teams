@@ -1,0 +1,43 @@
+# Deploy routing test cases
+
+- name: "Deploy Teams bot to Azure App Service"
+  input: "Deploy my Teams bot to Azure App Service with az login and Azure Bot registration"
+  expectedDomain: deploy
+  expectedClusters: ["Deploy to Azure"]
+  expectedExperts: ["azure-bot-deploy-ts.md"]
+  tags: [routing, deploy]
+
+- name: "Deploy Slack bot to AWS Lambda"
+  input: "Deploy my Slack bot to AWS Lambda with API Gateway using SAM deploy"
+  expectedDomain: deploy
+  expectedClusters: ["Deploy to AWS"]
+  expectedExperts: ["aws-bot-deploy-ts.md"]
+  tags: [routing, deploy]
+
+- name: "Azure CLI commands for bot resources"
+  input: "I need an Azure CLI CRUD reference — list all az bot commands and az webapp commands for deployment"
+  expectedDomain: deploy
+  expectedClusters: ["Azure CLI Reference"]
+  expectedExperts: ["azure-cli-reference-ts.md"]
+  tags: [routing, deploy]
+
+- name: "AWS CLI commands for Lambda and ECS"
+  input: "I need an AWS CLI CRUD reference — list all aws lambda commands and aws ecs commands for deployment"
+  expectedDomain: deploy
+  expectedClusters: ["AWS CLI Reference"]
+  expectedExperts: ["aws-cli-reference-ts.md"]
+  tags: [routing, deploy]
+
+- name: "Agents Toolkit provision and deploy"
+  input: "Use teamsapp provision and teamsapp deploy to push my bot to production"
+  expectedDomain: deploy
+  expectedClusters: ["Deploy to Azure"]
+  expectedExperts: ["azure-bot-deploy-ts.md"]
+  tags: [routing, deploy]
+
+- name: "Deploy dual bot to cloud"
+  input: "Deploy a dual-platform bot to both Azure and AWS with a single server deployment"
+  expectedDomain: deploy
+  expectedClusters: ["Deploy Both (Dual Bot)"]
+  expectedExperts: ["azure-bot-deploy-ts.md", "aws-bot-deploy-ts.md"]
+  tags: [routing, deploy]

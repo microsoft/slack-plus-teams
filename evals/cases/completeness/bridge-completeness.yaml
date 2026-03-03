@@ -1,0 +1,36 @@
+# Bridge completeness test cases
+
+- name: "Block Kit to Adaptive Cards bridge"
+  task: "Convert a Slack Block Kit message with sections, images, and button actions into an equivalent Teams Adaptive Card."
+  expertFiles:
+    - bridge/ui-block-kit-adaptive-cards-ts.md
+  requiredConcepts:
+    - "Section block to TextBlock/ColumnSet mapping"
+    - "Image block to Image element mapping"
+    - "Button action to Action.Submit mapping"
+    - "Accessory handling"
+    - "Fallback text for accessibility"
+  tags: [completeness, bridge]
+
+- name: "Slack middleware to Teams handlers"
+  task: "Port a Slack Bolt app with global middleware, listener middleware, and message handlers to the Teams handler pattern."
+  expertFiles:
+    - bridge/middleware-handlers-ts.md
+  requiredConcepts:
+    - "Global middleware to first-registered handler or wrapper function"
+    - "Listener middleware to guard function pattern"
+    - "ack() removal — Teams has no acknowledgement requirement"
+    - "say() to send() mapping for posting messages"
+    - "Error handling: app.error() to app.on('error') with different error shapes"
+  tags: [completeness, bridge]
+
+- name: "Cross-platform identity bridge"
+  task: "Implement a cross-platform identity bridge that maps Slack users to Azure AD users for a dual-platform bot."
+  expertFiles:
+    - bridge/identity-oauth-bridge-ts.md
+  requiredConcepts:
+    - "Slack user ID to Azure AD user mapping"
+    - "Email-based identity correlation"
+    - "Token management for both platforms"
+    - "User lookup via Graph API or Slack users.info"
+  tags: [completeness, bridge]

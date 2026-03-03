@@ -1,0 +1,32 @@
+name: Pattern Compilation Check
+
+on:
+  pull_request:
+    paths:
+      - 'experts/**/*.md'
+      - 'evals/src/**'
+      - 'evals/cases/patterns/**'
+  push:
+    branches: [main]
+    paths:
+      - 'experts/**/*.md'
+      - 'evals/src/**'
+      - 'evals/cases/patterns/**'
+
+jobs:
+  patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install eval dependencies
+        working-directory: evals
+        run: npm ci
+
+      - name: Run pattern compilation eval
+        working-directory: evals
+        run: npm run eval:patterns -- --verbose

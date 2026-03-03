@@ -1,0 +1,31 @@
+# Expert System Eval Configuration
+
+provider:
+  # Options: openai, anthropic, azure-openai
+  type: openai
+  model: gpt-4o
+  # For Azure OpenAI, also set:
+  # azure_endpoint: https://your-resource.openai.azure.com
+  # azure_deployment: your-deployment-name
+  # api_version: "2024-12-01-preview"
+
+paths:
+  experts_root: ../experts
+  cases_dir: ./cases
+  reports_dir: ./reports
+
+thresholds:
+  routing:
+    # Minimum score (0-1) for a routing test case to pass
+    min_score: 0.75
+  completeness:
+    # Minimum concept coverage ratio (0-1)
+    min_coverage: 0.70
+  patterns:
+    # Maximum allowed compilation errors per expert file
+    max_errors_per_file: 0
+
+dimensions:
+  - routing
+  - completeness
+  - patterns

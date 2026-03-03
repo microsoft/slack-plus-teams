@@ -15,6 +15,17 @@ A practical guide for developers adding cross-platform support to an existing bo
 | [Middleware & Handler Patterns](middleware-and-handlers.md) | Middleware chains, ack(), handler registration, error handling |
 | [Advanced Features](advanced-features.md) | Scheduling, workflows, shortcuts, channel ops, reactions, distribution |
 | [Infrastructure](infrastructure.md) | Transport, compute, storage, secrets, observability |
+| [**Eval Harness**](../evals/README.md) | Automated testing for expert routing, completeness, and code patterns |
+
+## Eval Harness
+
+The [`evals/`](../evals/) directory contains an automated test harness for the expert system. It validates three dimensions:
+
+- **Routing** — 51 test cases across all 7 domains verify queries route to the correct domain, clusters, and expert files
+- **Completeness** — 9 test cases check experts cover all required concepts for their domain
+- **Patterns** — 294 TypeScript code blocks across all experts are compiled in-memory to catch syntax errors
+
+Pattern evals are fully deterministic (no API key needed). Routing and completeness evals use an LLM judge (OpenAI, Anthropic, or Azure OpenAI). See [`evals/README.md`](../evals/README.md) for setup and usage.
 
 ## How to Read These Docs
 

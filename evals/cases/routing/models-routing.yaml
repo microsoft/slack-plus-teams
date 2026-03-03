@@ -1,0 +1,50 @@
+# Models routing test cases
+
+- name: "OpenAI chat completions setup"
+  input: "Configure the openai npm package to call GPT-4o chat completions with tool use"
+  expectedDomain: models
+  expectedClusters: ["OpenAI / Azure OpenAI"]
+  expectedExperts: ["openai-azure-openai-ts.md"]
+  tags: [routing, models]
+
+- name: "Anthropic Claude SDK"
+  input: "Use @anthropic-ai/sdk to call Claude 4 with the Messages API and tool use"
+  expectedDomain: models
+  expectedClusters: ["Anthropic (Claude)"]
+  expectedExperts: ["anthropic-ts.md"]
+  tags: [routing, models]
+
+- name: "AWS Bedrock Converse API"
+  input: "Call Bedrock Converse API with @aws-sdk/client-bedrock-runtime for hosted Anthropic models"
+  expectedDomain: models
+  expectedClusters: ["AWS Bedrock"]
+  expectedExperts: ["bedrock-ts.md"]
+  tags: [routing, models]
+
+- name: "Foundry Local on-device inference"
+  input: "Run Phi-4 locally with foundry model run for offline on-device AI inference"
+  expectedDomain: models
+  expectedClusters: ["Foundry Local"]
+  expectedExperts: ["foundry-local-ts.md"]
+  tags: [routing, models]
+
+- name: "Ollama OpenAI-compatible endpoint"
+  input: "Connect to Ollama running Llama locally via the /v1/chat/completions OpenAI-compatible endpoint"
+  expectedDomain: models
+  expectedClusters: ["OpenAI-Compatible OSS Endpoints"]
+  expectedExperts: ["oss-openai-compatible-ts.md"]
+  tags: [routing, models]
+
+- name: "Transformers.js browser embeddings"
+  input: "Generate local embeddings in the browser with @huggingface/transformers and the pipeline API using WebGPU"
+  expectedDomain: models
+  expectedClusters: ["Transformers.js (In-Process Inference)"]
+  expectedExperts: ["transformers-js-ts.md"]
+  tags: [routing, models]
+
+- name: "Azure AI Foundry cloud model"
+  input: "Deploy a model from Azure AI Foundry model catalog as a serverless MaaS endpoint"
+  expectedDomain: models
+  expectedClusters: ["Azure AI Foundry (Cloud)"]
+  expectedExperts: ["foundry-cloud-ts.md"]
+  tags: [routing, models]

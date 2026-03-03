@@ -88,7 +88,9 @@ export class CosmosDbStorage<T = unknown> implements IStorage<string, T> {
     }
   }
 }
+```
 
+```typescript
 // src/index.ts — Using CosmosDbStorage with the Teams app
 import { App } from "@microsoft/teams.apps";
 import { CosmosClient } from "@azure/cosmos";
