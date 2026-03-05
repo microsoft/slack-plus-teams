@@ -117,6 +117,13 @@ Read:
 - `cli.manifest-triggers.md` (datastores must be declared in manifest)
 Depends on: `cli.local-dev-deploy.md` (app must be deployed before datastore/env ops)
 
+### Slack Automations Platform
+When: Slack next-gen platform, DefineFunction, DefineWorkflow, DefineDatastore, Slack triggers, Slack hosted functions, Deno, Workflow Builder, custom functions, slack automation, competitive analysis
+Read:
+- `workflow.slack-automations-ts.md`
+- `cli.manifest-triggers.md` (trigger definitions)
+- `cli.datastore-env.md` (datastore operations)
+
 ### CLI: App Management
 When: `slack app install`, `slack app uninstall`, `slack app delete`, `slack app link`, `slack app unlink`, `slack app list`, `slack app settings`, `slack collaborator`, collaborator add, collaborator remove, collaborator list, multi-workspace, workspace management
 Read:
@@ -133,7 +140,8 @@ If a request spans multiple clusters (e.g., "add a slash command that opens a Bl
 
 ## file inventory
 
-`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-java.md` | `bolt-oauth-distribution-ts.md` | `bolt-python.md` | `cli.app-management.md` | `cli.datastore-env.md` | `cli.getting-started.md` | `cli.local-dev-deploy.md` | `cli.manifest-triggers.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.shortcuts-ts.md` | `runtime.slash-commands-ts.md` | `runtime.socket-mode-ts.md` | `ui.block-kit-ts.md` | `ui.modals-lifecycle-ts.md` | `web-api-proactive-ts.md`
+`bolt-assistant-ts.md` | `bolt-events-ts.md` | `bolt-java.md` | `bolt-oauth-distribution-ts.md` | `bolt-python.md` | `cli.app-management.md` | `cli.datastore-env.md` | `cli.getting-started.md` | `cli.local-dev-deploy.md` | `cli.manifest-triggers.md` | `runtime.ack-rules-ts.md` | `runtime.bolt-foundations-ts.md` | `runtime.shortcuts-ts.md` | `runtime.slash-commands-ts.md` | `runtime.socket-mode-ts.md` | `ui.block-kit-ts.md` | `ui.modals-lifecycle-ts.md` | `web-api-proactive-ts.md` | `workflow.slack-automations-ts.md`
 
 <!-- Updated 2026-02-27: Added bolt-assistant-ts (Assistant container), bolt-events-ts (Events API), bolt-oauth-distribution-ts (OAuth/multi-workspace) experts based on @slack/bolt v4.6.0 source -->
+<!-- Updated 2026-03-05: Added workflow.slack-automations-ts for Slack next-gen platform (functions, workflows, triggers, datastores) -->
 <!-- Updated 2026-03-01: Added 5 Slack CLI experts (getting-started, local-dev-deploy, manifest-triggers, datastore-env, app-management) based on slack-cli Go source -->

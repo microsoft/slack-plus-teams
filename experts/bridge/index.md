@@ -126,6 +126,12 @@ Read:
 - `workflows-automation-ts.md`
 Cross-domain deps: `../teams/ui.adaptive-cards-ts.md` (card construction for bot-driven workflows), `../teams/runtime.proactive-messaging-ts.md` (flow-triggered bot messages)
 
+### Composable Workflow Platform
+When: composable workflow architecture, reusable workflow engine, WorkflowDefinition, template workflows, five-element lifecycle, workflow platform design, workflow operating layer
+Read:
+- `workflow.composable-platform-ts.md`
+Cross-domain deps: `../teams/workflow.sharepoint-lists-ts.md` (state), `../teams/workflow.message-native-records-ts.md` (visibility), `../teams/workflow.triggers-compose-ts.md` (triggers), `../teams/ai.conversational-query-ts.md` (intelligence), `../teams/workflow.approvals-inline-ts.md` (routing)
+
 ### App Distribution & Packaging
 When: bridging Slack App Directory listing, OAuth install flow, InstallationStore, org-level installs and Teams sideloading, app packaging, Teams Admin Center
 Read:
@@ -200,9 +206,10 @@ If a request involves both Slack↔Teams app bridging **and** AWS↔Azure infra 
 
 ## file inventory
 
-`app-distribution-packaging-ts.md` | `channel-ops-graph-ts.md` | `commands-slash-text-ts.md` | `cross-platform-advisor-ts.md` | `cross-platform-architecture-ts.md` | `events-activities-ts.md` | `files-upload-download-ts.md` | `identity-oauth-bridge-ts.md` | `infra-compute-ts.md` | `infra-observability-ts.md` | `infra-secrets-config-ts.md` | `infra-storage-ts.md` | `interactive-responses-ts.md` | `link-unfurl-preview-ts.md` | `middleware-handlers-ts.md` | `python-cross-platform.md` | `rate-limiting-resilience-ts.md` | `rest-only-integration-ts.md` | `scheduling-deferred-send-ts.md` | `shortcuts-extensions-ts.md` | `transport-socketmode-https-ts.md` | `ui-app-home-personal-tab-ts.md` | `ui-block-kit-adaptive-cards-ts.md` | `ui-legacy-attachments-cards-ts.md` | `ui-modals-dialogs-ts.md` | `workflows-automation-ts.md`
+`app-distribution-packaging-ts.md` | `channel-ops-graph-ts.md` | `workflow.composable-platform-ts.md` | `commands-slash-text-ts.md` | `cross-platform-advisor-ts.md` | `cross-platform-architecture-ts.md` | `events-activities-ts.md` | `files-upload-download-ts.md` | `identity-oauth-bridge-ts.md` | `infra-compute-ts.md` | `infra-observability-ts.md` | `infra-secrets-config-ts.md` | `infra-storage-ts.md` | `interactive-responses-ts.md` | `link-unfurl-preview-ts.md` | `middleware-handlers-ts.md` | `python-cross-platform.md` | `rate-limiting-resilience-ts.md` | `rest-only-integration-ts.md` | `scheduling-deferred-send-ts.md` | `shortcuts-extensions-ts.md` | `transport-socketmode-https-ts.md` | `ui-app-home-personal-tab-ts.md` | `ui-block-kit-adaptive-cards-ts.md` | `ui-legacy-attachments-cards-ts.md` | `ui-modals-dialogs-ts.md` | `workflows-automation-ts.md`
 
 <!-- Updated 2026-02-27: Reframed from migrate-router to bridge-router — bidirectional cross-platform bridging between Slack↔Teams and AWS↔Azure. Renamed all files to platform-neutral names. -->
 <!-- Updated 2026-02-27: Added cross-platform-architecture-ts (dual-bot hosting) and rest-only-integration-ts (SDK-less HTTP patterns for Java/C#/Go). -->
 <!-- Updated 2026-02-28: Added RED gap workarounds and YELLOW gap best practices to expert files: interactive-responses-ts (R1 refresh.userIds, Y11 _version), events-activities-ts (R2 reaction→button, Y16 RSC manifest), ui-modals-dialogs-ts (R3 cancel TTL, R4/R6 step routing, R5 validation re-render), scheduling-deferred-send-ts (R7 Service Bus), link-unfurl-preview-ts (Y7 cache middleware), commands-slash-text-ts (Y1 text+manifest), rate-limiting-resilience-ts (Y17 retry+p-queue). -->
+<!-- Updated 2026-03-05: Added workflow.composable-platform-ts for composable workflow operating layer architecture -->
 <!-- Updated 2026-02-28: Added remaining missing patterns: events-activities-ts (Y2 replyWithBroadcast helper, Y3 Graph thread replies), files-upload-download-ts (Y4/5/6 sendFile helper), ui-modals-dialogs-ts (Y9 dynamic selects), ui-block-kit-adaptive-cards-ts (Y14 Action.ShowCard confirmation), link-unfurl-preview-ts (Y15 manifest domain generator), transport-socketmode-https-ts (R10 Azure Relay for on-prem). -->

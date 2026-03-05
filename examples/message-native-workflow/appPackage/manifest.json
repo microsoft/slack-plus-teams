@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.20/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.20",
+  "version": "1.0.0",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Your Company",
+    "websiteUrl": "https://example.com",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/terms"
+  },
+  "name": {
+    "short": "StandupBot",
+    "full": "Daily Standup Workflow Bot"
+  },
+  "description": {
+    "short": "Message-native daily standup workflow",
+    "full": "Demonstrates the message-native workflow pattern: scheduled standup prompts, structured check-in responses persisted to SharePoint Lists, and natural language queries over standup history."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#6264A7",
+  "staticTabs": [
+    { "entityId": "conversations", "scopes": ["personal"] },
+    { "entityId": "about", "scopes": ["personal"] }
+  ],
+  "bots": [
+    {
+      "botId": "${{BOT_ID}}",
+      "scopes": ["personal", "team", "groupChat"],
+      "commandLists": [
+        {
+          "scopes": ["team", "groupChat"],
+          "commands": [
+            { "title": "standup", "description": "Post a standup check-in right now" },
+            { "title": "status", "description": "Show today's standup summary" },
+            { "title": "blockers", "description": "Show all current blockers" },
+            { "title": "help", "description": "Show available commands" }
+          ]
+        }
+      ]
+    }
+  ],
+  "validDomains": ["${{BOT_DOMAIN}}"],
+  "webApplicationInfo": {
+    "id": "${{BOT_ID}}",
+    "resource": "api://${{BOT_DOMAIN}}/${{BOT_ID}}"
+  }
+}
