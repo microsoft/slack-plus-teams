@@ -150,7 +150,14 @@ class WorkflowEngine {
       const card = record.status === "completed"
         ? def.cards.completed(record)
         : def.cards.active(record);
-      return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: card };
+      return {
+        status: 200,
+        body: {
+          statusCode: 200,
+          type: "application/vnd.microsoft.card.adaptive",
+          value: card,
+        },
+      };
     }
   }
 
