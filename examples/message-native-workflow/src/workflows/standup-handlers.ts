@@ -52,7 +52,7 @@ export function registerStandupHandlers(app: App): void {
       });
     }
 
-    if (text === "standup") {
+    if (text === "standup" || text === "/standup") {
       const response = await ctx.send({
         type: "message",
         attachments: [
@@ -69,7 +69,7 @@ export function registerStandupHandlers(app: App): void {
       return;
     }
 
-    if (text === "status") {
+    if (text === "status" || text === "/status") {
       const today = new Date().toISOString().split("T")[0];
       const summary = summarizeDate(today);
       await ctx.send({
@@ -84,7 +84,7 @@ export function registerStandupHandlers(app: App): void {
       return;
     }
 
-    if (text === "blockers") {
+    if (text === "blockers" || text === "/blockers") {
       const blockerRecords = getBlockers(true);
       await ctx.send({
         type: "message",
@@ -98,7 +98,7 @@ export function registerStandupHandlers(app: App): void {
       return;
     }
 
-    if (text === "help") {
+    if (text === "help" || text === "/help") {
       await ctx.send({
         type: "message",
         attachments: [
@@ -187,9 +187,12 @@ export function registerStandupHandlers(app: App): void {
 
       if (!yesterday || !today) {
         return {
-          statusCode: 400,
-          type: "application/vnd.microsoft.card.adaptive",
-          value: standupPromptCard(), // Re-show the form
+          status: 400,
+          body: {
+            statusCode: 400,
+            type: "application/vnd.microsoft.card.adaptive",
+            value: standupPromptCard(), // Re-show the form
+          },
         };
       }
 
@@ -209,9 +212,12 @@ export function registerStandupHandlers(app: App): void {
 
       // Pillar 5: Replace the prompt card with the record card in-place
       return {
-        statusCode: 200,
-        type: "application/vnd.microsoft.card.adaptive",
-        value: standupRecordCard(record),
+        status: 200,
+        body: {
+          statusCode: 200,
+          type: "application/vnd.microsoft.card.adaptive",
+          value: standupRecordCard(record),
+        },
       };
     }
 
@@ -220,12 +226,15 @@ export function registerStandupHandlers(app: App): void {
       const records = await import("../store/standup-store.js");
       const all = records.getStandupsByDate(new Date().toISOString().split("T")[0]);
       const record = all.find((r: StandupRecord) => r.id === data.recordId);
-      if (!record) return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} };
+      if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       return {
-        statusCode: 200,
-        type: "application/vnd.microsoft.card.adaptive",
-        value: standupEditCard(record),
+        status: 200,
+        body: {
+          statusCode: 200,
+          type: "application/vnd.microsoft.card.adaptive",
+          value: standupEditCard(record),
+        },
       };
     }
 
@@ -234,7 +243,7 @@ export function registerStandupHandlers(app: App): void {
       const storeModule = await import("../store/standup-store.js");
       const all = storeModule.getStandupsByDate(new Date().toISOString().split("T")[0]);
       const record = all.find((r: StandupRecord) => r.id === data.recordId);
-      if (!record) return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} };
+      if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       // Update fields in-place (in production, PATCH the list item)
       record.yesterday = data.yesterday ?? record.yesterday;
@@ -243,9 +252,12 @@ export function registerStandupHandlers(app: App): void {
       record.hasBlockers = (record.blockers ?? "").trim().length > 0;
 
       return {
-        statusCode: 200,
-        type: "application/vnd.microsoft.card.adaptive",
-        value: standupRecordCard(record),
+        status: 200,
+        body: {
+          statusCode: 200,
+          type: "application/vnd.microsoft.card.adaptive",
+          value: standupRecordCard(record),
+        },
       };
     }
 
@@ -254,16 +266,19 @@ export function registerStandupHandlers(app: App): void {
       const storeModule = await import("../store/standup-store.js");
       const all = storeModule.getStandupsByDate(new Date().toISOString().split("T")[0]);
       const record = all.find((r: StandupRecord) => r.id === data.recordId);
-      if (!record) return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} };
+      if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       return {
-        statusCode: 200,
-        type: "application/vnd.microsoft.card.adaptive",
-        value: standupRecordCard(record),
+        status: 200,
+        body: {
+          statusCode: 200,
+          type: "application/vnd.microsoft.card.adaptive",
+          value: standupRecordCard(record),
+        },
       };
     }
 
-    return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} };
+    return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
   });
 
   // ---------- Pillar 1: Scheduled trigger ----------
@@ -273,11 +288,16 @@ export function registerStandupHandlers(app: App): void {
     console.log(`[standup] Scheduled trigger fired at ${new Date().toISOString()}`);
     for (const [convId, ref] of conversationRefs) {
       try {
-        // In production, use adapter.continueConversation(ref, ...) for proactive send.
-        // The Teams SDK v2 App doesn't expose a raw proactive API directly, so this
-        // would be wired via the underlying BotFrameworkAdapter. For this example,
-        // the ref is stored for demonstration purposes.
-        console.log(`[standup] Would send prompt to conversation: ${convId}`);
+        await app.send(ref.conversation.id, {
+          type: "message",
+          attachments: [
+            {
+              contentType: "application/vnd.microsoft.card.adaptive",
+              content: standupPromptCard(),
+            },
+          ],
+        } as any);
+        console.log(`[standup] Sent standup prompt to conversation: ${convId}`);
       } catch (err) {
         console.error(`[standup] Failed to send to ${convId}:`, err);
       }

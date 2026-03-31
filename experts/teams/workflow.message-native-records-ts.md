@@ -8,7 +8,7 @@ Implement the "structured records as message objects" pattern where workflow sta
 
 1. **Every workflow record is an Adaptive Card backed by a store row.** The card is the visual representation; the list/dataverse row is the source of truth. Card actions read from and write to the store, then refresh the card to reflect current state.
 2. **Use `Action.Execute` with `verb` for all record mutations.** `Action.Execute` triggers a server-side `adaptiveCard/action` invoke, allowing the bot to update the backing store and return a refreshed card in one round-trip. Never use `Action.Submit` for records — it doesn't support card refresh. [adaptivecards.io -- Action.Execute](https://adaptivecards.io/explorer/Action.Execute.html)
-3. **Return the updated card from the invoke response.** The `adaptiveCard/action` invoke handler must return `{ statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: <updated-card> }`. Teams replaces the original card in-place — no new message needed.
+3. **Return the updated card from the invoke response.** The `adaptiveCard/action` invoke handler must return `{ status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: <updated-card> } }` (Teams SDK v2 contract). Teams replaces the original card in-place — no new message needed.
 4. **Store the record ID in `Action.Execute.data`.** Every action button must include the backing store record ID (e.g., `{ verb: "approve", recordId: "item-123" }`) so the handler can look up and mutate the correct row.
 5. **Embed record metadata in the card body.** Display the record's key fields (status, requester, timestamps) directly in the card using `TextBlock` and `FactSet`. Users should see the full record state without clicking or navigating.
 6. **Use `refresh` property for user-specific views.** Adaptive Cards support a `refresh` block that triggers an automatic `adaptiveCard/action` invoke when specific users view the card. Use this to show role-specific actions (approver sees approve/reject; requester sees cancel). [learn.microsoft.com -- Universal Actions](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/universal-actions-for-adaptive-cards/overview)
@@ -82,7 +82,7 @@ function buildRecordCard(record: WorkflowRecord): object {
 ### Handle Action.Execute invoke and refresh card
 
 ```typescript
-app.on("adaptiveCard.action", async (ctx) => {
+app.on("card.action", async (ctx) => {
   const { verb, recordId } = ctx.activity.value?.action?.data ?? {};
 
   if (verb === "approve" || verb === "reject") {
@@ -104,9 +104,12 @@ app.on("adaptiveCard.action", async (ctx) => {
 
     // Return refreshed card (replaces original in-place)
     return {
-      statusCode: 200,
-      type: "application/vnd.microsoft.card.adaptive",
-      value: buildRecordCard(mapListItemToRecord(updated)),
+      status: 200,
+      body: {
+        statusCode: 200,
+        type: "application/vnd.microsoft.card.adaptive",
+        value: buildRecordCard(mapListItemToRecord(updated)),
+      },
     };
   }
 
@@ -117,9 +120,12 @@ app.on("adaptiveCard.action", async (ctx) => {
       .get();
 
     return {
-      statusCode: 200,
-      type: "application/vnd.microsoft.card.adaptive",
-      value: buildRecordCard(mapListItemToRecord(item)),
+      status: 200,
+      body: {
+        statusCode: 200,
+        type: "application/vnd.microsoft.card.adaptive",
+        value: buildRecordCard(mapListItemToRecord(item)),
+      },
     };
   }
 });

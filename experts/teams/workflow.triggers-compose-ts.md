@@ -126,7 +126,7 @@ import cron from "node-cron";
 // Store conversation references at bot install
 const conversationRefs = new Map<string, any>();
 
-app.on("install.added", async (ctx) => {
+app.on("install.add", async (ctx) => {
   conversationRefs.set(
     ctx.activity.conversation!.id,
     {

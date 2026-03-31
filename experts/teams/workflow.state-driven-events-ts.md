@@ -57,6 +57,7 @@ async function subscribeToPresence(
 ```typescript
 import express from "express";
 import crypto from "crypto";
+import { readFileSync } from "fs";
 
 const router = express.Router();
 
@@ -68,19 +69,23 @@ router.post("/api/webhooks/graph", (req, res) => {
     return;
   }
 
-  // Verify clientState
   const notifications = req.body.value ?? [];
-  for (const notification of notifications) {
-    if (notification.clientState !== "presence-break-workflow") {
-      continue; // Ignore unknown subscriptions
+
+  // Acknowledge receipt quickly; Graph expects a 2xx within ~3 seconds
+  res.sendStatus(202);
+
+  // Process notifications asynchronously to avoid request timeouts
+  setImmediate(() => {
+    for (const notification of notifications) {
+      if (notification.clientState !== "presence-break-workflow") {
+        continue; // Ignore unknown subscriptions
+      }
+
+      // Decrypt resource data
+      const decryptedData = decryptNotification(notification);
+      handlePresenceChange(notification.resource, decryptedData);
     }
-
-    // Decrypt resource data
-    const decryptedData = decryptNotification(notification);
-    handlePresenceChange(notification.resource, decryptedData);
-  }
-
-  res.sendStatus(202); // Must respond within 3 seconds
+  });
 });
 
 function decryptNotification(notification: any): any {

@@ -132,7 +132,7 @@ When: card-as-record pattern, structured records in threads, Action.Execute card
 Read:
 - `workflow.message-native-records-ts.md`
 - `ui.adaptive-cards-ts.md` (card construction patterns)
-Depends on: `workflow.sharepoint-lists-ts.md` (backing store), `runtime.routing-handlers-ts.md` (adaptiveCard.action handler)
+Depends on: `workflow.sharepoint-lists-ts.md` (backing store), `runtime.routing-handlers-ts.md` (card.action handler)
 
 ### Workflow: Triggers at Compose Surface
 When: workflow initiation, bot commands, message extension triggers, compose box, scheduled proactive workflows, workflow discoverability

@@ -138,7 +138,7 @@ function buildApprovalCard(record: ApprovalRecord, viewerUserId: string): object
 ### Handle approval action with routing logic
 
 ```typescript
-app.on("adaptiveCard.action", async (ctx) => {
+app.on("card.action", async (ctx) => {
   const { verb, recordId } = ctx.activity.value?.action?.data ?? {};
   const comment = ctx.activity.value?.action?.data?.comment;
   const actorId = ctx.activity.from?.aadObjectId!;
@@ -147,20 +147,23 @@ app.on("adaptiveCard.action", async (ctx) => {
   if (verb !== "approve" && verb !== "reject" && verb !== "refreshApproval") return;
 
   const record = await getApprovalRecord(recordId);
-  if (!record) return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} };
+  if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
   if (verb === "refreshApproval") {
     return {
-      statusCode: 200,
-      type: "application/vnd.microsoft.card.adaptive",
-      value: buildApprovalCard(record, actorId),
+      status: 200,
+      body: {
+        statusCode: 200,
+        type: "application/vnd.microsoft.card.adaptive",
+        value: buildApprovalCard(record, actorId),
+      },
     };
   }
 
   // Record the decision
   const approver = record.approvers.find((a) => a.userId === actorId && !a.decision);
   if (!approver) {
-    return { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: buildApprovalCard(record, actorId) };
+    return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: buildApprovalCard(record, actorId) } };
   }
 
   approver.decision = verb === "approve" ? "approved" : "rejected";
@@ -194,9 +197,12 @@ app.on("adaptiveCard.action", async (ctx) => {
   }
 
   return {
-    statusCode: 200,
-    type: "application/vnd.microsoft.card.adaptive",
-    value: buildApprovalCard(record, actorId),
+    status: 200,
+    body: {
+      statusCode: 200,
+      type: "application/vnd.microsoft.card.adaptive",
+      value: buildApprovalCard(record, actorId),
+    },
   };
 });
 
