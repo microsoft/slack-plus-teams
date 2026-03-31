@@ -73,6 +73,10 @@ export function getBlockers(currentOnly: boolean): StandupRecord[] {
   return withBlockers.filter((r) => r.date === dates[0]);
 }
 
+export function getStandupById(id: string): StandupRecord | undefined {
+  return records.find((r) => r.id === id);
+}
+
 export function getStandupsByRespondent(name: string, limit = 10): StandupRecord[] {
   return records
     .filter((r) => r.respondent.toLowerCase().includes(name.toLowerCase()))

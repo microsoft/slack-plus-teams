@@ -102,14 +102,24 @@ function executeQueryStandups(args: {
 }): QueryResult {
   let records: StandupRecord[];
 
-  if (args.respondent) {
-    records = getStandupsByRespondent(args.respondent);
-  } else if (args.startDate && args.endDate) {
+  if (args.startDate && args.endDate) {
     records = getStandupsByDateRange(args.startDate, args.endDate);
   } else if (args.date) {
     records = getStandupsByDate(args.date);
+  } else if (args.respondent) {
+    // Preserve existing behavior when only respondent is provided (no dates).
+    records = getStandupsByRespondent(args.respondent);
   } else {
     records = getStandupsByDate(todayISO());
+  }
+
+  // If both a respondent and a date/date-range were specified, apply respondent
+  // as an additional filter on the date-based results.
+  if (args.respondent && (args.startDate || args.date)) {
+    const respondentQuery = args.respondent.toLowerCase();
+    records = records.filter((r) =>
+      r.respondent.toLowerCase().includes(respondentQuery),
+    );
   }
 
   const text = records.length === 0
