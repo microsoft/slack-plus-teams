@@ -7,6 +7,7 @@ A practical guide for developers adding cross-platform support to an existing bo
 | Document | What It Covers |
 |---|---|
 | [**Feature Gaps**](feature-gaps.md) | **Complete inventory of every RED and YELLOW gap with mitigations in both directions** |
+| [**Workflows**](workflows.md) | **Message-native workflow scenarios: standup, PTO, equipment, account health, break management, incidents** |
 | [Messaging & Commands](messaging-and-commands.md) | Messages, slash commands, events, threading, @mentions |
 | [UI Components](ui-components.md) | Block Kit vs Adaptive Cards, modals vs dialogs, App Home vs personal tabs |
 | [Interactive Responses](interactive-responses.md) | Ephemeral messages, button actions, message updates, confirmation dialogs |
