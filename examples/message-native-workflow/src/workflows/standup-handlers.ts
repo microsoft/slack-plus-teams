@@ -14,8 +14,8 @@ import {
   createStandupRecord,
   updateCardActivityId,
   getBlockers,
+  getStandupById,
   summarizeDate,
-  type StandupRecord,
 } from "../store/standup-store.js";
 import {
   standupPromptCard,
@@ -41,7 +41,8 @@ export function registerStandupHandlers(app: App): void {
 
   // /standup — manually trigger a standup prompt
   app.on("message", async (ctx) => {
-    const text = (ctx.activity.text ?? "").trim().toLowerCase();
+    const originalText = (ctx.activity.text ?? "").trim();
+    const text = originalText.toLowerCase();
 
     // Store conversation reference for proactive messaging
     if (ctx.activity.conversation?.id && ctx.activity.serviceUrl) {
@@ -141,7 +142,7 @@ export function registerStandupHandlers(app: App): void {
 
     // ---------- Pillar 4: NL query for anything else ----------
     if (text.length > 3) {
-      const result = await handleNLQuery(text);
+      const result = await handleNLQuery(originalText);
 
       // Send the NL answer
       await ctx.send(result.answer);
@@ -176,7 +177,11 @@ export function registerStandupHandlers(app: App): void {
   // ---------- Pillar 3 & 5: Card action handlers (state machine + visibility) ----------
 
   app.on("card.action" as any, async (ctx) => {
-    const data = ctx.activity.value?.action?.data ?? ctx.activity.value ?? {};
+    // Merge top-level value (input fields) with action.data (verb, recordId) so
+    // that both the submitted inputs and the action metadata are accessible together.
+    const actionData = ctx.activity.value?.action?.data ?? {};
+    const inputValues = ctx.activity.value ?? {};
+    const data = { ...inputValues, ...actionData };
     const verb = data.verb ?? ctx.activity.value?.action?.verb;
 
     // Submit standup check-in
@@ -223,9 +228,7 @@ export function registerStandupHandlers(app: App): void {
 
     // Edit standup
     if (verb === "editStandup") {
-      const records = await import("../store/standup-store.js");
-      const all = records.getStandupsByDate(new Date().toISOString().split("T")[0]);
-      const record = all.find((r: StandupRecord) => r.id === data.recordId);
+      const record = getStandupById(data.recordId);
       if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       return {
@@ -240,9 +243,7 @@ export function registerStandupHandlers(app: App): void {
 
     // Save edited standup
     if (verb === "saveStandup") {
-      const storeModule = await import("../store/standup-store.js");
-      const all = storeModule.getStandupsByDate(new Date().toISOString().split("T")[0]);
-      const record = all.find((r: StandupRecord) => r.id === data.recordId);
+      const record = getStandupById(data.recordId);
       if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       // Update fields in-place (in production, PATCH the list item)
@@ -263,9 +264,7 @@ export function registerStandupHandlers(app: App): void {
 
     // Cancel edit — show the record card again
     if (verb === "cancelEdit") {
-      const storeModule = await import("../store/standup-store.js");
-      const all = storeModule.getStandupsByDate(new Date().toISOString().split("T")[0]);
-      const record = all.find((r: StandupRecord) => r.id === data.recordId);
+      const record = getStandupById(data.recordId);
       if (!record) return { status: 200, body: { statusCode: 200, type: "application/vnd.microsoft.card.adaptive", value: {} } };
 
       return {
