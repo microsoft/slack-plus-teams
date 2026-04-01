@@ -12,15 +12,11 @@ A step-by-step guide for migrating your organization's custom Slack bots and Lin
 2. [Phase 1: Plan Your Migration](#phase-1-plan-your-migration)
 3. [Phase 2: Set Up Your Environment](#phase-2-set-up-your-environment)
 4. [Phase 3: Bootstrap the Expert System](#phase-3-bootstrap-the-expert-system)
-5. [Phase 4: Understand Your Analysis Results](#phase-4-understand-your-analysis-results)
-6. [Phase 5: Architect the Dual-Platform Bot](#phase-5-architect-the-dual-platform-bot)
-7. [Phase 6: Migrate Core Functionality](#phase-6-migrate-core-functionality)
-8. [Phase 7: Migrate UI Components](#phase-7-migrate-ui-components)
-9. [Phase 8: Migrate Identity and Auth](#phase-8-migrate-identity-and-auth)
-10. [Phase 9: Migrate Infrastructure](#phase-9-migrate-infrastructure)
-11. [Phase 10: Test and Deploy](#phase-10-test-and-deploy)
-12. [Phase 11: Data Migration (Channels, Messages, Files)](#phase-11-data-migration-channels-messages-files)
-13. [Post-Migration: Maintaining and Extending Your App](#post-migration-maintaining-and-extending-your-app)
+5. [Phase 4: Execute the Migration Plan](#phase-4-execute-the-migration-plan)
+6. [Phase 5: Review the Migrated Code](#phase-5-review-the-migrated-code)
+7. [Phase 6: Test and Deploy](#phase-6-test-and-deploy)
+8. [Phase 7: Data Migration (Channels, Messages, Files)](#phase-7-data-migration-channels-messages-files)
+12. [Post-Migration: Maintaining and Extending Your App](#post-migration-maintaining-and-extending-your-app)
 
 ---
 
@@ -92,7 +88,7 @@ For organizations with multiple LOB apps, prioritize based on:
 - **User overlap** — Which app's users are migrating to Teams first?
 - **Dependencies** — Which apps depend on other apps that need to migrate first?
 
-![SCREENSHOT PLACEHOLDER: Example prioritization matrix showing 4-5 sample LOB apps plotted on a 2x2 grid of Business Impact (high/low) vs. Migration Complexity (low/high). Apps in the high-impact, low-complexity quadrant are marked "Migrate First."]
+![Example prioritization matrix. Apps in the high-impact, low-complexity quadrant are marked "Migrate First."](./assets/app-migration-priorities.png)
 
 ### 1.4 Coordinate with Data Migration
 
@@ -205,7 +201,18 @@ Built experts are saved to the appropriate domain folder (e.g., `experts/models/
 
 ![AI coding agent onboarding flow — gap analysis results and expert building prompt](./assets/onboard-missing-experts.png)
 
-### 3.3 Review the Generated Plan
+### 3.3 Cross-Platform Architecture
+
+After the advisor walkthrough, the agent loads the cross-platform architecture expert (`experts/bridge/cross-platform-architecture-ts.md`) to design your dual-platform bot structure. Based on your codebase analysis and migration strategy, it determines:
+
+- **Entry point pattern** — How Slack (Socket Mode) and Teams (HTTPS) adapters coexist in the same process
+- **Shared service layer** — Which business logic to extract so both platforms share it
+- **Adapter boundaries** — What stays platform-specific vs. what becomes shared
+- **Transport setup** — How to run both WebSocket (Slack) and HTTP (Teams) receivers
+
+The agent uses this architecture to inform the migration plan it generates next.
+
+### 3.4 Review the Generated Plan
 
 The agent produces a `PLAN.md` file that lists:
 - Every feature to bridge, with difficulty ratings
@@ -219,49 +226,19 @@ Review and approve this plan before proceeding.
 
 ---
 
-## Phase 4: Understand Your Analysis Results
+## Phase 4: Execute the Migration Plan
 
-The onboarding flow (Phase 3) automatically analyzes your codebase. This section explains what the analysis detects and how to interpret the results.
+With the `PLAN.md` approved, tell your AI coding agent to start executing it. The agent works through each phase of the plan autonomously, consulting the expert system for platform-specific patterns and making architecture decisions based on the cross-platform advisor's earlier analysis.
 
-### 4.1 What the Analysis Detects
+```
+Execute the migration plan in PLAN.md. Start with Phase 1.
+```
 
-The expert system's cross-platform advisor (`experts/bridge/cross-platform-advisor-ts.md`) scans your codebase for platform-specific patterns:
+The agent does all the coding work — extracting shared services, creating adapters, bridging UI, wiring up auth. **Your role is to review the code it produces, test on both platforms, and provide feedback.** The sections below describe what the agent builds at each stage so you know what to look for during review.
 
-| What It Detects | Slack Pattern | Teams Equivalent |
-|-----------------|---------------|------------------|
-| Message handling | `app.message()` | `app.on("message")` |
-| Slash commands | `app.command()` | Text command detection |
-| Block Kit UI | `blocks: [...]` | Adaptive Cards |
-| Modals | `views.open()` | Task Modules / Dialogs |
-| Ephemeral messages | `chat.postEphemeral` | `refresh.userIds` on cards |
-| File uploads | `files.upload` | `FileConsentCard` |
-| OAuth / identity | `SLACK_BOT_TOKEN` | Azure AD / SSO |
-| Socket Mode | `SocketModeReceiver` | HTTPS endpoint |
+### 4.1 Architecture: Adapter Pattern
 
-### 4.2 Feature Inventory
-
-The advisor builds a complete feature inventory categorized by bridging difficulty:
-
-![SCREENSHOT PLACEHOLDER: Terminal output from the cross-platform advisor showing a feature inventory table — columns for Feature, Slack Pattern Found, Teams Equivalent, and Difficulty (GREEN/YELLOW/RED). Shows 8-10 detected features from a sample Slack bot.]
-
-### 4.3 Gap Identification
-
-Any features rated **RED** require redesign. The advisor flags these and suggests alternatives:
-
-| RED Gap | Why It's Hard | Recommended Approach |
-|---------|---------------|---------------------|
-| Mid-form modal updates | Teams dialogs don't support `response_action: update` | Use multi-step dialogs or Adaptive Card `refresh` |
-| Emoji reactions as input | Teams reaction events are limited | Use Adaptive Card buttons as voting mechanism |
-| Thread broadcast | No `reply_broadcast` equivalent | Post to both thread and channel explicitly |
-| Workflow Steps | Slack Workflow Builder has no Teams equivalent | Use Power Automate or custom orchestration |
-
----
-
-## Phase 5: Architect the Dual-Platform Bot
-
-### 5.1 Recommended Architecture: Adapter Pattern
-
-The expert system recommends a **shared service layer** with platform-specific adapters:
+The agent sets up a **shared service layer** with platform-specific adapters. The typical project structure it creates looks like:
 
 ```
 your-app/
@@ -285,9 +262,11 @@ your-app/
 └── package.json
 ```
 
-![SCREENSHOT PLACEHOLDER: Architecture diagram showing the adapter pattern — a central "Shared Service Layer" box connected to two adapter boxes (Slack Adapter and Teams Adapter). Each adapter connects to its respective platform. Arrows show message flow from platform → adapter → shared logic → adapter → platform.]
+![Architecture diagram showing the adapter pattern — a central "Shared Service Layer" box connected to two adapter boxes (Slack Adapter and Teams Adapter). Each adapter connects to its respective platform.](./assets/adapter-pattern-architecture.png)
 
-### 5.2 Key Dependencies
+### 4.2 Key Dependencies
+
+The agent adds the required Teams dependencies alongside your existing Slack packages:
 
 ```json
 {
@@ -299,9 +278,9 @@ your-app/
 }
 ```
 
-### 5.3 Entry Point Pattern
+### 4.3 Entry Point Pattern
 
-Your app starts both platform adapters from a single entry point:
+The agent creates a single entry point that starts both platform adapters:
 
 ```typescript
 // src/index.ts
@@ -321,178 +300,80 @@ console.log('Teams bot running on :3978');
 
 ---
 
-## Phase 6: Migrate Core Functionality
+## Phase 5: Review the Migrated Code
 
-Work through your feature inventory in order of difficulty: GREEN first, then YELLOW, then RED.
+As the agent works through `PLAN.md`, review what it produces at each step. The agent tackles features in order of difficulty — GREEN first, then YELLOW, then RED — extracting business logic into the shared service layer and creating platform-specific adapters. Here's what to expect and what to look for.
 
-### 6.1 Messages
+### 5.1 Core Messaging and Commands
 
-**Slack:**
-```typescript
-app.message('hello', async ({ message, say }) => {
-  await say(`Hey there <@${message.user}>!`);
-});
-```
+The agent bridges your bot's message handling and commands between the two platforms:
 
-**Teams equivalent:**
-```typescript
-app.on('message', async (context) => {
-  if (context.activity.text?.includes('hello')) {
-    await context.sendActivity(`Hey there ${context.activity.from.name}!`);
-  }
-});
-```
+| Slack Pattern | Teams Equivalent | Difficulty |
+|---------------|------------------|------------|
+| `app.message()` handlers | `app.on('message')` activity handlers | GREEN |
+| Slash commands (`/status`) | Text command detection or message extensions | GREEN |
+| Button clicks / menu selections | Adaptive Card `Action.Submit` handlers | GREEN |
+| Threaded replies (`thread_ts`) | Reply-to-activity chains | GREEN |
+| Ephemeral messages (`postEphemeral`) | `refresh.userIds` per-user cards or 1:1 chat | YELLOW |
+| Proactive messages | Conversation reference + `continueConversation` | YELLOW |
 
-**Shared service approach:**
-```typescript
-// services/message-handler.ts
-export function handleHello(userName: string): string {
-  return `Hey there ${userName}!`;
-}
-```
+For each feature, the agent creates a shared service function (business logic) and two thin adapters (one for Slack, one for Teams) that call into it.
 
-> **Expert reference:** `experts/bridge/events-activities-ts.md`
+> **Expert references:** `experts/bridge/events-activities-ts.md`, `experts/bridge/commands-slash-text-ts.md`, `experts/bridge/interactive-responses-ts.md`
 
-### 6.2 Commands
+### 5.2 UI Components
 
-Slack uses slash commands (`/status`). Teams doesn't have native slash commands — use text command detection or message extensions instead.
+The agent converts your Slack Block Kit layouts to Adaptive Cards for Teams. This is the most visible part of the migration — review the generated cards carefully.
 
-**Slack:**
-```typescript
-app.command('/status', async ({ command, ack, respond }) => {
-  await ack();
-  await respond(getStatus(command.text));
-});
-```
+| Block Kit Element | Adaptive Card Equivalent | Difficulty |
+|-------------------|-------------------------|------------|
+| `section` with text | `TextBlock` | GREEN |
+| `actions` with buttons | `ActionSet` with `Action.Submit` | GREEN |
+| `input` block | `Input.Text` | GREEN |
+| `image` / `context` / `divider` | `Image` / subtle `TextBlock` / separator | GREEN |
+| Modals (`views.open`) | Task Modules / Dialogs | GREEN–YELLOW |
+| Push new modal view | Multi-step dialog (sequential) | YELLOW |
+| Mid-form modal updates | Close + reopen with new content | YELLOW |
+| Field validation errors in modal | Custom validation before submit | RED |
 
-**Teams equivalent:**
-```typescript
-app.on('message', async (context) => {
-  const text = context.activity.text?.trim();
-  if (text?.startsWith('status')) {
-    const args = text.replace('status', '').trim();
-    await context.sendActivity(getStatus(args));
-  }
-});
-```
+> **Expert references:** `experts/bridge/ui-block-kit-adaptive-cards-ts.md`, `experts/bridge/ui-modals-dialogs-ts.md`
 
-> **Expert reference:** `experts/bridge/commands-slash-text-ts.md`
+### 5.3 Identity and Auth
 
-### 6.3 Interactive Responses
-
-Slack and Teams handle button clicks, menu selections, and form submissions differently.
-
-> **Expert reference:** `experts/bridge/interactive-responses-ts.md`
-
----
-
-## Phase 7: Migrate UI Components
-
-### 7.1 Block Kit to Adaptive Cards
-
-This is the most visible part of the migration. Every Slack Block Kit layout needs an Adaptive Cards equivalent.
-
-| Block Kit Element | Adaptive Card Equivalent |
-|-------------------|-------------------------|
-| `section` with `text` | `TextBlock` |
-| `section` with `accessory` image | `ColumnSet` with `Image` |
-| `actions` with buttons | `ActionSet` with `Action.Submit` |
-| `input` block | `Input.Text` |
-| `divider` | Separator (spacing) |
-| `image` block | `Image` element |
-| `context` block | `TextBlock` with `isSubtle: true` |
-| `header` block | `TextBlock` with `size: "Large", weight: "Bolder"` |
-
-![SCREENSHOT PLACEHOLDER: Side-by-side comparison of the same UI rendered in Slack (Block Kit) and Teams (Adaptive Card). Show a card with a title, description text, an image, and two action buttons. Left side labeled "Slack — Block Kit", right side labeled "Teams — Adaptive Card."]
-
-### 7.2 Modals to Task Modules
-
-Slack modals (`views.open`) map to Teams Task Modules / Dialogs:
-
-| Slack Modal Feature | Teams Equivalent | Difficulty |
-|---------------------|------------------|------------|
-| Open modal | Open dialog / task module | GREEN |
-| Form inputs | Adaptive Card inputs in dialog | GREEN |
-| Modal submission | Dialog submit handler | GREEN |
-| Push new view | Multi-step dialog (sequential) | YELLOW |
-| Update current view | Close + reopen with new content | YELLOW |
-| Field validation errors | Custom validation before submit | RED |
-| Cancel notification | No direct equivalent | RED |
-
-![SCREENSHOT PLACEHOLDER: Side-by-side comparison of a form modal — Slack modal on the left with text inputs and a dropdown, Teams Task Module on the right with the equivalent Adaptive Card inputs. Both showing a "Create Ticket" form with Title, Description, and Priority fields.]
-
-> **Expert reference:** `experts/bridge/ui-modals-dialogs-ts.md`, `experts/bridge/ui-block-kit-adaptive-cards-ts.md`
-
----
-
-## Phase 8: Migrate Identity and Auth
-
-### 8.1 User Identity Mapping
-
-Slack and Teams use different identity systems. You'll need a mapping layer:
+The agent sets up the identity bridging layer so your bot can resolve users across both platforms:
 
 | Slack | Teams |
 |-------|-------|
 | Slack User ID (`U0123ABC`) | Azure AD Object ID (GUID) |
-| Workspace membership | Microsoft 365 tenant membership |
-| Slack OAuth tokens | Azure AD / Microsoft SSO tokens |
-| `users.info` API | Microsoft Graph API |
-
-Build a user mapping table that associates Slack User IDs with Azure AD Object IDs. Microsoft's data migration guide includes a [PowerShell script](https://learn.microsoft.com/en-us/microsoftteams/migrate-slack-to-teams#users) for matching Slack email addresses to Microsoft Entra ID accounts.
-
-### 8.2 OAuth and SSO
-
-| Slack Approach | Teams Approach |
-|----------------|----------------|
 | OAuth 2.0 with Slack as provider | Azure AD / Microsoft SSO |
 | `SLACK_CLIENT_ID` + `SLACK_CLIENT_SECRET` | `CLIENT_ID` + `CLIENT_SECRET` + `TENANT_ID` |
-| Bot tokens per workspace | Bot registration per Azure subscription |
-| User tokens for API calls | Delegated permissions via Graph API |
+| `users.info` API | Microsoft Graph API |
 
-![SCREENSHOT PLACEHOLDER: Diagram comparing Slack OAuth flow (left) and Teams SSO flow (right). Show the token exchange steps for each platform, highlighting that Teams uses Azure AD as the identity provider.]
+The agent generates a user mapping service that associates Slack User IDs with Azure AD Object IDs. For bulk mapping, Microsoft's data migration guide includes a [PowerShell script](https://learn.microsoft.com/en-us/microsoftteams/migrate-slack-to-teams#users) for matching Slack email addresses to Microsoft Entra ID accounts.
 
 > **Expert reference:** `experts/bridge/identity-oauth-bridge-ts.md`
 
----
+### 5.4 Infrastructure (Optional)
 
-## Phase 9: Migrate Infrastructure
+If your Slack bot runs on AWS, the agent can bridge infrastructure to Azure. This is optional — the dual-platform approach doesn't require moving off AWS.
 
-If your Slack bot runs on AWS, you may also need to bridge infrastructure to Azure.
-
-### 9.1 Infrastructure Mapping
-
-| AWS (Slack) | Azure (Teams) | Expert |
-|-------------|---------------|--------|
+| AWS Service | Azure Equivalent | Expert |
+|-------------|-----------------|--------|
 | Lambda | Azure Functions | `bridge/infra-compute-ts.md` |
 | S3 | Azure Blob Storage | `bridge/infra-storage-ts.md` |
 | DynamoDB | Cosmos DB | `bridge/infra-storage-ts.md` |
 | Secrets Manager | Azure Key Vault | `bridge/infra-secrets-config-ts.md` |
 | CloudWatch | Application Insights | `bridge/infra-observability-ts.md` |
-| API Gateway | Azure API Management | `bridge/infra-compute-ts.md` |
 
-> **Note:** The dual-platform approach doesn't require moving off AWS. You can run both adapters from the same compute service. Infrastructure migration is optional and can happen separately.
+The agent also configures **dual transport** — Socket Mode (WebSocket) for Slack alongside an HTTPS endpoint on port 3978 for Teams.
 
-![SCREENSHOT PLACEHOLDER: Infrastructure mapping diagram showing AWS services on the left connected by arrows to their Azure equivalents on the right. Each pair labeled with the bridging expert file name.]
-
-### 9.2 Transport: Socket Mode to HTTPS
-
-Slack bots commonly use Socket Mode (WebSocket). Teams bots use HTTPS endpoints exclusively.
-
-For the dual-platform architecture, your app runs **both**:
-- Socket Mode for Slack (no public URL needed)
-- HTTPS endpoint on port 3978 for Teams (requires public URL or tunnel)
-
-```bash
-# For local development, use a tunnel for the Teams endpoint
-# Agents Toolkit provides a built-in dev tunnel
-atk preview --env local
-```
+> **Expert reference:** `experts/bridge/transport-socketmode-https-ts.md`
 
 ---
 
-## Phase 10: Test and Deploy
+## Phase 6: Test and Deploy
 
-### 10.1 Local Testing
+### 6.1 Local Testing
 
 1. **Slack:** Test via Socket Mode (no tunnel needed)
 2. **Teams:** Use Agents Toolkit dev tunnel (`atk preview`) or ngrok for the HTTPS endpoint
@@ -500,7 +381,7 @@ atk preview --env local
 
 ![SCREENSHOT PLACEHOLDER: Teams client showing a sideloaded bot app in the left sidebar. The chat window shows a test conversation with the bot responding to a command.]
 
-### 10.2 Test Matrix
+### 6.2 Test Matrix
 
 Verify every migrated feature on both platforms:
 
@@ -514,7 +395,7 @@ Verify every migrated feature on both platforms:
 | Auth flow | [ ] | [ ] | |
 | Error handling | [ ] | [ ] | |
 
-### 10.3 Deploy
+### 6.3 Deploy
 
 For the dual-platform bot, deploy to a service that can run both adapters:
 
@@ -529,7 +410,7 @@ For the dual-platform bot, deploy to a service that can run both adapters:
 
 ![SCREENSHOT PLACEHOLDER: Azure Portal showing a deployed App Service running the dual-platform bot. The Overview page shows the app is running, with the URL endpoint visible.]
 
-### 10.4 Publish to Your Organization
+### 6.4 Publish to Your Organization
 
 1. Upload your Teams app package to the **Teams Admin Center**
 2. Approve the app for your organization
@@ -539,7 +420,7 @@ For the dual-platform bot, deploy to a service that can run both adapters:
 
 ---
 
-## Phase 11: Data Migration (Channels, Messages, Files)
+## Phase 7: Data Migration (Channels, Messages, Files)
 
 App migration and data migration are complementary efforts. While this guide focuses on apps, here's how data migration fits into the overall plan.
 
