@@ -12,7 +12,7 @@ A step-by-step guide for migrating your organization's custom Slack bots and Lin
 2. [Phase 1: Plan Your Migration](#phase-1-plan-your-migration)
 3. [Phase 2: Set Up Your Environment](#phase-2-set-up-your-environment)
 4. [Phase 3: Bootstrap the Expert System](#phase-3-bootstrap-the-expert-system)
-5. [Phase 4: Analyze Your Slack App](#phase-4-analyze-your-slack-app)
+5. [Phase 4: Understand Your Analysis Results](#phase-4-understand-your-analysis-results)
 6. [Phase 5: Architect the Dual-Platform Bot](#phase-5-architect-the-dual-platform-bot)
 7. [Phase 6: Migrate Core Functionality](#phase-6-migrate-core-functionality)
 8. [Phase 7: Migrate UI Components](#phase-7-migrate-ui-components)
@@ -51,7 +51,7 @@ You have three options depending on your timeline and requirements:
 
 > **This guide follows the dual-platform approach**, which is recommended for LOB apps because it minimizes disruption and allows phased rollout.
 
-![SCREENSHOT PLACEHOLDER: Diagram showing the three migration strategies — dual-platform (shared service layer with two adapters), full migration (single Teams app), and parallel operation (independent bots, shared backend). Highlight the dual-platform option as recommended.]
+![Diagram showing the three migration strategies](./assets/migration-strategies.png)
 
 ---
 
@@ -71,7 +71,7 @@ List every custom bot, integration, and workflow in your Slack workspace:
    - What external systems it connects to
    - How many users depend on it
 
-![SCREENSHOT PLACEHOLDER: Slack workspace App Management page showing installed apps list with custom integrations highlighted.]
+![Slack workspace App Management page](./assets/slack-installed-apps.png)
 
 ### 1.2 Categorize by Complexity
 
@@ -122,7 +122,7 @@ Microsoft provides a complete guide for migrating your organization's Slack data
 | **Slack app** | Your existing Slack bot with API credentials |
 | **Azure account** | For Teams bot registration and deployment |
 | **Microsoft 365 developer tenant** | For testing ([free dev program](https://developer.microsoft.com/microsoft-365/dev-program)) |
-| **Teams Toolkit** | VS Code extension or CLI for Teams app scaffolding |
+| **Microsoft 365 Agents Toolkit** | [VS Code extension or CLI](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/overview-agents-toolkit) for Teams app scaffolding |
 | **AI coding agent** | Claude Code, GitHub Copilot, or Cursor |
 
 ### 2.2 Register a Teams Bot
@@ -130,11 +130,10 @@ Microsoft provides a complete guide for migrating your organization's Slack data
 1. Go to the [Azure Portal](https://portal.azure.com) → **Create a resource** → **Azure Bot**
 2. Configure the bot with a unique handle and your Azure subscription
 3. Under **Configuration**, note your **Microsoft App ID** and generate a **Client Secret**
-4. Set the messaging endpoint to your app's URL (e.g., `https://your-app.azurewebsites.net/api/messages`)
+4. Set the messaging endpoint to your app's URL (e.g., `https://your-app.azurewebsites.net/api/messages`) or a [Dev Tunnel](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started) for local testing (e.g., `https://your-tunnel.devtunnels.ms/api/messages)
+![Azure Portal "Create Azure Bot" page](./assets/create-azure-bot.png)
 
-![SCREENSHOT PLACEHOLDER: Azure Portal "Create Azure Bot" page showing the form fields — Bot handle, Subscription, Resource group, Pricing tier, and Microsoft App ID section.]
-
-![SCREENSHOT PLACEHOLDER: Azure Bot Configuration page showing the Messaging endpoint field and the Microsoft App ID / Password section.]
+![Azure Bot Configuration page](./assets/configure-azure-bot.png)
 
 ### 2.3 Enable Teams Channel
 
@@ -142,20 +141,20 @@ Microsoft provides a complete guide for migrating your organization's Slack data
 2. Click **Microsoft Teams** to enable the Teams channel
 3. Accept the Terms of Service
 
-![SCREENSHOT PLACEHOLDER: Azure Bot Channels page showing available channels with Microsoft Teams highlighted and the "Connect" button visible.]
+![Azure Bot Channels page](./assets/enable-teams-channel.png)
 
-### 2.4 Create a Teams App Manifest
+### 2.4 Scaffold a Teams App with Manifest
 
-Use Teams Toolkit or create manually:
+Use Microsoft 365 Agents Toolkit to create a scaffolded Agent:
 
 ```bash
-# Using Teams Toolkit CLI
-teamsapp init --capability bot
+# Using Agents Toolkit CLI (install: npm install -g @microsoft/m365agentstoolkit-cli)
+atk new -c basic-custom-engine-agent -l typescript -n slack-plus-teams-bot -i false
 ```
 
 Your manifest defines your app's identity, permissions, and capabilities in Teams.
 
-![SCREENSHOT PLACEHOLDER: Teams Toolkit in VS Code showing a newly scaffolded bot project with the manifest file open, highlighting the bot configuration section.]
+![VS Code showing a newly scaffolded bot project with the manifest file open](./assets/atk-created-bot.png)
 
 ---
 
@@ -163,32 +162,48 @@ Your manifest defines your app's identity, permissions, and capabilities in Team
 
 The `slack-plus-teams` expert system is a collection of 116 micro-expert files that guide AI agents through every aspect of cross-platform bot development. Here's how to set it up.
 
-### 3.1 Copy Experts to Your Project
+### 3.1 Clone the Repository
+
+Clone the `slack-plus-teams` repository from GitHub:
 
 ```bash
-# From your project root
-cp -r <path-to-slack-plus-teams>/experts/ ./experts/
+git clone https://github.com/microsoft/slack-plus-teams.git
 ```
-
-This copies the entire expert system into your project. Your AI agent will use these files to make informed bridging decisions.
 
 ### 3.2 Start the Onboarding Flow
 
-Open your AI coding agent and reference the onboarding playbook:
+Open your AI coding agent (Claude Code, GitHub Copilot, Cursor, etc.) from your Slack bot's project directory and reference the onboarding playbook:
 
 ```
-Read ONBOARD.md and follow the instructions. I have an existing Slack bot
-that I want to add Teams support to.
+Read ../slack-plus-teams/ONBOARD.md and follow the instructions. I have an existing Slack bot that I want to add Teams support to.
 ```
 
-The agent will:
-1. Detect that you have an existing project (Flow B)
-2. Analyze your codebase for platform signatures
-3. Identify your language, framework, and features
-4. Run a gap analysis against the expert system
-5. Build a migration plan (PLAN.md)
+The agent will walk you through the following steps interactively:
 
-![SCREENSHOT PLACEHOLDER: AI coding agent (Claude Code or Copilot) terminal showing the onboarding flow — the agent has detected a Slack bot and is presenting the bridging direction options: "Add Teams to existing Slack bot (Recommended)", "Add Slack to existing Teams bot", "Audit existing dual-platform bot."]
+1. **Ask for your project path** — The agent asks where your existing Slack bot lives. Provide the path (e.g., `..\bolt-js-assistant-template` or an absolute path).
+2. **Bootstrap the expert system** — The agent copies the `experts/` directory from the cloned repo into your project automatically.
+3. **Analyze your codebase** — The agent scans your project in parallel to detect your language, platform, features, and architecture.
+4. **Present analysis results** — You'll see a summary table showing what the agent found (language, platform, framework, hosting, features, etc.).
+5. **Ask for your migration strategy** — The agent presents the three migration strategies (Dual-platform, Full migration, Parallel operation) and waits for your choice.
+6. **Identify missing experts** — The agent compares your tech stack against the expert system to find any gaps (see [Identifying and Building Missing Experts](#identifying-and-building-missing-experts) below).
+7. **Build missing experts** — Based on the gap analysis, the agent can create new experts for technologies not yet covered.
+8. **Run the cross-platform advisor** — The agent loads the bridging advisor, builds a feature inventory of your codebase, and walks you through design decisions for any YELLOW-rated features (e.g., ephemeral messages, transport mode). You can accept the recommended defaults or choose alternatives.
+9. **Generate a migration plan** — The agent produces a `PLAN.md` file with your complete migration roadmap, including phased implementation steps and expert references for each task.
+
+![AI coding agent onboarding flow — project path prompt](./assets/onboard-path-prompt.png)
+![AI coding agent onboarding flow — migration strategy prompt](./assets/onboard-strategy-prompt.png)
+
+#### Identifying and Building Missing Experts
+
+After you choose your migration strategy, the agent compares your project's tech stack against the expert system to identify any technologies that aren't yet covered. If it finds gaps, it offers to build new expert files for you:
+
+1. **All high priority** — Automatically create experts for the most important gaps.
+2. **Let me pick** — Review the list and choose which experts to create.
+3. **Skip** — Proceed with the existing experts as-is.
+
+Built experts are saved to the appropriate domain folder (e.g., `experts/models/` or `experts/slack/`) in the same format as the existing experts. You can always build additional experts later by asking your AI agent to create one for a specific technology.
+
+![AI coding agent onboarding flow — gap analysis results and expert building prompt](./assets/onboard-missing-experts.png)
 
 ### 3.3 Review the Generated Plan
 
@@ -200,15 +215,17 @@ The agent produces a `PLAN.md` file that lists:
 
 Review and approve this plan before proceeding.
 
-![SCREENSHOT PLACEHOLDER: Generated PLAN.md file open in an editor, showing a structured migration plan with sections for Architecture, Feature Bridging Order (with GREEN/YELLOW/RED ratings), and Expert References.]
+![Generated PLAN.md file](./assets/onboard-plan-output.png)
 
 ---
 
-## Phase 4: Analyze Your Slack App
+## Phase 4: Understand Your Analysis Results
 
-### 4.1 Automatic Codebase Analysis
+The onboarding flow (Phase 3) automatically analyzes your codebase. This section explains what the analysis detects and how to interpret the results.
 
-The expert system's cross-platform advisor (`experts/bridge/cross-platform-advisor-ts.md`) automatically scans your codebase for platform-specific patterns:
+### 4.1 What the Analysis Detects
+
+The expert system's cross-platform advisor (`experts/bridge/cross-platform-advisor-ts.md`) scans your codebase for platform-specific patterns:
 
 | What It Detects | Slack Pattern | Teams Equivalent |
 |-----------------|---------------|------------------|
@@ -467,8 +484,8 @@ For the dual-platform architecture, your app runs **both**:
 
 ```bash
 # For local development, use a tunnel for the Teams endpoint
-# Teams Toolkit provides a built-in dev tunnel
-teamsapp preview
+# Agents Toolkit provides a built-in dev tunnel
+atk preview --env local
 ```
 
 ---
@@ -478,7 +495,7 @@ teamsapp preview
 ### 10.1 Local Testing
 
 1. **Slack:** Test via Socket Mode (no tunnel needed)
-2. **Teams:** Use Teams Toolkit dev tunnel or ngrok for the HTTPS endpoint
+2. **Teams:** Use Agents Toolkit dev tunnel (`atk preview`) or ngrok for the HTTPS endpoint
 3. **Sideload** your Teams app in a test tenant
 
 ![SCREENSHOT PLACEHOLDER: Teams client showing a sideloaded bot app in the left sidebar. The chat window shows a test conversation with the bot responding to a command.]
@@ -619,7 +636,8 @@ Pull the latest expert files periodically to get updated patterns:
 
 ```bash
 # Update experts from the slack-plus-teams repo
-cp -r <path-to-slack-plus-teams>/experts/ ./experts/
+cd ./slack-plus-teams && git pull && cd ..
+cp -r ./slack-plus-teams/experts/ ./experts/
 ```
 
 ### Maintaining Your Dual-Platform App

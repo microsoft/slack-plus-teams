@@ -24,19 +24,32 @@ multiSelect: false
 
 For greenfield projects with no existing bot code.
 
-### A1: Bootstrap
+### A1: Set project path
+
+**STOP and ask the developer** — do not infer, assume, or auto-fill this value:
+
+```
+header: "Project Path"
+question: "Where would you like to create your new bot project?"
+type: "text"
+placeholder: "/path/to/my-teams-bot"
+```
+
+Wait for the developer's explicit answer before proceeding. Record their response as `{projectPath}`.
+
+### A2: Bootstrap
 
 Copy the `experts/` directory from this repo into the target project root:
 
 ```
-cp -r <path-to-slack-plus-teams>/experts/ <target-project>/experts/
+cp -r <path-to-slack-plus-teams>/experts/ {projectPath}/experts/
 ```
 
 The target project should now have `experts/index.md` at its root. All subsequent expert paths use the `experts/` prefix relative to the target project.
 
 > **Why copy?** Copying avoids cross-repo path resolution issues. The expert system uses relative `Read:` directives that assume experts live inside the working project. GitHub Copilot ignores dot-prefixed folders, so use `experts/` — not `.experts/`.
 
-### A2: Scaffold the project
+### A3: Scaffold the project
 
 Ask the developer:
 
@@ -55,7 +68,7 @@ multiSelect: false
 
 Record: `{platform}`.
 
-### A3: Load the expert system
+### A4: Load the expert system
 
 1. Read `experts/index.md` — this is the root router.
 2. Execute the **pre-task interview** defined in `experts/index.md` § "pre-task interview (mandatory)".
@@ -65,7 +78,7 @@ Record: `{platform}`.
    - **Teams only** → Read `experts/teams/index.md`.
 4. Let the domain router and advisor take over from here.
 
-### A4: Architecture setup
+### A5: Architecture setup
 
 1. Read `experts/bridge/cross-platform-architecture-ts.md` (even for single-platform — it establishes patterns that make adding the second platform easier later).
 2. Reference the matching example project:
@@ -73,7 +86,7 @@ Record: `{platform}`.
    - `examples/slack-add-teams/` — Slack-first with Teams added
    - `examples/teams-add-slack/` — Teams-first with Slack added
 
-### A5: Write PLAN.md
+### A6: Write PLAN.md
 
 Create a `PLAN.md` file in the target project root:
 
@@ -81,7 +94,7 @@ Create a `PLAN.md` file in the target project root:
 # Project Plan
 
 ## Target
-- **Platform(s)**: {platform choice from A2}
+- **Platform(s)**: {platform choice from A3}
 - **Language**: TypeScript
 - **Architecture**: {pattern from cross-platform-architecture}
 
@@ -92,7 +105,7 @@ Create a `PLAN.md` file in the target project root:
 {List of expert files loaded during onboarding, in order}
 ```
 
-### A6: Implementation
+### A7: Implementation
 
 Follow the advisor's or domain router's output. Implement feature by feature:
 
@@ -108,21 +121,53 @@ Follow the advisor's or domain router's output. Implement feature by feature:
 
 For projects that already have code — adding platform support, bridging, or improving coverage.
 
-### B1: Bootstrap
+### B1: Set project path
+
+**STOP and ask the developer** — do not infer, assume, or auto-fill this value:
+
+```
+header: "Project Path"
+question: "What is the path to your existing Slack bot project?"
+type: "text"
+placeholder: "/path/to/my-slack-bot"
+```
+
+Wait for the developer's explicit answer before proceeding. Record their response as `{projectPath}`.
+
+### B2: Bootstrap
 
 Copy the `experts/` directory from this repo into the target project root:
 
 ```
-cp -r <path-to-slack-plus-teams>/experts/ <target-project>/experts/
+cp -r <path-to-slack-plus-teams>/experts/ {projectPath}/experts/
 ```
 
 > **Why copy?** Copying avoids cross-repo path resolution issues. The expert system uses relative `Read:` directives that assume experts live inside the working project. GitHub Copilot ignores dot-prefixed folders, so use `experts/` — not `.experts/`.
 
-### B2: Analyze the project
+### B3: Choose migration strategy
+
+Ask the developer:
+
+```
+header: "Migration Strategy"
+question: "You have three options depending on your timeline and requirements. Which migration strategy do you want to use?"
+options:
+  - label: "Dual-platform (recommended)"
+    description: "Keep your Slack bot running while adding Teams support. Both platforms share a common service layer. Migrate users gradually."
+  - label: "Full migration"
+    description: "Rewrite the Slack bot as a Teams-only app. Simpler end state but higher risk and no fallback."
+  - label: "Parallel operation"
+    description: "Run independent Slack and Teams bots with shared backend services. Lower coupling but duplicated logic."
+multiSelect: false
+```
+
+Record: `{migrationStrategy}`.
+
+### B4: Analyze the project
 
 Run these four sub-analyses **in parallel**. Store all results — they feed into every subsequent step.
 
-#### 2a: Detect language
+#### 4a: Detect language
 
 Scan the project root for language indicators:
 
@@ -139,7 +184,7 @@ Scan the project root for language indicators:
 
 Record: `{language}` and `{isTypeScript: boolean}`.
 
-#### 2b: Detect current platform
+#### 4b: Detect current platform
 
 Scan dependencies and imports for platform SDK indicators:
 
@@ -149,7 +194,7 @@ Scan dependencies and imports for platform SDK indicators:
 
 Record: `{platform: "slack" | "teams" | "both" | "neither"}`.
 
-#### 2c: Detect features in use
+#### 4c: Detect features in use
 
 Scan for feature patterns:
 
@@ -167,7 +212,7 @@ Scan for feature patterns:
 
 Record: `{features: string[]}`.
 
-#### 2d: Detect framework and architecture
+#### 4d: Detect framework and architecture
 
 Scan for:
 
@@ -178,9 +223,9 @@ Scan for:
 
 Record: `{framework, hosting, cloud, architecture}`.
 
-### B3: Language gate
+### B5: Language gate
 
-Classify `{language}` from B2a into one of four tiers based on SDK availability:
+Classify `{language}` from B4a into one of four tiers based on SDK availability:
 
 | Tier | Languages | Slack SDK | Teams SDK | Unified Server? |
 |---|---|---|---|---|
@@ -191,13 +236,13 @@ Classify `{language}` from B2a into one of four tiers based on SDK availability:
 
 ---
 
-#### Tier 1: TypeScript / JavaScript → proceed to B4
+#### Tier 1: TypeScript / JavaScript → proceed to B6
 
 The full expert system is available. JavaScript projects will get TypeScript migration guidance as part of the expert workflow.
 
 ---
 
-#### Tier 2: Python → proceed to B4 with adaptation guidance
+#### Tier 2: Python → proceed to B6 with adaptation guidance
 
 Both platforms have maintained Python SDKs (`slack_bolt` for Slack, `teams-ai` / M365 Agents SDK for Teams). The unified-server architecture applies — use Flask or FastAPI instead of Express.
 
@@ -238,9 +283,9 @@ Where:
 - **C#** → `{supported_platform}` = Teams, `{unsupported_platform}` = Slack, `{sdk_name}` = Teams SDK / M365 Agents SDK (.NET)
 
 Route based on choice:
-- **SDK + REST hybrid** → For the SDK side, read the language-specific expert: `experts/slack/bolt-java.md` (Java Slack) or `experts/teams/teams-dotnet.md` (C# Teams). For the unsupported-platform side, read `experts/bridge/rest-only-integration-ts.md` and adapt its HTTP patterns for `{language}`. Proceed to B4.
-- **Dual codebase** → The `{language}` service handles `{supported_platform}` natively — read `experts/slack/bolt-java.md` (Java) or `experts/teams/teams-dotnet.md` (C#). Create a separate TypeScript service for `{unsupported_platform}` using the full expert system. Proceed to B4 for the TypeScript service.
-- **Convert to TypeScript** → Read `experts/convert/index.md`. Complete the conversion first, then restart from B4.
+- **SDK + REST hybrid** → For the SDK side, read the language-specific expert: `experts/slack/bolt-java.md` (Java Slack) or `experts/teams/teams-dotnet.md` (C# Teams). For the unsupported-platform side, read `experts/bridge/rest-only-integration-ts.md` and adapt its HTTP patterns for `{language}`. Proceed to B6.
+- **Dual codebase** → The `{language}` service handles `{supported_platform}` natively — read `experts/slack/bolt-java.md` (Java) or `experts/teams/teams-dotnet.md` (C#). Create a separate TypeScript service for `{unsupported_platform}` using the full expert system. Proceed to B6 for the TypeScript service.
+- **Convert to TypeScript** → Read `experts/convert/index.md`. Complete the conversion first, then restart from B6.
 
 ---
 
@@ -262,10 +307,10 @@ multiSelect: false
 ```
 
 - **REST-only** → Read `experts/bridge/rest-only-integration-ts.md`. Adapt its HTTP patterns for `{language}`. Skip remaining steps.
-- **Convert to TypeScript** → Read `experts/convert/index.md`. Complete the conversion first, then restart from B4.
+- **Convert to TypeScript** → Read `experts/convert/index.md`. Complete the conversion first, then restart from B6.
 - **Skip** → Point the developer to `docs/README.md` and stop.
 
-### B4: Expert coverage gap analysis
+### B6: Expert coverage gap analysis
 
 This is the critical step for existing projects. The expert system ships with Slack, Teams, and bridging knowledge — but the project may use libraries, frameworks, or patterns that no existing expert covers.
 
@@ -293,7 +338,7 @@ This is the critical step for existing projects. The expert system ships with Sl
    - Coverage map (what's covered, what's a gap)
    - Prioritized recommendations (stubs to populate, new experts to create, project-specific experts)
 
-### B5: Build missing experts
+### B7: Build missing experts
 
 After the developer reviews the gap analysis:
 
@@ -323,21 +368,21 @@ For each expert to create:
 
 > **Source priority for building experts:** (1) The project's own code — how it actually uses the technology. (2) The installed package's source, types, and README in `node_modules/`. (3) Official docs via web search. This order ensures experts reflect real usage, not just API surface.
 
-### B6: Load the expert system
+### B8: Load the expert system
 
 1. Read `experts/index.md` — this is the root router.
-2. Execute the **pre-task interview** defined in `experts/index.md` § "pre-task interview (mandatory)". Use the analysis results from B2 to pre-fill context:
+2. Execute the **pre-task interview** defined in `experts/index.md` § "pre-task interview (mandatory)". Use the analysis results from B4 to pre-fill context:
    - Mention the detected platform (`{platform}`), features (`{features}`), and architecture (`{framework}`, `{hosting}`).
-   - Skip interview questions that B2 already answered.
+   - Skip interview questions that B4 already answered.
 3. Route based on `{platform}`:
    - `"slack"` → developer wants to add Teams support. Route to **Bridge** domain.
    - `"teams"` → developer wants to add Slack support. Route to **Bridge** domain.
    - `"both"` → already cross-platform. Route based on task intent (bridge refinement, deploy, models, etc.).
    - `"neither"` → ask which platform(s) to target, then route to the appropriate domain.
-4. Load `experts/bridge/cross-platform-advisor-ts.md` if bridging. Feed B2 results into the advisor's Phase 1 (it expects project analysis data — providing it avoids redundant scanning).
+4. Load `experts/bridge/cross-platform-advisor-ts.md` if bridging. Feed B4 results into the advisor's Phase 1 (it expects project analysis data — providing it avoids redundant scanning).
 5. Let the advisor's routing take over.
 
-### B7: Architecture setup
+### B9: Architecture setup
 
 After the advisor completes its analysis phases:
 
@@ -351,7 +396,7 @@ After the advisor completes its analysis phases:
    - `examples/slack-add-teams/` — adding Teams to existing Slack bot
    - `examples/teams-add-slack/` — adding Slack to existing Teams bot
 
-### B8: Write PLAN.md
+### B10: Write PLAN.md
 
 Create a `PLAN.md` file in the target project root:
 
@@ -361,6 +406,7 @@ Create a `PLAN.md` file in the target project root:
 ## Project Analysis
 - **Language**: {language}
 - **Current platform**: {platform}
+- **Migration strategy**: {migrationStrategy from B3}
 - **Detected features**: {features as bulleted list}
 - **Framework**: {framework}
 - **Hosting**: {hosting}
@@ -369,7 +415,7 @@ Create a `PLAN.md` file in the target project root:
 
 ## Expert Coverage
 - **Existing coverage**: {list of technologies covered by existing experts}
-- **Gaps filled**: {list of new experts created in B5, with filenames}
+- **Gaps filled**: {list of new experts created in B7, with filenames}
 - **Remaining gaps**: {any gaps the developer chose not to fill}
 
 ## Routing Decisions
@@ -391,12 +437,12 @@ Create a `PLAN.md` file in the target project root:
 
 Fill in every `{placeholder}` with actual values. This file is a living document — update it as implementation progresses.
 
-### B9: Implementation
+### B11: Implementation
 
 Follow the advisor's Phase 4 output. Implement feature by feature:
 
 1. Pick the next feature from the advisor's prioritized list.
-2. Load the expert(s) the advisor specifies for that feature — including any new experts created in B5.
+2. Load the expert(s) the advisor specifies for that feature — including any new experts created in B7.
 3. Implement using the expert's patterns and rules.
 4. Verify against the expert's pitfalls section.
 5. Repeat until all features are bridged.
