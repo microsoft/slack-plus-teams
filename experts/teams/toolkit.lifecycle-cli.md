@@ -166,7 +166,7 @@ atk validate --env dev -i false
 atk package --env dev -i false
 
 # Publish to org catalog
-atk publish
+atk publish --env dev -i false
 
 # Local preview / Agents Playground
 atk preview
