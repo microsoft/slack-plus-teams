@@ -121,7 +121,7 @@ deploy:
         TENANT_ID: ${{TEAMS_APP_TENANT_ID}}
 ```
 
-> **Critical:** `.localConfigs` is what your app reads at runtime, NOT `env/.env.local`. The `file/createOrUpdateEnvironmentFile` action transforms env vars from `env/.env.local` into `.localConfigs`. If `TENANT_ID` is missing from `.localConfigs` after deploy, copy it from `env/.env.local`.
+> **Critical:** `.localConfigs` is what your app reads at runtime, NOT `env/.env.local`. The `file/createOrUpdateEnvironmentFile` action transforms env vars from `env/.env.local` into `.localConfigs`. In the example above, `.localConfigs` `TENANT_ID` comes from `TEAMS_APP_TENANT_ID` in `env/.env.local`. If `TENANT_ID` is missing from `.localConfigs` after deploy, copy the value from `TEAMS_APP_TENANT_ID` in `env/.env.local`.
 
 ### Pattern 2: Manual steps replaced by m365agents.yml
 
