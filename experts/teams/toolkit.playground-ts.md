@@ -86,7 +86,6 @@ app.message(/.*/, async (ctx) => {
 const port = process.env.PORT || 3978;
 app.listen(port, () => {
   console.log(`Bot running at http://localhost:${port}`);
-  console.log(`Run "atk preview" to open Agents Playground`);
 });
 ```
 
