@@ -33,7 +33,7 @@ atk package --manifest-path ./appPackage/manifest.json \
   --output-zip-path ./build/appPackage.zip
 
 # Step 3: Publish to org catalog (submits for admin approval)
-atk publish
+atk publish --env dev -i false
 
 # Step 4: Notify your Teams admin to approve in Admin Center
 # admin.teams.microsoft.com → Teams apps → Manage apps → search for your app
