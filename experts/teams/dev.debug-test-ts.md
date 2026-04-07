@@ -117,7 +117,12 @@ app.start(process.env.PORT || 3978).catch(console.error);
 // 7. Open DevTools in browser
 //    http://localhost:3979/devtools
 
-// 8. For real Teams testing, open sideload URL (TEAMS_APP_ID from env/.env.local):
+// 7. For real Teams testing, start a dev tunnel and provision:
+//    devtunnel host -p 3978 --allow-anonymous
+//    Set BOT_ENDPOINT in env/.env.local to the tunnel URL
+//    atk provision --env local -i false
+//    atk deploy --env local -i false
+//    Open Teams sideload URL (TEAMS_APP_ID from env/.env.local):
 //    https://teams.microsoft.com/l/app/$TEAMS_APP_ID?installAppPackage=true&webjoin=true&appTenantId=$TENANT_ID
 
 // === Option B: Manual workflow (no ATK) ===

@@ -67,25 +67,27 @@ testScenarios:
 
 ```typescript
 // src/index.ts — bot entry point
-import { App } from '@microsoft/teams.apps';
-import { ConsoleLogger } from '@microsoft/teams.common';
+import { Application, TurnState } from '@microsoft/teams-ai';
 
-const app = new App({
-  // In playground mode, the bot runs locally with skipAuth
+const app = new Application<TurnState>({
+  // In playground mode, the bot runs locally
   // No special config needed — same code works in playground and Teams
-  skipAuth: true,
-  logger: new ConsoleLogger('my-bot', { level: 'debug' }),
 });
 
-app.on('message', async ({ send, activity }) => {
-  await send(`You said: ${activity.text}`);
+app.message('/test', async (ctx) => {
+  await ctx.send('Playground test successful!');
+});
+
+app.message(/.*/, async (ctx) => {
+  await ctx.send(`You said: ${ctx.activity.text}`);
 });
 
 // Start the server
 const port = process.env.PORT || 3978;
-app.start(port);
-console.log(`Bot running at http://localhost:${port}`);
-console.log(`Run "agentsplayground -e http://localhost:${port}/api/messages -c msteams" to test`);
+app.listen(port, () => {
+  console.log(`Bot running at http://localhost:${port}`);
+  console.log(`Run "atk preview" to open Agents Playground`);
+});
 ```
 
 ## pitfalls

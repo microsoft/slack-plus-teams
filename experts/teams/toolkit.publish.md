@@ -25,11 +25,12 @@ Publishing workflow for Teams agents — from local sideloading through org cata
 
 ```bash
 # Step 1: Validate the manifest
-atk validate --env dev -i false
+atk validate --manifest-path ./appPackage/manifest.json
 # Fix any reported errors before continuing
 
 # Step 2: Package the app
-atk package --env dev -i false
+atk package --manifest-path ./appPackage/manifest.json \
+  --output-zip-path ./build/appPackage.zip
 
 # Step 3: Publish to org catalog (submits for admin approval)
 atk publish
@@ -48,13 +49,14 @@ atk publish
 # After:  "version": "1.1.0"
 
 # Step 2: Validate the updated manifest
-atk validate --env dev -i false
+atk validate --manifest-path ./appPackage/manifest.json
 
 # Step 3: Update the Teams app registration
 atk update
 
 # Step 4: Re-package with the new version
-atk package --env dev -i false
+atk package --manifest-path ./appPackage/manifest.json \
+  --output-zip-path ./build/appPackage.zip
 
 # Step 5: Re-publish (triggers admin re-approval for org catalog)
 atk publish
