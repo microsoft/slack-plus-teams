@@ -7,16 +7,17 @@ Multi-environment management with environment files, variable resolution, and th
 ## rules
 
 1. **Environment files live in `env/`.** Each environment has a pair of files: `env/.env.{name}` for shared config and `env/.env.{name}.user` for personal/secret values. The `environmentFolderPath` in `m365agents.yml` points to this folder.
-2. **Default environment is `dev`.** Scaffolded projects create `env/.env.dev` and `env/.env.dev.user`. Additional environments (staging, production) are created by running `teamsapp provision --env <name>`.
+2. **Default environment is `dev`.** Scaffolded projects create `env/.env.dev` and `env/.env.dev.user`. Additional environments (staging, production) are created by running `atk provision --env <name>`.
 3. **Variable syntax is `${{VAR_NAME}}`.** Both `manifest.json` and `m365agents.yml` use `${{VAR_NAME}}` placeholders. At build/provision/deploy time, the toolkit resolves them from the active environment's `.env` files.
 4. **`SECRET_` prefix marks sensitive values.** Variables prefixed with `SECRET_` (e.g., `SECRET_BOT_PASSWORD`, `SECRET_AAD_APP_CLIENT_SECRET`) are stored only in `.env.*.user` files, which are gitignored. Never put `SECRET_` values in `.env.{name}`.
 5. **`.env.*.user` files are gitignored by default.** The scaffold includes a `.gitignore` entry for `env/.env.*.user`. These files contain developer-specific credentials and secrets. Never commit them.
 6. **Built-in environment variables are auto-populated.** Lifecycle actions write outputs to env files via `writeToEnvironmentFile`. Common auto-populated vars: `TEAMS_APP_ID`, `BOT_ID`, `SECRET_BOT_PASSWORD`, `AAD_APP_CLIENT_ID`, `SECRET_AAD_APP_CLIENT_SECRET`, `AAD_APP_OBJECT_ID`, `AAD_APP_TENANT_ID`.
 7. **Azure resource variables must be set per environment.** `AZURE_SUBSCRIPTION_ID` and `AZURE_RESOURCE_GROUP_NAME` are required for provisioning. Set them in `.env.{name}` or pass via CLI/CI environment.
-8. **Custom environments mirror the dev structure.** To create a staging environment, run `teamsapp provision --env staging`. This creates `env/.env.staging` and `env/.env.staging.user` with the same variable structure as dev but pointing to separate cloud resources.
+8. **Custom environments mirror the dev structure.** To create a staging environment, run `atk provision --env staging`. This creates `env/.env.staging` and `env/.env.staging.user` with the same variable structure as dev but pointing to separate cloud resources.
 9. **VS Code sidebar switches environments.** The Agents Toolkit VS Code extension shows a dropdown in the sidebar to switch the active environment. This changes which `.env.{name}` files are used for provision, deploy, and preview commands.
-10. **Manifest placeholders resolve at package time.** When `teamsapp package` or `teamsApp/zipAppPackage` runs, all `${{VAR}}` placeholders in `manifest.json` are replaced with values from the active environment. The output zip contains a fully resolved manifest.
+10. **Manifest placeholders resolve at package time.** When `atk package` or `teamsApp/zipAppPackage` runs, all `${{VAR}}` placeholders in `manifest.json` are replaced with values from the active environment. The output zip contains a fully resolved manifest.
 11. **Environment-specific resource isolation.** Each environment should use separate Azure resource groups to avoid resource conflicts. Use naming conventions like `rg-mybot-dev`, `rg-mybot-staging`, `rg-mybot-prod`.
+12. **`.localConfigs` is the runtime config for local development.** `atk deploy --env local` generates `.localConfigs` by reading values from `env/.env.local` and transforming them via `file/createOrUpdateEnvironmentFile` in `m365agents.local.yml`. Your app reads `.localConfigs` at runtime — NOT `env/.env.local`. If `TENANT_ID` is missing from `.localConfigs`, copy it from `env/.env.local`.
 
 ## patterns
 
@@ -38,7 +39,7 @@ project-root/
 
 ```ini
 # env/.env.dev — shared config (safe to commit)
-TEAMSFX_ENV=dev
+APP_ENV=dev
 TEAMS_APP_NAME=MyBot-Dev
 TEAMS_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 BOT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -86,20 +87,20 @@ SECRET_AAD_APP_CLIENT_SECRET=your-client-secret-here
 
 ```bash
 # Step 1: Provision creates the env files and cloud resources
-teamsapp provision --env staging
+atk provision --env staging -i false
 
 # This creates:
-#   env/.env.staging          (with TEAMSFX_ENV=staging, resource IDs)
+#   env/.env.staging          (with APP_ENV=staging, resource IDs)
 #   env/.env.staging.user     (with SECRET_* values)
 
 # Step 2: Set environment-specific overrides
 # Edit env/.env.staging to adjust resource names, domains, etc.
 
 # Step 3: Deploy to the new environment
-teamsapp deploy --env staging
+atk deploy --env staging -i false
 
-# Step 4: Preview/test against a specific environment
-teamsapp preview --env staging
+# Step 4: Test against the new environment
+# Use agentsplayground CLI or sideload in Teams
 ```
 
 ### Pattern 4: Cross-Platform Environment Variables
@@ -128,7 +129,7 @@ SLACK_SIGNING_SECRET=your-slack-signing-secret
 PORT=3978
 ```
 
-> **Key difference from Toolkit-managed projects:** Standalone cross-platform examples use a single `.env` file (loaded via `dotenv`) instead of the `env/.env.dev` + `env/.env.dev.user` pair. This is intentional — these examples don't ship `m365agents.yml` or run `teamsapp provision`.
+> **Key difference from Toolkit-managed projects:** Standalone cross-platform examples use a single `.env` file (loaded via `dotenv`) instead of the `env/.env.dev` + `env/.env.dev.user` pair. This is intentional — these examples don't ship `m365agents.yml` or run `atk provision`.
 
 ## pitfalls
 
@@ -139,7 +140,7 @@ PORT=3978
 - **Stale env files after re-provisioning** — If you delete cloud resources and re-provision, old IDs in env files may not update. Delete the env files and re-provision from scratch.
 - **`${{VAR}}` vs `${VAR}` confusion** — Agents Toolkit uses double-brace `${{VAR}}`. Shell-style `${VAR}` is not recognized and will not resolve.
 - **Confusing Toolkit `${{VAR}}` placeholders with Slack runtime env vars** — Toolkit placeholders resolve at package/provision time in manifest files. Slack env vars (`SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`) are read at runtime by `@slack/bolt`. They live in different worlds — don't put Slack tokens inside `${{}}` brackets in the manifest.
-- **Missing variables at package time** — If a `${{VAR}}` in manifest.json has no matching env entry, packaging fails. Run `teamsapp validate` first to catch these.
+- **Missing variables at package time** — If a `${{VAR}}` in manifest.json has no matching env entry, packaging fails. Run `atk validate` first to catch these.
 - **CI/CD without `.user` files** — In CI, secrets come from pipeline secrets, not `.user` files. Set `SECRET_*` vars as environment variables in the CI runner.
 
 ## references
@@ -154,8 +155,8 @@ PORT=3978
 Do a web search for:
 
 - "Microsoft 365 Agents Toolkit multi-environment env files configuration 2025"
-- "teamsapp provision --env staging multiple environments"
-- "Teams Toolkit SECRET_ prefix environment variables"
+- "atk provision --env staging multiple environments"
+- "Agents Toolkit SECRET_ prefix environment variables"
 
 Pair with:
 - `toolkit.lifecycle-cli.md` — lifecycle hooks that consume environment variables
@@ -167,4 +168,4 @@ Pair with:
 
 Deep Research prompt:
 
-"Write a micro expert on Microsoft 365 Agents Toolkit environment management (TypeScript). Cover env/.env.{name} and env/.env.{name}.user file pairs, ${{VAR}} variable resolution in manifest.json and m365agents.yml, SECRET_ prefix convention, built-in environment variables (TEAMS_APP_ID, BOT_ID, BOT_PASSWORD, AZURE_SUBSCRIPTION_ID), creating custom environments with teamsapp provision --env, VS Code sidebar environment switching, and CI/CD environment variable injection. Include canonical patterns for: environment file structure, manifest placeholder resolution, multi-environment setup."
+"Write a micro expert on Microsoft 365 Agents Toolkit environment management (TypeScript). Cover env/.env.{name} and env/.env.{name}.user file pairs, ${{VAR}} variable resolution in manifest.json and m365agents.yml, SECRET_ prefix convention, built-in environment variables (TEAMS_APP_ID, BOT_ID, BOT_PASSWORD, AZURE_SUBSCRIPTION_ID), creating custom environments with atk provision --env, VS Code sidebar environment switching, and CI/CD environment variable injection. Include canonical patterns for: environment file structure, manifest placeholder resolution, multi-environment setup."

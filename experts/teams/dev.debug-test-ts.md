@@ -13,9 +13,10 @@ Developer tools, local debugging, DevTools plugin, sideloading, tunneling, Conso
 5. Configure logging with `ConsoleLogger` at the appropriate level: `'trace'` for deep SDK internals, `'debug'` for development, `'info'` for staging, `'warn'` or `'error'` for production. Use `pattern: '-azure/msal-node'` to suppress noisy MSAL authentication logs. Child loggers are created with `logger.child('name')`. [github.com/microsoft/teams.ts -- common](https://github.com/microsoft/teams.ts/tree/main/packages/common)
 6. Run `npx tsc --noEmit` as a build verification gate before testing or deploying. This type-checks all TypeScript source without producing output files. The project must compile cleanly -- type errors caught here prevent runtime failures. [github.com/microsoft/teams.ts](https://github.com/microsoft/teams.ts)
 7. For testing with real Teams clients locally, use a tunneling solution (ngrok, dev tunnels, Cloudflare Tunnel) to expose your local `localhost:3978` endpoint over HTTPS. Update the Azure Bot messaging endpoint to the tunnel URL (e.g., `https://abc123.ngrok.io/api/messages`). [learn.microsoft.com -- Dev tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/overview)
-8. Sideload the app by creating a zip of the `appPackage/` directory (manifest.json + icons) and uploading in Teams via Apps > Manage your apps > Upload a custom app. Sideloading requires admin permission or a developer tenant. [learn.microsoft.com -- Sideload apps](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/deploy-and-publish/apps-upload)
+8. Sideload the app by opening the Teams sideloading URL after provisioning: `https://teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&appTenantId=${{TENANT_ID}}&login_hint=${{USER_EMAIL}}` (get values from `env/.env.local`). Alternatively, zip the `appPackage/` directory (manifest.json + icons) and upload in Teams via Apps > Manage your apps > Upload a custom app. Both paths require admin-enabled custom app upload or a developer tenant. [learn.microsoft.com -- Sideload apps](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/deploy-and-publish/apps-upload)
 9. Use `skipAuth: true` in `AppOptions` for purely local development against DevTools without Azure Bot credentials. This disables JWT validation. Never use it in production or when testing against real Teams clients. [github.com/microsoft/teams.ts -- apps](https://github.com/microsoft/teams.ts/tree/main/packages/apps)
-10. The M365 Agents Toolkit VS Code extension provides GUI-based provisioning, dev tunnel management, one-click deployment, and manifest editing. It is an alternative to manual CLI workflows for developers who prefer a visual interface. [learn.microsoft.com -- Agents Toolkit](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/toolkit-v4/teams-toolkit-fundamentals-vs)
+10. Use Agents Toolkit (ATK) as the recommended provisioning path for local development. First start a devtunnel (`devtunnel host -p 3978 --allow-anonymous`) and set `BOT_ENDPOINT` in `env/.env.local` to the tunnel URL. Then run `atk provision --env local -i false` to create the Entra ID app registration, Bot Framework registration, and Teams app. Then run `atk deploy --env local -i false` to generate `.localConfigs` with CLIENT_ID, CLIENT_SECRET, TENANT_ID, and PORT. Verify `.localConfigs` has TENANT_ID — if missing, copy from `env/.env.local`. See → `toolkit.lifecycle-cli.md` for the full m365agents.yml reference. [learn.microsoft.com -- Agents Toolkit](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/microsoft-365-agents-toolkit-cli)
+11. For manual bot registration without ATK, create the Entra ID app registration and Azure Bot resource through the Azure Portal or Azure CLI, then copy the credentials into `.env`. This path is useful for understanding what ATK automates or when ATK is not available. See → `azure-bot-deploy-ts.md` for the full manual workflow.
 
 ## patterns
 
@@ -90,43 +91,49 @@ app.start(process.env.PORT || 3978).catch(console.error);
 ### Build verification and debugging workflow
 
 ```typescript
-// Step-by-step local development workflow:
+// === Option A: ATK-provisioned workflow (recommended) ===
 
 // 1. Install dependencies
 //    npm install
 
-// 2. Create .env with required variables
-//    CLIENT_ID=<your-bot-client-id>
-//    CLIENT_SECRET=<your-bot-client-secret>
-//    TENANT_ID=<your-azure-tenant-id>
-//    PORT=3978
+// 2. Start a dev tunnel (must be running BEFORE provisioning)
+//    devtunnel host -p 3978 --allow-anonymous
+//    Copy the tunnel URL and set BOT_ENDPOINT in env/.env.local
 
-// 3. Type-check the project (build gate)
+// 3. Provision bot resources via ATK (creates Entra ID app + Bot Framework + Teams app)
+//    atk provision --env local -i false
+
+// 4. Generate .localConfigs with credentials
+//    atk deploy --env local -i false
+//    Verify .localConfigs contains CLIENT_ID, CLIENT_SECRET, TENANT_ID, PORT.
+//    If TENANT_ID is missing, copy it from env/.env.local.
+
+// 5. Type-check the project (build gate)
 //    npx tsc --noEmit
-//    Fix any type errors before proceeding.
 
-// 4. Start dev server with file watching
+// 6. Start dev server with file watching
 //    npm run dev
-//    This runs: tsx watch -r dotenv/config src/index.ts
 
-// 5. Open DevTools in browser
+// 7. Open DevTools in browser
 //    http://localhost:3979/devtools
-//    Send test messages, inspect activities in real time.
 
-// 6. For real Teams testing, set up a tunnel:
-//    ngrok http 3978
-//    Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
-//    Update Azure Bot messaging endpoint to:
-//      https://abc123.ngrok.io/api/messages
+// 8. For real Teams testing, open sideload URL (TEAMS_APP_ID from env/.env.local):
+//    https://teams.microsoft.com/l/app/$TEAMS_APP_ID?installAppPackage=true&webjoin=true&appTenantId=$TENANT_ID
 
-// 7. Sideload the app:
-//    cd appPackage
-//    zip -r ../mybot.zip manifest.json color.png outline.png
-//    Upload mybot.zip in Teams > Apps > Upload a custom app
+// === Option B: Manual workflow (no ATK) ===
 
-// 8. Build for production:
-//    npm run build     # Compiles to dist/ via tsup
-//    npm run start     # Runs compiled JS: node -r dotenv/config .
+// 1. npm install
+// 2. Create .env: CLIENT_ID, CLIENT_SECRET, TENANT_ID, PORT=3978
+//    (Register bot manually -- see azure-bot-deploy-ts.md)
+// 3. npx tsc --noEmit
+// 4. npm run dev
+// 5. devtunnel host -p 3978 --allow-anonymous → update Azure Bot messaging endpoint
+// 6. Sideload: zip appPackage/ → upload in Teams
+
+// === Build for production (both options) ===
+
+// npm run build     # Compiles to dist/ via tsup
+// npm run start     # Runs compiled JS: node -r dotenv/config .
 
 // Common troubleshooting:
 // - Bot not responding in Teams?
@@ -137,6 +144,8 @@ app.start(process.env.PORT || 3978).catch(console.error);
 //     Check: tsconfig module is "NodeNext", not "commonjs"
 // - .env not loaded?
 //     Check: dotenv in devDependencies, -r dotenv/config in scripts
+// - 401 Unauthorized after atk deploy?
+//     Check: .localConfigs has TENANT_ID; if missing, copy from env/.env.local
 ```
 
 ## pitfalls
@@ -149,6 +158,8 @@ app.start(process.env.PORT || 3978).catch(console.error);
 - **Missing sideload permissions**: Sideloading requires either admin-enabled custom app upload or a Microsoft 365 developer tenant. Without it, the "Upload a custom app" option does not appear in Teams.
 - **Wrong log level in production**: Running with `'debug'` or `'trace'` in production floods logs and can impact performance. Switch to `'info'` or `'warn'` for deployed environments.
 - **Testing only in DevTools**: DevTools simulates a Teams client but does not replicate all Teams behaviors (e.g., @mention stripping, SSO token exchange, card rendering differences). Always test in a real Teams client before shipping.
+- **`.localConfigs` missing TENANT_ID**: After `atk deploy --env local`, the generated `.localConfigs` may omit `TENANT_ID`. Without it, MSAL defaults to the wrong token authority, causing 401 errors. Copy `TENANT_ID` from `env/.env.local` into `.localConfigs`.
+- **Dev tunnel URL blacklisted or expired**: Dev tunnel URLs can be flagged by corporate proxies or expire after inactivity. If the bot suddenly stops receiving messages with a working tunnel, create a fresh tunnel and update the messaging endpoint.
 
 ## references
 
@@ -168,8 +179,9 @@ This expert covers local development, debugging, and testing workflows for Teams
 - Run the bot locally with `npm run dev` (tsx watch with hot reload)
 - Configure `ConsoleLogger` levels and noise filtering for different environments
 - Use `skipAuth: true` for credential-free local testing
-- Set up ngrok or dev tunnels for testing with real Teams clients
-- Sideload the bot by packaging and uploading `appPackage/` as a zip
+- Provision bot credentials locally with `atk provision --env local` and `atk deploy --env local`
+- Set up dev tunnels or ngrok for testing with real Teams clients
+- Sideload the bot via the Teams sideloading URL or by packaging and uploading `appPackage/` as a zip
 - Run `npx tsc --noEmit` as a build verification gate
 - Troubleshoot common issues (bot not responding, DevTools blank, import errors)
 - Understand the difference between DevTools testing and real Teams testing

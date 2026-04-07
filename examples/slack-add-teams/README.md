@@ -34,7 +34,7 @@ src/
 
 - Node.js 18+
 - Slack app with Socket Mode enabled (for Slack)
-- Azure Bot registration (for Teams)
+- Azure Bot registration (for Teams) — use `atk provision --env local` (recommended) or [create manually in the Azure Portal](https://portal.azure.com)
 
 ## Environment Setup
 
@@ -44,7 +44,8 @@ src/
    - `SLACK_APP_TOKEN` — App-Level Token with `connections:write` scope (starts with `xapp-`)
    - `SLACK_SIGNING_SECRET` — from Slack app settings
 3. Fill in Teams credentials (new):
-   - `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` from Azure Bot registration
+   - **Recommended:** Run `atk provision --env local` then `atk deploy --env local` — credentials are written to `.localConfigs`
+   - **Manual:** Copy `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` from your Azure Bot registration in the Azure Portal
 
 ## Running Locally
 
@@ -56,7 +57,7 @@ npm start
 
 For Slack: Socket Mode connects automatically — no tunnel needed.
 
-For Teams: use Dev Tunnels or ngrok to expose `:3978` and set the messaging endpoint in Azure Bot settings.
+For Teams: start a dev tunnel (`devtunnel host -p 3978 --allow-anonymous`), set `BOT_ENDPOINT` in `env/.env.local`, run `atk provision --env local && atk deploy --env local`, then open the Teams sideloading URL from `env/.env.local`.
 
 ## TODO
 
