@@ -13,7 +13,7 @@ Teams app manifest (manifest.json) structure, schema, bots config, permissions, 
 5. The `validDomains` array lists domains the bot is allowed to open in web views and task modules. Always include `"*.botframework.com"` and your bot's domain. Omitting a domain causes blank task modules. [learn.microsoft.com -- Valid domains](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema#validdomains)
 6. The `webApplicationInfo` section provides SSO configuration with `id` (the bot/app ID) and `resource` (the application ID URI, typically `"api://botid-${{BOT_ID}}"`). Required for OAuth/SSO flows. [learn.microsoft.com -- webApplicationInfo](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema#webapplicationinfo)
 7. Icons must be: `color.png` at exactly 192x192 pixels and `outline.png` at exactly 32x32 pixels with a transparent background. Both are PNG format. Place them in the `appPackage/` directory alongside `manifest.json`. [learn.microsoft.com -- App icons](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/apps-package#app-icons)
-8. Package the app as a `.zip` file containing `manifest.json`, `color.png`, and `outline.png` from the `appPackage/` directory. The zip must contain these files at the root level (not nested in subdirectories). Upload via Teams > Apps > Upload a custom app, or through Teams Admin Center. [learn.microsoft.com -- App package](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/apps-package)
+8. Package the app as a `.zip` file containing `manifest.json`, `color.png`, and `outline.png` from the `appPackage/` directory. The zip must contain these files at the root level (not nested in subdirectories). Use `atk package` to generate the zip with placeholders resolved, or manually zip and upload via Teams > Apps > Upload a custom app, or through Teams Admin Center. [learn.microsoft.com -- App package](https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/apps-package)
 9. Use placeholder variables like `${{TEAMS_APP_ID}}`, `${{BOT_ID}}`, and `${{BOT_DOMAIN}}` in the manifest for values that change between environments. The M365 Agents Toolkit resolves these during packaging. For manual deployment, replace them with actual values before zipping. [learn.microsoft.com -- Agents Toolkit](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/toolkit-v4/teams-toolkit-fundamentals-vs)
 10. Add `staticTabs` for personal-scope tab experiences. The two default entries (`conversations` and `about`) are recommended for all bots. Add `commands` inside bot entries for slash-command discoverability in the Teams compose box. [learn.microsoft.com -- Static tabs](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema#statictabs)
 
@@ -146,6 +146,9 @@ const manifestWithExtensions = {
 
 ```typescript
 // Build script or manual steps to create the app package
+// Preferred: atk package --env <environment> (resolves placeholders automatically)
+// Manual steps below:
+
 // 1. Ensure appPackage/ contains:
 //    - manifest.json (with placeholders replaced)
 //    - color.png   (192x192 pixels)

@@ -128,7 +128,7 @@ Read:
 - `runtime.routing-handlers-ts.md` (for mapping TeamsActivityHandler to SDK v2 routes)
 
 ### Dev: Debug & Test
-When: debugging, testing, Teams Toolkit, local tunnel, dev tools, unit tests
+When: debugging, testing, Agents Toolkit, local tunnel, dev tools, unit tests
 Read:
 - `dev.debug-test-ts.md`
 - `project.scaffold-files-ts.md` (for npm scripts and build verification)
@@ -153,7 +153,7 @@ Read:
 Note: C# has SDK support for Teams only (Tier 3). For the Slack side, route to `../bridge/rest-only-integration-ts.md`.
 
 ### Toolkit: Lifecycle & CLI
-When: `m365agents.yml`, `teamsapp` CLI, `teamsapp provision`, `teamsapp deploy`, `teamsapp publish`, `teamsapp new`, lifecycle hooks, CI/CD pipeline, built-in actions, `uses:`, `runs:`, `arm/deploy`, `azureAppService/deploy`, `teamsApp/create`, `writeToEnvironmentFile`
+When: `m365agents.yml`, `atk` CLI, `atk provision`, `atk deploy`, `atk publish`, `atk new`, lifecycle hooks, CI/CD pipeline, built-in actions, `uses:`, `runs:`, `arm/deploy`, `azureAppService/deploy`, `teamsApp/create`, `writeToEnvironmentFile`
 Read:
 - `toolkit.lifecycle-cli.md`
 Depends on: `project.scaffold-files-ts.md` (project must exist before lifecycle commands apply)
@@ -165,13 +165,13 @@ Read:
 Depends on: `toolkit.lifecycle-cli.md` (environments are consumed by lifecycle hooks)
 
 ### Toolkit: Agents Playground
-When: Agents Playground, local testing, `teamsapp preview`, test harness, mock activity, playground config, `.m365agentsplayground.yml`, browser-based testing
+When: Agents Playground, local testing, `atk preview`, test harness, mock activity, playground config, `.m365agentsplayground.yml`, browser-based testing
 Read:
 - `toolkit.playground-ts.md`
 - `dev.debug-test-ts.md` (broader debug patterns)
 
 ### Toolkit: Publishing
-When: publish to org, Teams Store, Partner Center, admin approval, `teamsapp publish`, `teamsapp validate`, `teamsapp package`, `teamsapp update`, app validation, sideload to org, org catalog, version bump
+When: publish to org, Teams Store, Partner Center, admin approval, `atk publish`, `atk validate`, `atk package`, `atk update`, app validation, sideload to org, org catalog, version bump
 Read:
 - `toolkit.publish.md`
 - `runtime.manifest-ts.md` (manifest must be valid before publishing)

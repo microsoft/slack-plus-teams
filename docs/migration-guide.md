@@ -123,15 +123,45 @@ Microsoft provides a complete guide for migrating your organization's Slack data
 
 ### 2.2 Register a Teams Bot
 
+#### Option A: Agents Toolkit (recommended)
+
+The fastest path is to let Agents Toolkit (ATK) handle bot registration automatically:
+
+```bash
+# Install the CLI if you haven't (or use the VS Code extension)
+npm install -g @microsoft/m365agentstoolkit-cli
+
+# From your project directory (after scaffolding in 2.4):
+atk provision --env local
+```
+
+This single command creates the **Entra ID app registration**, **Bot Framework registration**, and **Teams app** — including enabling the Teams channel. Then generate local credentials:
+
+```bash
+atk deploy --env local
+# Produces .localConfigs with CLIENT_ID, CLIENT_SECRET, TENANT_ID, PORT
+```
+
+> **Tip:** If `.localConfigs` is missing `TENANT_ID`, copy it from `env/.env.local`.
+
+Skip to [2.4 Scaffold a Teams App with Manifest](#24-scaffold-a-teams-app-with-manifest) if using ATK — section 2.3 is handled automatically.
+
+#### Option B: Manual Azure Portal registration
+
+Use this path to understand what ATK automates, or when ATK is not available:
+
 1. Go to the [Azure Portal](https://portal.azure.com) → **Create a resource** → **Azure Bot**
 2. Configure the bot with a unique handle and your Azure subscription
 3. Under **Configuration**, note your **Microsoft App ID** and generate a **Client Secret**
-4. Set the messaging endpoint to your app's URL (e.g., `https://your-app.azurewebsites.net/api/messages`) or a [Dev Tunnel](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started) for local testing (e.g., `https://your-tunnel.devtunnels.ms/api/messages)
+4. Set the messaging endpoint to your app's URL (e.g., `https://your-app.azurewebsites.net/api/messages`) or a [Dev Tunnel](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started) for local testing (e.g., `https://your-tunnel.devtunnels.ms/api/messages`)
+
 ![Azure Portal "Create Azure Bot" page](./assets/create-azure-bot.png)
 
 ![Azure Bot Configuration page](./assets/configure-azure-bot.png)
 
-### 2.3 Enable Teams Channel
+### 2.3 Enable Teams Channel (manual path only)
+
+> **If you used ATK in 2.2, skip this step** — `atk provision` enables the Teams channel automatically.
 
 1. In the Azure Bot resource, go to **Channels**
 2. Click **Microsoft Teams** to enable the Teams channel
@@ -376,7 +406,7 @@ The agent also configures **dual transport** — Socket Mode (WebSocket) for Sla
 ### 6.1 Local Testing
 
 1. **Slack:** Test via Socket Mode (no tunnel needed)
-2. **Teams:** Use Agents Toolkit dev tunnel (`atk preview`) or ngrok for the HTTPS endpoint
+2. **Teams:** Start a dev tunnel (`devtunnel host -p 3978 --allow-anonymous`), set `BOT_ENDPOINT` in `env/.env.local`, then run `atk provision --env local` and `atk deploy --env local`
 3. **Sideload** your Teams app in a test tenant
 
 ![SCREENSHOT PLACEHOLDER: Teams client showing a sideloaded bot app in the left sidebar. The chat window shows a test conversation with the bot responding to a command.]
