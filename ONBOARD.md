@@ -167,7 +167,7 @@ Record: `{migrationStrategy}`.
 
 Run these four sub-analyses **in parallel**. Store all results — they feed into every subsequent step.
 
-#### 4a: Detect language
+#### B4a: Detect language
 
 Scan the project root for language indicators:
 
@@ -184,7 +184,7 @@ Scan the project root for language indicators:
 
 Record: `{language}` and `{isTypeScript: boolean}`.
 
-#### 4b: Detect current platform
+#### B4b: Detect current platform
 
 Scan dependencies and imports for platform SDK indicators:
 
@@ -194,7 +194,7 @@ Scan dependencies and imports for platform SDK indicators:
 
 Record: `{platform: "slack" | "teams" | "both" | "neither"}`.
 
-#### 4c: Detect features in use
+#### B4c: Detect features in use
 
 Scan for feature patterns:
 
@@ -212,7 +212,7 @@ Scan for feature patterns:
 
 Record: `{features: string[]}`.
 
-#### 4d: Detect framework and architecture
+#### B4d: Detect framework and architecture
 
 Scan for:
 

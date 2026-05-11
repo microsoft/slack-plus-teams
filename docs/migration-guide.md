@@ -16,7 +16,7 @@ A step-by-step guide for migrating your organization's custom Slack bots and Lin
 6. [Phase 5: Review the Migrated Code](#phase-5-review-the-migrated-code)
 7. [Phase 6: Test and Deploy](#phase-6-test-and-deploy)
 8. [Phase 7: Data Migration (Channels, Messages, Files)](#phase-7-data-migration-channels-messages-files)
-12. [Post-Migration: Maintaining and Extending Your App](#post-migration-maintaining-and-extending-your-app)
+9. [Post-Migration: Maintaining and Extending Your App](#post-migration-maintaining-and-extending-your-app)
 
 ---
 
@@ -186,7 +186,7 @@ Your manifest defines your app's identity, permissions, and capabilities in Team
 
 ## Phase 3: Bootstrap the Expert System
 
-The `slack-plus-teams` expert system is a collection of 116 micro-expert files that guide AI agents through every aspect of cross-platform bot development. Here's how to set it up.
+The `slack-plus-teams` expert system is a collection of micro-expert files that guide AI agents through every aspect of cross-platform bot development. Here's how to set it up.
 
 ### 3.1 Clone the Repository
 

@@ -117,7 +117,7 @@ app.start(process.env.PORT || 3978).catch(console.error);
 // 7. Open DevTools in browser
 //    http://localhost:3979/devtools
 
-// 7. For real Teams testing, start a dev tunnel and provision:
+// 8. For real Teams testing, start a dev tunnel and provision:
 //    devtunnel host -p 3978 --allow-anonymous
 //    Set BOT_ENDPOINT in env/.env.local to the tunnel URL
 //    atk provision --env local -i false
