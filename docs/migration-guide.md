@@ -407,9 +407,9 @@ The agent also configures **dual transport** — Socket Mode (WebSocket) for Sla
 
 1. **Slack:** Test via Socket Mode (no tunnel needed)
 2. **Teams:** Start a dev tunnel (`devtunnel host -p 3978 --allow-anonymous`), set `BOT_ENDPOINT` in `env/.env.local`, then run `atk provision --env local` and `atk deploy --env local`
-3. **Sideload** your Teams app in a test tenant
+3. **Sideload** your Teams app in a test tenant, then send a test message to verify the bot responds.
 
-![SCREENSHOT PLACEHOLDER: Teams client showing a sideloaded bot app in the left sidebar. The chat window shows a test conversation with the bot responding to a command.]
+![Sideloaded bot in the Teams left rail with a chat window showing the bot responding to a test message](./assets/teams-sideload-bot-chat.png)
 
 ### 6.2 Test Matrix
 
@@ -438,7 +438,7 @@ For the dual-platform bot, deploy to a service that can run both adapters:
 
 > **Expert reference:** `experts/deploy/azure-bot-deploy-ts.md`, `experts/deploy/aws-bot-deploy-ts.md`
 
-![SCREENSHOT PLACEHOLDER: Azure Portal showing a deployed App Service running the dual-platform bot. The Overview page shows the app is running, with the URL endpoint visible.]
+![Azure Portal Overview page for the deployed App Service showing Status: Running and the default `*.azurewebsites.net` endpoint](./assets/azure-app-service-overview.png)
 
 ### 6.4 Publish to Your Organization
 
@@ -446,7 +446,7 @@ For the dual-platform bot, deploy to a service that can run both adapters:
 2. Approve the app for your organization
 3. Optionally pin the app in the Teams app bar for all users
 
-![SCREENSHOT PLACEHOLDER: Teams Admin Center "Manage apps" page showing the custom LOB app uploaded and approved, with the "Publish" status visible.]
+![Microsoft Teams admin center "Manage apps" page with a custom LOB app (`testbot0511dev`) listed and its app status visible](./assets/teams-admin-center-manage-apps.png)
 
 ---
 
@@ -529,8 +529,6 @@ The agent will:
 - Consult `experts/bridge/commands-slash-text-ts.md` for command bridging
 - Consult `experts/bridge/ui-block-kit-adaptive-cards-ts.md` for the confirmation card
 - Implement the shared service logic once, with platform-specific adapters
-
-![SCREENSHOT PLACEHOLDER: AI coding agent (Claude Code) terminal showing the agent routing a new feature request through the expert system — displaying which experts it's consulting and the implementation plan it generated.]
 
 #### Keeping Up with Platform Changes
 
