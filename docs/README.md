@@ -6,6 +6,7 @@ A practical guide for developers adding cross-platform support to an existing bo
 
 | Document | What It Covers |
 |---|---|
+| [**Migration Guide**](migration-guide.md) | **Step-by-step guide for migrating Line of Business apps from Slack to Teams** |
 | [**Feature Gaps**](feature-gaps.md) | **Complete inventory of every RED and YELLOW gap with mitigations in both directions** |
 | [**Workflows**](workflows.md) | **Message-native workflow scenarios: standup, PTO, equipment, account health, break management, incidents** |
 | [Messaging & Commands](messaging-and-commands.md) | Messages, slash commands, events, threading, @mentions |

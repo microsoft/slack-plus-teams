@@ -46,7 +46,7 @@ multiSelect: false
 ## task clusters
 
 ### Deploy to Azure
-When: deploying a bot to Azure, Azure App Service, Azure Functions, Azure Container Apps, `az` CLI, `az login`, Azure Bot registration, App Registration, Entra ID, `teamsapp provision`, `teamsapp deploy`, Agents Toolkit deploy, deploy Teams bot, deploy Slack bot to Azure
+When: deploying a bot to Azure, Azure App Service, Azure Functions, Azure Container Apps, `az` CLI, `az login`, Azure Bot registration, App Registration, Entra ID, `atk provision`, `atk deploy`, Agents Toolkit deploy, deploy Teams bot, deploy Slack bot to Azure
 Read:
 - `azure-bot-deploy-ts.md`
 Cross-domain deps: `../teams/project.scaffold-files-ts.md` (project structure), `../teams/runtime.manifest-ts.md` (Teams manifest for sideloading), `../teams/dev.debug-test-ts.md` (Agents Toolkit reference), `../security/secrets-ts.md` (secrets hygiene), `../bridge/infra-compute-ts.md` (if also migrating from AWS)

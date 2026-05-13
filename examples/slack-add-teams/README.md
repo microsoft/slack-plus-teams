@@ -34,7 +34,9 @@ src/
 
 - Node.js 18+
 - Slack app with Socket Mode enabled (for Slack)
-- Azure Bot registration (for Teams)
+- Azure Bot registration (for Teams) — [create one in the Azure Portal](https://portal.azure.com)
+
+> This standalone example uses a single `.env` file (loaded via `dotenv`). It does not ship `m365agents.yml` and does not use Microsoft 365 Agents Toolkit (`atk provision` / `atk deploy`). For a full Toolkit-managed setup, see [`experts/teams/toolkit.environments.md`](../../experts/teams/toolkit.environments.md).
 
 ## Environment Setup
 
@@ -43,8 +45,7 @@ src/
    - `SLACK_BOT_TOKEN` — Bot User OAuth Token (starts with `xoxb-`)
    - `SLACK_APP_TOKEN` — App-Level Token with `connections:write` scope (starts with `xapp-`)
    - `SLACK_SIGNING_SECRET` — from Slack app settings
-3. Fill in Teams credentials (new):
-   - `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` from Azure Bot registration
+3. Fill in Teams credentials (new) by copying `CLIENT_ID`, `CLIENT_SECRET`, and `TENANT_ID` from your Azure Bot registration in the Azure Portal.
 
 ## Running Locally
 
@@ -56,7 +57,7 @@ npm start
 
 For Slack: Socket Mode connects automatically — no tunnel needed.
 
-For Teams: use Dev Tunnels or ngrok to expose `:3978` and set the messaging endpoint in Azure Bot settings.
+For Teams: start a dev tunnel (`devtunnel host -p 3978 --allow-anonymous`), set the tunnel URL as the messaging endpoint on your Azure Bot registration, then sideload your Teams app package in a test tenant.
 
 ## TODO
 
